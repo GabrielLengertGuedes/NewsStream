@@ -4,18 +4,15 @@ const sqlite3 = require('sqlite3').verbose();
 
 const app = express();
 
-// Configurações básicas
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.urlencoded({ extended: true }));
 
-// Conexão com banco de dados
 const db = new sqlite3.Database('./usuarios.db', (err) => {
   if (err) return console.error(err.message);
   console.log("Conectado ao banco SQLite.");
 });
 
-// Criação da tabela (se não existir)
 db.run(`
   create table if not exists usuarios (
     id integer primary key autoincrement,
@@ -26,12 +23,10 @@ db.run(`
   )
 `);
 
-// Redirecionamento padrão
 app.get('/', (req, res) => {
   res.redirect('/login');
 });
 
-// Exibe tela de login
 app.get('/login', (req, res) => {
   res.render('acesso', {
     mensagem: null,
@@ -40,7 +35,6 @@ app.get('/login', (req, res) => {
   });
 });
 
-// Exibe tela de cadastro
 app.get('/cadastro', (req, res) => {
   res.render('acesso', {
     mensagem: null,
@@ -49,7 +43,6 @@ app.get('/cadastro', (req, res) => {
   });
 });
 
-// Processa login
 app.post('/login', (req, res) => {
   const { email, senha } = req.body;
 
@@ -79,7 +72,6 @@ app.post('/login', (req, res) => {
   });
 });
 
-// Processa cadastro
 app.post('/cadastro', (req, res) => {
   const { nome, email, senha, confirmar, notificacoes } = req.body;
 
@@ -116,7 +108,6 @@ app.post('/cadastro', (req, res) => {
   );
 });
 
-// Inicia o servidor
 const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Servidor rodando em http://localhost:${PORT}`);

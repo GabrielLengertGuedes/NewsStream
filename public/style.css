@@ -1,0 +1,87 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #f2f2f2;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.top-bar {
+  background-color: #111;
+  color: white;
+  padding: 16px 0;
+  text-align: center;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.login-container {
+  margin: auto;
+  width: 300px;
+  padding: 32px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.login-container input[type="email"],
+.login-container input[type="password"] {
+  width: 90%;
+  padding: 8px;
+  margin: 8px 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.login-container button {
+  padding: 8px 16px;
+  background-color: #333;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.login-container button:hover {
+  background-color: #555;
+}
+
+.registro-msg {
+  margin-top: 16px;
+  font-size: 14px;
+}
+
+.registro-msg a {
+  color: #007BFF;
+  text-decoration: none;
+}
+
+.registro-msg a:hover {
+  text-decoration: underline;
+}
+
+.checkbox-inline {
+  margin: 15px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.checkbox-inline input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  align-self: center;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body, html {
+  height: 100%;
+}

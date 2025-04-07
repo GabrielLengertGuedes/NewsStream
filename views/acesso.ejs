@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>NewsStream - Login e Cadastro</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      padding: 0;
+      margin: 0;
+    }
+
+    body, html {
+      height: 100%;
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+    }
+
+    .header {
+      background-color: black;
+      color: white;
+      padding: 30px;
+      text-align: center;
+      font-size: 36px;
+      font-weight: bold;
+    }
+
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: calc(100% - 100px);
+    }
+
+    .form-box {
+      background-color: white;
+      padding: 30px 40px;
+      border-radius: 10px;
+      width: 450px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      background-color: #eaeaea;
+    }
+
+    .checkbox-inline {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #d3d3d3;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #bfbfbf;
+    }
+
+    .switch-link {
+      text-align: center;
+      margin-top: 15px;
+    }
+
+    .switch-link a {
+      text-decoration: underline;
+      cursor: pointer;
+      color: #007bff;
+      font-weight: bold;
+    }
+
+    .message {
+      text-align: center;
+      color: red;
+      margin-bottom: 15px;
+      font-weight: bold;
+    }
+
+    .success {
+      color: green;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">NewsStream</div>
+
+  <div class="container">
+    <div class="form-box">
+      <% if (mensagem) { %>
+        <div class="message <%= sucesso ? 'success' : '' %>"><%= mensagem %></div>
+      <% } %>
+
+      <!-- Login -->
+      <div id="login-form" class="<%= mostrarCadastro ? 'hidden' : '' %>">
+        <h2>Entrar</h2>
+        <form method="POST" action="/login">
+          <label for="email-login">E-mail</label>
+          <input type="email" id="email-login" name="email" required>
+
+          <label for="senha-login">Senha</label>
+          <input type="password" id="senha-login" name="senha" required>
+
+          <button type="submit">Entrar</button>
+        </form>
+        <div class="switch-link">
+          Não possui uma conta? <a onclick="alternarForm(true)">Crie uma!</a>
+        </div>
+      </div>
+
+      <!-- Cadastro -->
+      <div id="cadastro-form" class="<%= mostrarCadastro ? '' : 'hidden' %>">
+        <h2>Informe seus dados</h2>
+        <form method="POST" action="/cadastro">
+          <label for="nome">Nome</label>
+          <input type="text" id="nome" name="nome" required>
+
+          <label for="email">E-mail</label>
+          <input type="email" id="email" name="email" required>
+
+          <label for="senha">Senha</label>
+          <input type="password" id="senha" name="senha" required>
+
+          <label for="confirmar">Confirmar senha</label>
+          <input type="password" id="confirmar" name="confirmar" required>
+
+          <div class="checkbox-inline">
+            <label for="notificacoes" style="display: flex; align-items: center; gap: 8px;">
+              <input type="checkbox" id="notificacoes" name="notificacoes">
+              Desejo receber notificações
+            </label>
+          </div>
+
+          <button type="submit">Criar conta</button>
+        </form>
+        <div class="switch-link">
+          Já possui uma conta? <a onclick="alternarForm(false)">Entrar</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function alternarForm(paraCadastro) {
+      document.getElementById('login-form').classList.toggle('hidden', paraCadastro);
+      document.getElementById('cadastro-form').classList.toggle('hidden', !paraCadastro);
+    }
+  </script>
+</body>
+</html>

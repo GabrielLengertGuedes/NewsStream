@@ -6,14 +6,11 @@
     <title>Gerenciar Notícias - NewsStream</title>
     <link rel="stylesheet" href="/style.css">
     <style>
-        /* Estilos básicos para a tabela de notícias no painel admin */
         .admin-table-container {
             padding: 20px;
             background: #fff;
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            /* REMOVA OU COMENTE O margin-top: 20px; SE ESTIVER AQUI */
-            /* margin-top: 20px; */ /* Este margin-top é do container em si, não do espaçamento acima da tabela */
         }
 
         .admin-table-container h1 {
@@ -22,14 +19,11 @@
             color: #333;
         }
 
-        /* O BLOCO DE ESTILO DO BOTÃO (a.add-button) JÁ DEVERIA ESTAR REMOVIDO OU COMENTADO DO SEU style.css ou deste <style> */
-
         .admin-table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
-            /* ADICIONE ESTA LINHA PARA RECRIAR O ESPAÇAMENTO: */
-            margin-top: 20px; /* Isso empurrará a tabela para baixo */
+            margin-top: 20px; 
         }
 
         .admin-table th, .admin-table td {
@@ -86,7 +80,6 @@
             background-color: #c82333;
         }
 
-        /* Responsive adjustments */
         @media (max-width: 768px) {
             .admin-table, .admin-table tbody, .admin-table tr, .admin-table td {
                 display: block;

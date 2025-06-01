@@ -1,11 +1,7 @@
-
-
-// routes/main.js
 const express = require('express');
 const router = express.Router();
 const todasNoticias = require('../data/todas-noticias');
 
-// Comentários por notícia (adicione outros conforme necessário)
 const comentariosPorNoticia = {
   1: [
     "Maria Silva: Ótima notícia! A reforma vai simplificar impostos.",
@@ -19,14 +15,12 @@ router.get('/main', (req, res) => {
       return res.redirect('/login');
     }
   
-    // renderiza o arquivo noticias.ejs com todas as notícias
     res.render('noticias', {
       todasNoticias,
       nome: req.session.usuario.nome
     });
   });
 
-// Página de uma notícia
 router.get('/noticias/:id', (req, res) => {
   const noticiaId = parseInt(req.params.id);
   const noticia = todasNoticias.find(n => n.id === noticiaId);

@@ -104,45 +104,41 @@
     </section>
 
     <script>
-        // Obtém o ID da notícia atual diretamente do EJS
         const noticiaId = parseInt('<%= noticia.id %>');
         const categoriaNoticia = '<%= noticia.categoria %>';
 
         const followBtn = document.getElementById('followBtn');
         const likeBtn = document.getElementById('likeBtn');
 
-        // Usa chaves únicas para cada notícia e categoria
         const storageKeySeguindo = 'seguindo_categoria_' + categoriaNoticia;
         const storageKeyCurtido = 'curtido_noticia_' + noticiaId;
 
-        // Recupera o estado do localStorage (ou sessionStorage)
         let seguindo = localStorage.getItem(storageKeySeguindo) === 'true';
         let curtido = localStorage.getItem(storageKeyCurtido) === 'true';
 
-        // Atualiza o texto e a cor do botão ao carregar a página
-        if (followBtn) { // Verifica se o elemento existe
+        if (followBtn) { 
             if (seguindo) {
                 followBtn.textContent = 'Seguindo';
                 followBtn.style.backgroundColor = '#6b7280';
             }
-            // Adiciona evento de clique para o botão "Seguir"
+
             followBtn.addEventListener('click', () => {
-                seguindo = !seguindo; // Inverte o estado
-                localStorage.setItem(storageKeySeguindo, seguindo); // Salva o novo estado
+                seguindo = !seguindo; 
+                localStorage.setItem(storageKeySeguindo, seguindo); 
                 followBtn.textContent = seguindo ? 'Seguindo' : '🔔 Seguir';
                 followBtn.style.backgroundColor = seguindo ? '#6b7280' : '#1d4ed8';
             });
         }
 
 
-        if (likeBtn) { // Verifica se o elemento existe
+        if (likeBtn) { 
             if (curtido) {
                 likeBtn.textContent = 'Curtido 👍';
                 likeBtn.style.backgroundColor = '#6b7280';
             }
-            // Adiciona evento de clique para o botão "Curtir"
+
             likeBtn.addEventListener('click', () => {
-                curtido = !curtido; // Inverte o estado
+                curtido = !curtido; 
                 localStorage.setItem(storageKeyCurtido, curtido); // Salva o novo estado
                 likeBtn.textContent = curtido ? 'Curtido 👍' : 'Curtir 👍';
                 likeBtn.style.backgroundColor = curtido ? '#6b7280' : '#1d4ed8';
@@ -160,7 +156,6 @@
     </div>
 
     <script>
-        // Lógica do pop-up de compartilhamento
         const shareBtn = document.querySelector('.interaction-button.share');
         const sharePopup = document.getElementById('share-popup');
         const closeSharePopupButton = sharePopup ? sharePopup.querySelector('.close-popup-button') : null; // Renomeado para evitar conflito
@@ -213,40 +208,34 @@
             });
         }
 
-        // Lógica do pop-up de notificações (replicado e ajustado)
         const notificationButton = document.getElementById('notificationButton');
         const notificationsPopup = document.getElementById('notifications-popup');
         const closeNotificationsButton = document.getElementById('closeNotificationsButton');
-        const notificationCountSpan = document.querySelector('.notification-count'); // Seleciona o span do contador
+        const notificationCountSpan = document.querySelector('.notification-count');
 
-        // Adiciona evento de clique para o botão "Notificações"
+
         if (notificationButton) {
             notificationButton.addEventListener('click', () => {
                 if (notificationsPopup) {
-                    notificationsPopup.classList.remove('hidden'); // Exibe o pop-up
+                    notificationsPopup.classList.remove('hidden'); 
                 }
                 if (notificationCountSpan) {
-                    notificationCountSpan.classList.add('hidden'); // Oculta o contador
+                    notificationCountSpan.classList.add('hidden'); 
                 }
-                // Em um cenário real, você faria uma requisição AJAX para marcar as notificações como lidas aqui
             });
         }
 
-        // Adiciona evento de clique para o botão "Fechar" do pop-up de notificações
         if (closeNotificationsButton) {
             closeNotificationsButton.addEventListener('click', () => {
                 if (notificationsPopup) {
-                    notificationsPopup.classList.add('hidden'); // Oculta o pop-up
+                    notificationsPopup.classList.add('hidden'); 
                 }
-                // Você pode adicionar lógica para reexibir o contador se houver novas notificações não lidas
-                // ou zerá-lo se todas foram lidas
             });
         }
 
-        // Adiciona evento de clique para fechar o pop-up de notificações ao clicar no overlay
         if (notificationsPopup) {
             notificationsPopup.addEventListener('click', (event) => {
-                if (event.target === notificationsPopup) { // Verifica se o clique foi no fundo (overlay)
+                if (event.target === notificationsPopup) { 
                     notificationsPopup.classList.add('hidden');
                 }
             });

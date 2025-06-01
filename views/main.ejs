@@ -85,33 +85,23 @@
             document.querySelector('.sidebar-main').classList.toggle('oculta');
         }
 
-        // NOVO JavaScript para o pop-up de notificações
         const notificationButton = document.getElementById('notificationButton');
         const notificationsPopup = document.getElementById('notifications-popup');
         const closeNotificationsButton = document.getElementById('closeNotificationsButton');
         const notificationCountSpan = document.querySelector('.notification-count');
-
-        // Função para mostrar o pop-up
         notificationButton.addEventListener('click', () => {
             notificationsPopup.classList.remove('hidden');
-            // Oculta o contador de notificações quando o pop-up é aberto
             if (notificationCountSpan) {
                 notificationCountSpan.classList.add('hidden');
             }
-            // Aqui você poderia marcar as notificações como lidas no backend
         });
 
-        // Função para fechar o pop-up
         closeNotificationsButton.addEventListener('click', () => {
             notificationsPopup.classList.add('hidden');
-            // Reexibe o contador se houver novas notificações não lidas (lógica futura)
-            // Ou zera o contador se todas foram lidas
-            // Por enquanto, apenas o oculta ao fechar
         });
 
-        // Ocultar pop-up se clicar fora dele
         notificationsPopup.addEventListener('click', (event) => {
-            if (event.target === notificationsPopup) { // Se o clique foi no overlay, não no conteúdo
+            if (event.target === notificationsPopup) { 
                 notificationsPopup.classList.add('hidden');
             }
         });

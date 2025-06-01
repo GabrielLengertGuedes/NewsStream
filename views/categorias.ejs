@@ -6,7 +6,6 @@
     <title>Gerenciar Categorias - NewsStream</title>
     <link rel="stylesheet" href="/style.css">
     <style>
-        /* Adicione ou modifique este CSS no seu style.css para melhor organização */
         .add-category-container {
             background: #f9f9f9;
             padding: 20px;
@@ -23,8 +22,8 @@
 
         .add-category-form {
             display: flex;
-            gap: 15px; /* Espaçamento entre o input e o botão */
-            align-items: flex-end; /* Alinha o botão com o input */
+            gap: 15px; 
+            align-items: flex-end; 
         }
 
         .add-category-form label {
@@ -35,7 +34,7 @@
         }
 
         .add-category-form input[type="text"] {
-            flex-grow: 1; /* Permite que o input preencha o espaço disponível */
+            flex-grow: 1; 
             padding: 10px 15px;
             border: 1px solid #ddd;
             border-radius: 5px;
@@ -44,7 +43,7 @@
 
         .add-category-form button {
             padding: 10px 20px;
-            background-color: #28a745; /* Verde para adicionar */
+            background-color: #28a745; 
             color: white;
             border: none;
             border-radius: 5px;
@@ -52,14 +51,13 @@
             font-size: 1rem;
             font-weight: bold;
             transition: background-color 0.2s ease-in-out;
-            white-space: nowrap; /* Evita que o texto do botão quebre */
+            white-space: nowrap; 
         }
 
         .add-category-form button:hover {
             background-color: #218838;
         }
 
-        /* Mensagens de feedback */
         .message.add-category-message {
             padding: 10px;
             margin-top: 15px;
@@ -78,14 +76,13 @@
             border: 1px solid #f5c6cb;
         }
 
-        /* Estilo para os botões de ação na lista de categorias */
         .category-edit-item .action-buttons {
             display: flex;
-            gap: 8px; /* Espaçamento entre os botões Editar e Excluir */
+            gap: 8px; 
         }
 
         .category-edit-item .delete-category-button {
-            background-color: #dc3545; /* Cor vermelha para excluir */
+            background-color: #dc3545; 
             color: white;
             border: none;
             padding: 8px 12px;
@@ -171,18 +168,15 @@
     </div>
 
     <script>
-        // Função para mostrar o formulário de edição
         function showEditForm(categoryName) {
             document.getElementById('currentCategoryName').value = categoryName;
             document.getElementById('editCategoryFormContainer').classList.remove('hidden');
-            // Oculta a mensagem de feedback se ela estiver visível
             const messageDiv = document.querySelector('.add-category-message');
             if (messageDiv) {
                 messageDiv.classList.add('hidden');
             }
         }
 
-        // Função para ocultar o formulário de edição
         function hideEditForm() {
             document.getElementById('editCategoryFormContainer').classList.add('hidden');
         }

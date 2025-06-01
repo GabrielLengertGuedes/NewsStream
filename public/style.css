@@ -1,80 +1,4 @@
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background-color: #f2f2f2;
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
-
-.top-bar {
-  background-color: #111;
-  color: white;
-  padding: 16px 0;
-  text-align: center;
-  font-size: 24px;
-  font-weight: bold;
-}
-
-.login-container {
-  margin: auto;
-  width: 300px;
-  padding: 32px;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  text-align: center;
-}
-
-.login-container input[type="email"],
-.login-container input[type="password"] {
-  width: 90%;
-  padding: 8px;
-  margin: 8px 0;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-.login-container button {
-  padding: 8px 16px;
-  background-color: #333;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.login-container button:hover {
-  background-color: #555;
-}
-
-.registro-msg {
-  margin-top: 16px;
-  font-size: 14px;
-}
-
-.registro-msg a {
-  color: #007BFF;
-  text-decoration: none;
-}
-
-.registro-msg a:hover {
-  text-decoration: underline;
-}
-
-.checkbox-inline {
-  margin: 15px 0;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.checkbox-inline input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
-  margin: 0;
-  align-self: center;
-}
+style.css
 
 * {
   margin: 0;
@@ -82,6 +6,1251 @@ body {
   box-sizing: border-box;
 }
 
-body, html {
+html, body {
   height: 100%;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #f5f6fa;
+  color: #333;
+}
+
+.navbar {
+  background: black;
+  color: #fff;
+  padding: 32px 32px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+}
+
+.navbar::after {
+  content: "";
+  display: block;
+  position: absolute;
+  bottom: -20px;
+  left: 0;
+  width: 100%;
+  height: 20px;
+  background: black;
+}
+
+.logo {
+  font-size: 2rem;
+  font-weight: bold;
+  position: relative;
+}
+
+.auth-buttons {
+  position: absolute;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.auth-buttons button {
+  background: transparent;
+  border: none;
+  color: #c4b5fd;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.auth-buttons button:hover {
+  text-decoration: underline;
+}
+
+.notification-wrapper {
+  position: relative;
+  margin-right: 8px;
+}
+
+.notification-count {
+  /* Todas as propriedades anteriores */
+  background: red;
+  color: white;
+  font-size: 11px;
+  font-weight: bold;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  text-align: center;
+  display: flex; /* Mantenha display: flex, mas será sobrescrito */
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  top: 0;
+  right: -10px;
+  padding: 2px;
+  transform: translate(50%, -50%);
+  z-index: 1;
+
+  /* --- NOVO: OCULTAR O CÍRCULO VERMELHO --- */
+  display: none !important; /* Força a ocultação */
+}
+
+.main-container {
+  display: flex;
+  min-height: calc(100vh - 80px);
+}
+
+.sidebar-main {
+  position: relative;
+  margin-top: 100px;
+  background-color: #111827;
+  color: white;
+  padding: 20px;
+  width: 250px;
+  min-height: 100vh;
+}
+
+.sidebar-dashboard {
+  position: fixed;
+  top: 0;
+  left: 0;
+  background-color: #000000;
+  color: white;
+  width: 220px;
+  height: 100vh;
+  padding-top: 20px;
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+}
+
+.sidebar h2 {
+  font-size: 1.3rem;
+  margin-bottom: 20px;
+}
+
+
+.category-list ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.category-list li {
+  background: none; /* Remove fundo */
+  color: #333; /* Mantém cor neutra */
+  padding: 4px 10px; /* Reduzido para ocupar menos espaço */
+  border-radius: 6px; /* Ajustado para um visual mais compacto */
+  font-size: 0.95rem; /* Diminuído ligeiramente */
+  text-align: center;
+}
+
+.category-list a {
+  text-decoration: none;
+  color: #2563eb; /* Mantém cor do link */
+  font-weight: bold;
+}
+
+.category-list a.active {
+  color: #1d4ed8;
+  font-weight: bold;
+}
+
+.category-list a:hover,
+.category-list a.active {
+  background: #333;
+  color: #FFD700;
+}
+
+
+
+.category-list-dashboard {
+  display: flex;
+  flex-direction: column; /* Agora aparecem verticalmente */
+  gap: 6px; /* Ajuste no espaçamento */
+  padding: 20px;
+}
+
+.category-list-dashboard ul {
+  list-style: none;
+  padding: 0;
+}
+
+.category-list-dashboard li {
+  font-size: 1rem;
+  color: #333;
+  padding: 6px 0;
+  border-bottom: 1px solid #ddd; /* Adiciona um separador leve entre as categorias */
+}
+
+.comments-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.comments-table th,
+.comments-table td {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+}
+
+.comments-table th {
+  background-color: #f3f4f6;
+  font-weight: bold;
+}
+
+/* Estilos para a Seção de Comentários (noticia.ejs) */
+.comment-section {
+  margin-top: 30px;
+  padding: 20px;
+  background: #fdfdfd;
+  border-radius: 10px;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.05);
+}
+
+.comment-section h3 {
+  font-size: 1.4rem;
+  color: #222;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 10px;
+}
+
+.comment-form {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 25px;
+  align-items: center;
+}
+
+.comment-form input[type="text"] {
+  flex-grow: 1;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.comment-submit-button {
+  background-color: #2563eb; /* Azul para o botão comentar */
+  padding: 12px 20px;
+  font-weight: bold;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.comment-submit-button:hover {
+  background-color: #1d4ed8;
+}
+
+.comments-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.comment-item {
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 15px;
+  display: flex; /* Agora o item é um flex container */
+  align-items: flex-start; /* Alinha o conteúdo ao topo */
+  gap: 15px; /* Espaçamento entre o conteúdo e o botão */
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.comment-author {
+  font-weight: bold;
+  color: #1d4ed8; /* Cor para o nome do autor */
+  font-size: 1.05rem;
+}
+
+.comment-content-and-report {
+  flex-grow: 1; /* Permite que o conteúdo ocupe o máximo de espaço possível */
+  display: flex;
+  flex-direction: column;
+}
+
+.comment-date {
+  font-size: 0.85rem;
+  color: #777;
+}
+
+.comment-text {
+  color: #444;
+  line-height: 1.5;
+  margin-bottom: 10px; /* Espaço antes do botão de denúncia */
+}
+
+.report-comment-form {
+  /* Nenhuma posição absoluta mais. Ele se comportará como um item flex */
+  flex-shrink: 0; /* Impede que o botão encolha */
+  margin-left: auto; /* Empurra o botão para a direita */
+}
+
+.report-button {
+  background: none; /* Remove fundo */
+  border: 1px solid #ef4444; /* Borda vermelha */
+  color: #ef4444; /* Texto vermelho */
+  padding: 6px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 5px; /* Espaço entre o ícone e o texto */
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.report-button:hover {
+  background-color: #ef4444;
+  color: white;
+}
+
+.report-button svg {
+  margin-right: 3px; /* Espaço entre o SVG e o texto "Denunciar" */
+}
+
+.no-comments-message {
+  text-align: center;
+  color: #777;
+  font-style: italic;
+  padding: 20px;
+  border: 1px dashed #ccc;
+  border-radius: 8px;
+  margin-top: 20px;
+}
+
+
+.delete-button {
+  background: #dc2626;
+  color: white;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.delete-button:hover {
+  background: #b91c1c;
+}
+
+.users-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.users-table th,
+.users-table td {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+}
+
+.users-table th {
+  background-color: #f3f4f6;
+  font-weight: bold;
+}
+
+.delete-button {
+  background: #dc2626;
+  color: white;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.delete-button:hover {
+  background: #b91c1c;
+}
+
+
+.category-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); /* Ajusta automaticamente a largura das categorias */
+  gap: 10px;
+  padding: 0;
+  margin: 0 auto;
+}
+
+
+/* NOVO CSS PARA A LISTA DE CATEGORIAS */
+.categories-management-container {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-top: 20px; /* Espaço acima do bloco */
+}
+
+.instruction-text {
+  margin-bottom: 20px;
+  color: #555;
+  font-style: italic;
+  text-align: center;
+}
+
+.category-edit-list {
+  list-style: none; /* Remove marcadores de lista */
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column; /* Itens um abaixo do outro */
+  gap: 10px; /* Espaçamento entre os itens da lista */
+}
+
+.category-edit-item {
+  background: #f8f8f8;
+  border: 1px solid #eee;
+  padding: 10px 15px;
+  border-radius: 6px;
+  display: flex;
+  justify-content: space-between; /* Nome à esquerda, botão à direita */
+  align-items: center;
+}
+
+.category-display-name {
+  font-size: 1.1em;
+  font-weight: bold;
+  color: #333;
+}
+
+.edit-category-button {
+  background: #2563eb; /* Azul */
+  color: white;
+  padding: 8px 15px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s ease;
+}
+
+.edit-category-button:hover {
+  background: #1d4ed8;
+}
+
+/* NOVO CSS PARA O FORMULÁRIO DE EDIÇÃO (MODAL/BLOCO) */
+.edit-form-container {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  margin-top: 30px; /* Espaço para o formulário aparecer abaixo da lista */
+  max-width: 500px; /* Largura máxima para o formulário */
+  margin-left: auto;
+  margin-right: auto;
+  border: 1px solid #ddd;
+}
+
+.edit-form-container h2 {
+  text-align: center;
+  margin-bottom: 25px;
+  color: #222;
+}
+
+.category-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.category-edit-form label {
+  font-weight: bold;
+  color: #333;
+}
+
+.category-edit-form input[type="text"] {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1em;
+}
+
+.category-edit-form input[type="text"][readonly] {
+  background-color: #f0f0f0; /* Fundo cinza para campo somente leitura */
+  cursor: not-allowed;
+}
+
+.form-buttons {
+  display: flex;
+  justify-content: flex-end; /* Botões à direita */
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.save-button {
+  background: #28a745; /* Verde para Salvar */
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.save-button:hover {
+  background: #218838;
+}
+
+.cancel-button {
+  background: #6c757d; /* Cinza para Cancelar */
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.cancel-button:hover {
+  background: #5a6268;
+}
+
+/* Utilitário para ocultar elementos */
+.hidden {
+  display: none !important;
+}
+
+.category-form input {
+  padding: 6px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+
+.edit-button {
+  background: #2563eb;
+  color: white;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.edit-button:hover {
+  background: #1d4ed8;
+}
+
+
+.delete-button {
+  background: #dc2626;
+  color: white;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.delete-button:hover {
+  background: #b91c1c;
+}
+
+
+.content {
+  flex: 1;
+  padding: 32px;
+  margin-left: 260px;
+  margin-top: 100px;
+}
+
+.content h2 {
+  margin-bottom: 24px;
+}
+
+.news-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+.news-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  transition: transform 0.2s ease-in-out;
+}
+
+.news-card:hover {
+  transform: translateY(-4px);
+}
+
+.news-card img {
+  width: 200px;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.card-body {
+  padding-left: 16px;
+  flex: 1;
+}
+
+.card-body h3 {
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+}
+
+.card-body a {
+  text-decoration: none;
+  color: #1d4ed8;
+}
+
+.card-body a:hover {
+  text-decoration: underline;
+}
+
+.card-body p {
+  color: #555;
+  font-size: 0.95rem;
+}
+
+.news-container {
+  max-width: 800px;
+  margin: 140px auto 40px;
+  padding: 24px;
+  background: white;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  text-align: left;
+}
+
+.news-container h1 {
+  font-size: 2.2rem;
+  margin-bottom: 16px;
+  text-align: center;
+  color: #222;
+}
+
+.news-meta {
+  font-size: 0.95rem;
+  color: #555;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.news-container img {
+  width: 100%;
+  max-height: 400px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.news-details {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #333;
+  margin-top: 20px;
+}
+
+.news-details h2 {
+  font-size: 1.3rem;
+  margin-top: 24px;
+  margin-bottom: 12px;
+  color: #111;
+}
+
+.news-details ul {
+  list-style: none;
+  padding: 0;
+  margin-top: 16px;
+}
+
+.news-details ul li {
+  padding: 8px;
+  background: #f8f9fa;
+  border-left: 4px solid #1d4ed8;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+
+.follow-button {
+  display: inline-block;
+  background: #1d4ed8;
+  color: white;
+  padding: 8px 14px;
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.follow-button:hover {
+  background: #122b8b;
+}
+
+.news-interaction {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.interaction-button {
+  padding: 10px 18px;
+  font-size: 1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  color: white;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background 0.3s ease;
+}
+
+.interaction-button.like {
+  background-color: #1d4ed8;
+}
+
+.interaction-button.like:hover {
+  background-color: #122b8b;
+}
+
+.interaction-button.share {
+  background-color: #10b981;
+}
+
+.interaction-button.share:hover {
+  background-color: #059669;
+}
+
+.menu-button {
+  position: fixed;
+  top: 135px;
+  left: 2385px;
+  z-index: 1001;
+  background: black;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.sidebar.oculta {
+  display: none;
+}
+
+.interaction-button.report {
+  background-color: #ef4444;
+}
+
+.interaction-button.report:hover {
+  background-color: #b91c1c;
+}
+
+/* ESTILO EXCLUSIVO DO DASHBOARD */
+.sidebar {
+  width: 220px;
+  background: #000000;
+  color: white;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding-top: 20px;
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+}
+
+.sidebar h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 1.2rem;
+}
+
+.sidebar a {
+  padding: 12px 20px;
+  text-decoration: none;
+  color: white;
+  display: block;
+}
+
+.sidebar a:hover,
+.sidebar a.active {
+  background-color: #374151;
+}
+
+.dashboard-main {
+  margin-left: 220px; /* Espaço para o menu lateral */
+  padding: 30px;
+  background-color: #f3f4f6;
+  min-height: 100vh;
+}
+
+.chart-box {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  flex: 1;
+  min-width: 320px;
+  max-width: 100%;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.chart-image {
+  width: 90%; /* Ajustando para caber bem dentro do bloco */
+  height: auto;
+  max-height: 180px; /* Limita a altura para evitar distorções */
+  object-fit: contain;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+
+
+.stats {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 30px;
+}
+
+.stat-box {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  flex: 1;
+  min-width: 160px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.charts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+  margin-bottom: 30px;
+}
+
+.chart-box {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  flex: 1;
+  min-width: 320px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.news-table {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-top: 30px; /* Adiciona espaçamento entre os gráficos e a tabela */
+}
+
+
+.news-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.news-table th,
+.news-table td {
+  padding: 12px;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: left;
+  font-size: 0.95rem;
+}
+
+.container-form {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  text-align: center;
+  padding: 20px;
+}
+
+.news-form {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 600px; /* Mantém o formato original da caixa branca */
+  width: 100%;
+  min-height: 650px; /* Agora a caixa branca será mais comprida sem perder o formato */
+  align-items: flex-start; /* Mantém os itens alinhados corretamente */
+}
+
+.news-form label {
+  font-weight: bold;
+  width: 100%;
+  text-align: left;
+}
+
+.news-form input,
+.news-form select,
+.news-form textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+
+.news-form textarea {
+  height: 180px; /* Ajusta a altura do campo de texto para mais espaço */
+}
+
+.save-button {
+  background: #2563eb;
+  color: white;
+  padding: 12px 20px; /* Botão ajustado para manter proporção */
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  width: 100%;
+}
+
+.save-button:hover {
+  background: #1d4ed8;
+}
+
+
+.edit-link {
+  color: #2563eb;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.new-button {
+  float: right;
+  background: #2563eb;
+  color: white;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-bottom: 12px;
+}
+
+/* Estilos para o Pop-up de Compartilhamento */
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6); /* Fundo escuro transparente */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000; /* Garante que fique acima de tudo */
+  backdrop-filter: blur(5px); /* Efeito de desfoque no fundo */
+}
+
+.popup-content {
+  background-color: #ffffff;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+  transform: scale(0.95); /* Pequena animação */
+  animation: fadeInScale 0.3s forwards;
+}
+
+.popup-content h3 {
+  margin-top: 0;
+  color: #2563eb; /* Azul para o título */
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+}
+
+.popup-content p {
+  color: #555;
+  font-size: 1rem;
+  margin-bottom: 20px;
+}
+
+.close-popup-button {
+  background-color: #2563eb; /* Azul */
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+  transition: background-color 0.2s ease;
+}
+
+.close-popup-button:hover {
+  background-color: #1d4ed8;
+}
+
+/* --- ESTILOS REFINADOS PARA NOTIFICAÇÃO NO NAVBAR (main.ejs e noticia.ejs) --- */
+.notification-wrapper {
+  /* O wrapper agora é apenas um container para o botão de notificação */
+  position: relative; /* Necessário para posicionar o badge, se for o caso */
+  margin-right: 15px; /* Espaçamento à direita do botão */
+}
+
+.notification-button {
+  background: transparent;
+  border: none;
+  color: #c4b5fd; /* Cor do texto dos outros botões */
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 1rem;
+  
+  /* Usa flexbox para alinhar o sino, o texto e o círculo */
+  display: flex; 
+  align-items: center; /* Alinha o conteúdo verticalmente */
+  gap: 5px; /* Espaço entre o ícone e o texto "Notificações" */
+  padding: 0; /* Remove padding padrão do botão */
+  
+  /* Para que o badge possa ser posicionado em relação a este botão */
+  position: relative; 
+}
+
+.notification-button:hover {
+  text-decoration: underline;
+}
+
+.notification-button svg {
+  fill: #c4b5fd; /* Cor do ícone */
+  /* Remove margem aqui, o gap já cuida disso */
+  /* Garante alinhamento vertical perfeito */
+  vertical-align: middle; 
+}
+
+.notification-count {
+  background: red;
+  color: white;
+  font-size: 11px; /* Tamanho da fonte do número */
+  font-weight: bold;
+  width: 20px; /* Largura do círculo */
+  height: 20px; /* Altura do círculo */
+  border-radius: 50%; /* Transforma em círculo */
+  text-align: center;
+  
+  /* Centraliza o número dentro do círculo */
+  display: flex; 
+  justify-content: center;
+  align-items: center;
+  
+  /* Posicionamento absoluto em relação ao .notification-button */
+  position: absolute; 
+  
+  /* Ajustes finos de posição para ficar ao lado do texto "Notificações" */
+  top: -8px; /* Move para cima */
+  right: -10px; /* Move para a direita (fora do botão, mas colado ao texto) */
+  
+  /* Pequeno padding para números maiores */
+  padding: 2px; 
+  
+  /* Transforma para ajustar o posicionamento */
+  transform: translate(50%, 0); /* Move 50% da sua própria largura para a direita */
+  
+  /* Garante que o badge fique acima de tudo */
+  z-index: 1; 
+}
+/* --- FIM DOS ESTILOS REFINADOS PARA NOTIFICAÇÃO --- */
+
+/* --- Estilos para o Pop-up de Notificações --- */
+.notifications-content {
+  max-width: 450px; /* Ajuste a largura máxima do pop-up de notificações */
+  text-align: left; /* Alinha o texto das notificações à esquerda */
+}
+
+.notifications-content h3 {
+  text-align: center; /* Centraliza o título "Notificações" */
+  margin-bottom: 20px;
+}
+
+.notifications-list {
+  list-style: none; /* Remove marcadores de lista */
+  padding: 0;
+  margin: 0;
+  max-height: 300px; /* Limita a altura para que a lista possa ter scroll */
+  overflow-y: auto; /* Adiciona scroll se as notificações excederem a altura */
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 20px;
+}
+
+.notifications-list li {
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f0f0; /* Linha separadora entre notificações */
+  font-size: 0.95rem;
+  color: #444;
+}
+
+.notifications-list li:last-child {
+  border-bottom: none; /* Remove a borda do último item */
+}
+
+.notification-type {
+  font-weight: bold;
+  margin-right: 5px;
+  padding: 3px 6px;
+  border-radius: 4px;
+  color: white; /* Cor padrão para os tipos */
+  display: inline-block; /* Para que o padding e a borda se apliquem corretamente */
+}
+
+/* Cores diferentes para tipos de notificação */
+.notification-type.new-news {
+  background-color: #28a745; /* Verde */
+}
+
+.notification-type.new-comment {
+  background-color: #007bff; /* Azul */
+}
+
+.notification-type.category-update {
+  background-color: #ffc107; /* Amarelo */
+  color: #333; /* Texto escuro para contraste no amarelo */
+}
+
+.notification-type.admin-message {
+  background-color: #dc3545; /* Vermelho */
+}
+
+.close-notifications-button {
+  background-color: #6c757d; /* Cinza para fechar notificações */
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+  transition: background-color 0.2s ease;
+  display: block; /* Para ocupar a largura total do pop-up */
+  width: 100%;
+}
+
+.close-notifications-button:hover {
+  background-color: #5a6268;
+}
+
+/* Estilos para notificação na Sidebar (dashboard.ejs) */
+.sidebar-notification-item {
+  padding: 12px 20px; /* Mesmo padding dos outros links da sidebar */
+  position: relative; /* Para posicionar o count */
+  border-bottom: 1px solid #374151; /* Linha divisória como outros itens */
+  margin-bottom: 10px; /* Espaço após o item */
+}
+
+.sidebar-notification-item .notification-link {
+  text-decoration: none;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Espaço entre o ícone e o texto */
+  font-weight: bold;
+}
+
+.sidebar-notification-item .notification-link svg {
+  fill: white; /* Ícone branco */
+}
+
+.sidebar-notification-item .notification-count {
+  position: absolute;
+  top: 50%;
+  right: 20px; /* Alinhar à direita da sidebar */
+  transform: translateY(-50%); /* Centralizar verticalmente */
+  background: red;
+  color: white;
+  font-size: 11px;
+  font-weight: bold;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2px;
+}
+
+/* Classe de utilidade para esconder/mostrar */
+.hidden {
+  display: none;
+}
+
+/* Animação para o pop-up */
+@keyframes fadeInScale {
+  from {
+      opacity: 0;
+      transform: scale(0.8);
+  }
+  to {
+      opacity: 1;
+      transform: scale(1);
+  }
+}
+
+@media (max-width: 768px) {
+  .main-container {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    position: relative;
+    width: auto;
+    height: auto;
+  }
+
+  .content {
+    margin-left: 0;
+  }
+
+  .news-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+
+  .news-card {
+    flex-direction: column;
+  }
+
+  .news-card img {
+    width: 100%;
+    height: auto;
+  }
 }

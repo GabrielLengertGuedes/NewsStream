@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gerenciar Usuários - NewsStream</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+  <div class="sidebar sidebar-dashboard">
+    <h2>NewsStream</h2>
+    <a href="/dashboard">Dashboard</a>
+    <a href="/noticias">Notícias</a>
+    <a href="/categorias">Categorias</a>
+    <a href="/comentarios">Comentários</a>
+    <a href="/usuarios" class="active">Usuários</a>
+    <a href="/logout">Sair</a>
+  </div>
+
+  <div class="dashboard-main">
+    <header class="dashboard-header">
+      <h1>Usuários Cadastrados</h1>
+    </header>
+
+    <table class="users-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nome</th>
+          <th>Email</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% usuariosCadastrados.forEach(usuario => { %>
+          <tr>
+            <td><%= usuario.id %></td>
+            <td><%= usuario.nome %></td>
+            <td><%= usuario.email %></td>
+            <td>
+              <form action="/remover-usuario/<%= usuario.id %>" method="POST">
+                <button type="submit" class="delete-button">Excluir</button>
+              </form>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    
+  </div>
+
+</body>
+</html>

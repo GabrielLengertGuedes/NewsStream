@@ -1,0 +1,89 @@
+main.ejs
+
+main.ejs
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>NewsStream – Página Principal</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+
+  <button class="menu-button" onclick="toggleSidebar()">☰ Categorias</button>
+
+  <header class="navbar">
+    <div class="logo">NewsStream</div>
+    <div class="auth-buttons">
+        <div class="notification-wrapper">
+            <button class="notification-button">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bell-fill" viewBox="0 0 16 16">
+                    <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2m.995-14.901a1 1 0 1 0-1.99 0A5 5 0 0 0 3 6c0 1.098-.5 6-2 7h12c-1.5-1-2-5.902-2-7s-.995-14.901a1 1 1 0 1 0-1.99 0z"/>
+                </svg>
+                <span>Notificações</span> <span class="notification-count"><%= numNotifications %></span>
+            </button>
+        </div>
+        <button onclick="location.href='/main'">Home</button>
+        <% if (usuario && usuario.email === 'admin@newsstream.com') { %>
+            <button onclick="location.href='/dashboard'" class="interaction-button">
+                Painel Admin
+            </button>
+        <% } %>
+        <button onclick="location.href='/logout'">Sair</button>
+    </div>
+</header>
+        <button onclick="location.href='/main'">Home</button>
+        <% if (usuario && usuario.email === 'admin@newsstream.com') { %>
+            <button onclick="location.href='/dashboard'" class="interaction-button">
+                Painel Admin
+            </button>
+        <% } %>
+        <button onclick="location.href='/logout'">Sair</button>
+    </div>
+</header>
+
+  <div class="main-container">
+    <aside class="sidebar sidebar-main">
+      <h2>Categorias</h2>
+      <ul class="category-list">
+        <li><a href="/main" class="<%= selecionada === 'Todas' ? 'active' : '' %>">Todas</a></li>
+        <% categorias.forEach(cat => { %>
+          <li><a href="/main?categoria=<%= encodeURIComponent(cat) %>" class="<%= selecionada === cat ? 'active' : '' %>"><%= cat %></a></li>
+        <% }) %>
+      </ul>
+    </aside>
+    
+    <section class="content">
+      <h2>
+        <%= selecionada === 'Todas' ? `Bem-vindo, ${nome}!` : `Categoria: ${selecionada}` %>
+      </h2>
+      <div class="news-grid">
+        <% if (noticias.length === 0) { %>
+          <p>Nenhuma notícia encontrada.</p>
+        <% } else { %>
+          <% noticias.forEach(item => { %>
+            <article class="news-card">
+              <img src="<%= item.imagemUrl %>" alt="<%= item.titulo %>" />
+              <div class="card-body">
+                <h3>
+                  <a href="/noticias/<%= item.id %>"><%= item.titulo %></a>
+                </h3>
+                <p><%= item.resumo %></p>
+              </div>
+            </article>
+          <% }) %>
+        <% } %>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    function toggleSidebar() {
+      document.querySelector('.sidebar-main').classList.toggle('oculta');
+    }
+  </script>
+
+</body>
+</html>

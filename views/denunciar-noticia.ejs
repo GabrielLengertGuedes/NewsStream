@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Denúncia de Notícia</title>
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: #e5e7eb;
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .report-container {
+      width: 90%;
+      max-width: 700px;
+      background: #fff;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    }
+
+    .report-container h1 {
+      font-size: 1.5rem;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .comentario-denunciado {
+      background: #f3f4f6;
+      padding: 12px;
+      margin-bottom: 24px;
+      border-left: 4px solid #1d4ed8;
+    }
+
+    .comentario-denunciado strong {
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .motivos {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .detalhes textarea {
+      width: 100%;
+      height: 100px;
+      padding: 10px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      resize: vertical;
+    }
+
+    .botoes {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .botoes button {
+      padding: 10px 18px;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    .cancelar {
+      background: #d1d5db;
+      color: #111;
+    }
+
+    .enviar {
+      background: #1d4ed8;
+      color: white;
+    }
+
+    .enviar:hover {
+      background-color: #122b8b;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="report-container">
+    <h1>Denúncia de notícia</h1>
+
+    <div class="comentario-denunciado">
+      <strong>Notícia denunciada:</strong>
+      <%= noticia.titulo %>
+    </div>
+
+    <form method="POST" action="/denunciar-noticia/<%= noticia.id %>">
+      <div class="motivos">
+        <label><input type="radio" name="motivo" value="Discurso de ódio" required> Discurso de ódio</label>
+        <label><input type="radio" name="motivo" value="Assédio ou bullying"> Assédio ou bullying</label>
+        <label><input type="radio" name="motivo" value="Informação falsa"> Informação falsa</label>
+        <label><input type="radio" name="motivo" value="Conteúdo impróprio"> Conteúdo impróprio</label>
+        <label><input type="radio" name="motivo" value="Spam ou propaganda"> Spam ou propaganda</label>
+        <label><input type="radio" name="motivo" value="Outro"> Outro</label>
+      </div>
+
+      <div class="detalhes">
+        <label for="detalhes">Quer nos contar mais detalhes? (opcional)</label>
+        <textarea name="detalhes" id="detalhes"></textarea>
+      </div>
+
+      <div class="botoes">
+        <button type="button" onclick="window.history.back()" class="cancelar">Cancelar</button>
+        <button type="submit" class="enviar">Enviar Denúncia</button>
+      </div>
+    </form>
+  </div>
+
+</body>
+</html>

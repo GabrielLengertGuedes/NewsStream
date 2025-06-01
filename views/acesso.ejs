@@ -120,7 +120,6 @@
         <div class="message <%= sucesso ? 'success' : '' %>"><%= mensagem %></div>
       <% } %>
 
-      <!-- Login -->
       <div id="login-form" class="<%= mostrarCadastro ? 'hidden' : '' %>">
         <h2>Entrar</h2>
         <form method="POST" action="/login">
@@ -137,7 +136,6 @@
         </div>
       </div>
 
-      <!-- Cadastro -->
       <div id="cadastro-form" class="<%= mostrarCadastro ? '' : 'hidden' %>">
         <h2>Informe seus dados</h2>
         <form method="POST" action="/cadastro">
@@ -169,11 +167,6 @@
     </div>
   </div>
 
-  <script>
-    function alternarForm(paraCadastro) {
-      document.getElementById('login-form').classList.toggle('hidden', paraCadastro);
-      document.getElementById('cadastro-form').classList.toggle('hidden', !paraCadastro);
-    }
-  </script>
+  <script src="/js/formToggle.js"></script>
 </body>
 </html>

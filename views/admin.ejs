@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Painel Administrativo – NewsStream</title>
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f3f4f6;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .admin-container {
+      max-width: 800px;
+      margin: auto;
+      background: #fff;
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .stat {
+      padding: 16px;
+      margin-bottom: 20px;
+      border-left: 4px solid #1d4ed8;
+      background: #f9fafb;
+      border-radius: 8px;
+    }
+
+    .stat strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 1.1rem;
+    }
+
+    .logout {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 10px 18px;
+      background-color: #ef4444;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      text-decoration: none;
+    }
+
+    .logout:hover {
+      background-color: #b91c1c;
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-container">
+    <h1>Painel Administrativo</h1>
+
+    <div class="stat">
+      <strong>Usuário Logado:</strong>
+      <%= nome %>
+    </div>
+
+    <div class="stat">
+      <strong>Total de Notícias:</strong>
+      <%= totalNoticias %>
+    </div>
+
+    <div class="stat">
+      <strong>Total de Categorias:</strong>
+      <%= categorias.length %>
+    </div>
+
+    <div class="stat">
+      <strong>Total de Comentários:</strong>
+      <%= totalComentarios %>
+    </div>
+
+    <a href="/logout" class="logout">Sair</a>
+  </div>
+</body>
+</html>

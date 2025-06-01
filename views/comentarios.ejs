@@ -1,0 +1,60 @@
+  <!DOCTYPE html>
+  <html lang="pt-br">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Comentários - NewsStream</title>
+    <link rel="stylesheet" href="/style.css">
+  </head>
+  <body>
+
+    <div class="sidebar sidebar-dashboard">
+      <h2>NewsStream</h2>
+      <a href="/dashboard">Dashboard</a>
+      <a href="/noticias">Notícias</a>
+      <a href="/categorias">Categorias</a>
+      <a href="/comentarios" class="active">Comentários</a>
+      <a href="/usuarios">Usuários</a>
+      <a href="/logout">Sair</a>
+    </div>
+
+    <div class="dashboard-main">
+      <header class="dashboard-header">
+        <h1>Gerenciar Comentários Denunciados</h1>
+      </header>
+
+      <% if (comentariosDenunciados.length === 0) { %>
+        <p>Não há comentários denunciados no momento.</p>
+      <% } else { %>
+        <table class="comments-table">
+          <thead>
+            <tr>
+              <th>Autor</th>
+              <th>Comentário</th>
+              <th>Data</th>
+              <th>Notícia</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% comentariosDenunciados.forEach(comentario => { %>
+              <tr>
+                <td><%= comentario.autor %></td>
+                <td><%= comentario.texto %></td>
+                <td><%= comentario.data %></td>
+                <td><a href="/noticias/<%= comentario.noticiaId %>">Ver Notícia</a></td>
+                <td>
+                  <form action="/remover-comentario/<%= comentario.id %>" method="POST">
+                    <button type="submit" class="delete-button">Excluir</button>
+                  </form>
+                </td>              
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      <% } %>
+
+    </div>
+
+  </body>
+  </html>

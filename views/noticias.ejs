@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>NewsStream – Notícias</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <header class="navbar">
+    <div class="logo">NewsStream</div>
+    <div class="auth-buttons">
+      <span>Bem-vindo, <%= nome %>!</span>
+      <button onclick="location.href='/logout'">Sair</button>
+    </div>
+  </header>
+
+  <main class="news-list">
+    <% todasNoticias.forEach((noticia) => { %>
+      <article class="news-item">
+        <a href="/noticias/<%= noticia.id %>">
+          <img src="<%= noticia.imagemUrl %>" alt="<%= noticia.titulo %>" />
+          <h2><%= noticia.titulo %></h2>
+        </a>
+        <p><%= noticia.resumo %></p>
+      </article>
+    <% }) %>
+  </main>
+</body>
+</html>

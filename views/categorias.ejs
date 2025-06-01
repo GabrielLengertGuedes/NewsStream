@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Categorias - NewsStream</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        /* Adicione ou modifique este CSS no seu style.css para melhor organização */
+        .add-category-container {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .add-category-container h2 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .add-category-form {
+            display: flex;
+            gap: 15px; /* Espaçamento entre o input e o botão */
+            align-items: flex-end; /* Alinha o botão com o input */
+        }
+
+        .add-category-form label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .add-category-form input[type="text"] {
+            flex-grow: 1; /* Permite que o input preencha o espaço disponível */
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .add-category-form button {
+            padding: 10px 20px;
+            background-color: #28a745; /* Verde para adicionar */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: background-color 0.2s ease-in-out;
+            white-space: nowrap; /* Evita que o texto do botão quebre */
+        }
+
+        .add-category-form button:hover {
+            background-color: #218838;
+        }
+
+        /* Mensagens de feedback */
+        .message.add-category-message {
+            padding: 10px;
+            margin-top: 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            text-align: center;
+        }
+        .message.add-category-message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .message.add-category-message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Estilo para os botões de ação na lista de categorias */
+        .category-edit-item .action-buttons {
+            display: flex;
+            gap: 8px; /* Espaçamento entre os botões Editar e Excluir */
+        }
+
+        .category-edit-item .delete-category-button {
+            background-color: #dc3545; /* Cor vermelha para excluir */
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.2s ease-in-out;
+        }
+
+        .category-edit-item .delete-category-button:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar sidebar-dashboard">
+        <h2>NewsStream</h2>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/noticias">Notícias</a>
+        <a href="/categorias" class="active">Categorias</a>
+        <a href="/comentarios">Comentários</a>
+        <a href="/usuarios">Usuários</a>
+        <a href="/logout">Sair</a>
+    </div>
+
+    <div class="dashboard-main">
+        <header class="dashboard-header">
+            <h1>Gerenciar Categorias</h1>
+        </header>
+
+        <% if (mensagem) { %>
+            <div class="message add-category-message <%= sucesso ? 'success' : 'error' %>">
+                <%= mensagem %>
+            </div>
+        <% } %>
+
+        <div class="add-category-container">
+            <h2>Adicionar Nova Categoria</h2>
+            <form action="/adicionar-categoria" method="POST" class="add-category-form">
+                <div style="flex-grow: 1;">
+                    <label for="novaCategoriaNome">Nome da Nova Categoria:</label>
+                    <input type="text" id="novaCategoriaNome" name="novaCategoriaNome" placeholder="Ex: Mundo, Finanças" required>
+                </div>
+                <button type="submit">Adicionar</button>
+            </form>
+        </div>
+
+        <div class="categories-management-container">
+            <p class="instruction-text">Para editar uma categoria, clique no botão "Editar" ao lado dela.</p>
+            <ul class="category-edit-list">
+                <% categorias.forEach(categoria => { %>
+                    <li class="category-edit-item">
+                        <span class="category-display-name"><%= categoria %></span>
+                        <div class="action-buttons">
+                            <button type="button" class="edit-category-button" onclick="showEditForm('<%= categoria %>')">Editar</button>
+                            <form action="/remover-categoria" method="POST" style="display:inline;">
+                                <input type="hidden" name="categoriaParaRemover" value="<%= categoria %>">
+                                <button type="submit" class="delete-category-button" onclick="return confirm('Tem certeza que deseja remover a categoria <%= categoria %>? Todas as notícias associadas precisarão ser reavaliadas.');">Excluir</button>
+                            </form>
+                        </div>
+                    </li>
+                <% }); %>
+            </ul>
+
+            <div id="editCategoryFormContainer" class="edit-form-container hidden">
+                <h2>Editar Categoria</h2>
+                <form action="/editar-categoria" method="POST" class="category-edit-form">
+                    <label for="currentCategoryName">Categoria Atual:</label>
+                    <input type="text" id="currentCategoryName" name="categoriaAtual" readonly>
+
+                    <label for="newCategoryName">Novo Nome da Categoria:</label>
+                    <input type="text" id="newCategoryName" name="novaCategoria" placeholder="Digite o novo nome da categoria" required>
+
+                    <div class="form-buttons">
+                        <button type="submit" class="save-button">Salvar</button>
+                        <button type="button" class="cancel-button" onclick="hideEditForm()">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Função para mostrar o formulário de edição
+        function showEditForm(categoryName) {
+            document.getElementById('currentCategoryName').value = categoryName;
+            document.getElementById('editCategoryFormContainer').classList.remove('hidden');
+            // Oculta a mensagem de feedback se ela estiver visível
+            const messageDiv = document.querySelector('.add-category-message');
+            if (messageDiv) {
+                messageDiv.classList.add('hidden');
+            }
+        }
+
+        // Função para ocultar o formulário de edição
+        function hideEditForm() {
+            document.getElementById('editCategoryFormContainer').classList.add('hidden');
+        }
+    </script>
+
+</body>
+</html>

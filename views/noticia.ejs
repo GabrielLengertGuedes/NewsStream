@@ -1,0 +1,203 @@
+noticia.ejs
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>NewsStream – <%= noticia.titulo %></title>
+    <link rel="stylesheet" href="/style.css" />
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+<body>
+
+  <header class="navbar">
+    <div class="logo">NewsStream</div>
+    <div class="auth-buttons">
+        <div class="notification-wrapper">
+            <button class="notification-button">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bell-fill" viewBox="0 0 16 16">
+                    <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2m.995-14.901a1 1 0 1 0-1.99 0A5 5 0 0 0 3 6c0 1.098-.5 6-2 7h12c-1.5-1-2-5.902-2-7s-.995-14.901a1 1 1 0 1 0-1.99 0z"/>
+                </svg>
+                <span>Notificações</span>
+                <span class="notification-count">0</span> </button>
+        </div>
+        <button onclick="location.href='/main'">Home</button>
+        <% if (usuario && usuario.email === 'admin@newsstream.com') { %>
+            <button onclick="location.href='/dashboard'" class="interaction-button">
+                Painel Admin
+            </button>
+        <% } %>
+        <button onclick="location.href='/logout'">Sair</button>
+    </div>
+</header>
+
+    <section class="news-container">
+        <div class="tags">
+            <span><%= noticia.categoria %></span>
+            <button id="followBtn" class="follow-button">🔔 Seguir</button>
+        </div>
+
+        <h1><%= noticia.titulo %></h1>
+        <p class="news-meta">Publicado em 12 de Janeiro de 2025 | Fonte: NewsStream</p>
+
+        <img src="<%= noticia.imagemUrl %>" alt="<%= noticia.titulo %>">
+
+        <div class="news-details">
+            <%- noticia.conteudo %>
+        </div>
+
+        <div class="news-interaction">
+            <div class="button-group">
+                <button id="likeBtn" class="interaction-button like">Curtir 👍</button>
+                <button class="interaction-button share">Compartilhar 📤</button>
+                <form method="GET" action="/denunciar-noticia/<%= noticia.id %>" style="display: inline;">
+                    <button type="submit" class="interaction-button report">Denunciar 🚫</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="comment-section">
+            <h3>Comentários</h3>
+            <form method="POST" action="/comentar/<%= noticia.id %>" class="comment-form">
+                    <input type="text" name="comentario" placeholder="Deixe seu comentário aqui" required>
+                    <button type="submit" class="interaction-button comment-submit-button">Comentar</button>
+            </form>
+        
+            <% if (comentarios && comentarios.length > 0) { %>
+                    <ul class="comments-list">
+                            <% comentarios.forEach((comentario) => { %>
+                                <li class="comment-item">
+                                    <div class="comment-content-and-report">
+                                            <div class="comment-header">
+                                                    <span class="comment-author"><%= comentario.autor %></span>
+                                                    <span class="comment-date"><%= comentario.data %></span>
+                                            </div>
+                                            <p class="comment-text"><%= comentario.texto %></p>
+                                    </div>
+                                    <form method="GET" action="/denunciar-comentario/<%= noticia.id %>/<%= comentario.id %>" class="report-comment-form">
+                                            <button type="submit" class="report-button" title="Denunciar comentário">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-flag-fill" viewBox="0 0 16 16">
+                                                            <path d="M14.778.085A.5.5 0 0 1 15 .5V14a.5.5 0 0 1-.085.223l-1.406 2.812A.5.5 0 0 1 13 16H3a.5.5 0 0 1-.475-.31L.085 4.887A.5.5 0 0 1 .5 4h10.325l-4.215-3.372A.5.5 0 0 1 5.465.5z"/>
+                                                    </svg>
+                                                    Denunciar
+                                            </button>
+                                    </form>
+                                </li>
+                            <% }) %>
+                    </ul>
+            <% } else { %>
+                    <p class="no-comments-message">Nenhum comentário ainda. Seja o primeiro a comentar!</p>
+            <% } %>
+        </div>
+    </section>
+
+    <script>
+        // Obtém o ID da notícia atual diretamente do EJS
+        const noticiaId = parseInt('<%= noticia.id %>'); // <--- CORREÇÃO AQUI
+        const categoriaNoticia = '<%= noticia.categoria %>';
+
+        const followBtn = document.getElementById('followBtn');
+        const likeBtn = document.getElementById('likeBtn');
+
+        // Usa chaves únicas para cada notícia e categoria
+        const storageKeySeguindo = 'seguindo_categoria_' + categoriaNoticia;
+        const storageKeyCurtido = 'curtido_noticia_' + noticiaId;
+
+        // Recupera o estado do localStorage (ou sessionStorage)
+        let seguindo = localStorage.getItem(storageKeySeguindo) === 'true';
+        let curtido = localStorage.getItem(storageKeyCurtido) === 'true';
+
+        // Atualiza o texto e a cor do botão ao carregar a página
+        if (seguindo) {
+            followBtn.textContent = 'Seguindo';
+            followBtn.style.backgroundColor = '#6b7280';
+        }
+
+        if (curtido) {
+            likeBtn.textContent = 'Curtido 👍';
+            likeBtn.style.backgroundColor = '#6b7280';
+        }
+
+        // Adiciona evento de clique para o botão "Seguir"
+        followBtn.addEventListener('click', () => {
+            seguindo = !seguindo; // Inverte o estado
+            localStorage.setItem(storageKeySeguindo, seguindo); // Salva o novo estado
+            followBtn.textContent = seguindo ? 'Seguindo' : '🔔 Seguir';
+            followBtn.style.backgroundColor = seguindo ? '#6b7280' : '#1d4ed8';
+        });
+
+        // Adiciona evento de clique para o botão "Curtir"
+        likeBtn.addEventListener('click', () => {
+            curtido = !curtido; // Inverte o estado
+            localStorage.setItem(storageKeyCurtido, curtido); // Salva o novo estado
+            likeBtn.textContent = curtido ? 'Curtido 👍' : 'Curtir 👍';
+            likeBtn.style.backgroundColor = curtido ? '#6b7280' : '#1d4ed8';
+        });
+    </script>
+
+<div id="share-popup" class="popup-overlay hidden">
+  <div class="popup-content">
+      <h3>Notícia Compartilhada!</h3>
+      <p>O link desta notícia foi copiado para sua área de transferência.</p>
+      <p>Você pode colar e compartilhar onde desejar!</p>
+      <button class="close-popup-button">Fechar</button>
+  </div>
+</div>
+
+<script>
+  // ... (Seu JavaScript existente aqui, dentro da tag script) ...
+
+  // NOVO CÓDIGO JavaScript para o pop-up de compartilhamento
+
+  const shareBtn = document.querySelector('.interaction-button.share');
+  const sharePopup = document.getElementById('share-popup');
+  const closePopupButton = document.querySelector('.close-popup-button');
+
+  // Função para copiar o URL da página
+  function copyPageUrl() {
+      const currentUrl = window.location.href;
+      navigator.clipboard.writeText(currentUrl)
+          .then(() => {
+              console.log('URL copiado com sucesso!');
+          })
+          .catch(err => {
+              console.error('Erro ao copiar URL: ', err);
+              // Fallback para navegadores sem suporte a navigator.clipboard
+              const textArea = document.createElement("textarea");
+              textArea.value = currentUrl;
+              document.body.appendChild(textArea);
+              textArea.focus();
+              textArea.select();
+              try {
+                  document.execCommand('copy');
+                  console.log('Fallback: URL copiado com sucesso!');
+              } catch (err) {
+                  console.error('Fallback: Falha ao copiar URL', err);
+              }
+              document.body.removeChild(textArea);
+          });
+  }
+
+  // Evento de clique para o botão Compartilhar
+  shareBtn.addEventListener('click', () => {
+      copyPageUrl(); // Copia o URL para a área de transferência
+      sharePopup.classList.remove('hidden'); // Exibe o pop-up
+  });
+
+  // Evento de clique para o botão Fechar do pop-up
+  closePopupButton.addEventListener('click', () => {
+      sharePopup.classList.add('hidden'); // Oculta o pop-up
+  });
+
+  // Ocultar pop-up se clicar fora dele (opcional, mas bom para UX)
+  sharePopup.addEventListener('click', (event) => {
+      if (event.target === sharePopup) { // Se o clique foi no overlay, não no conteúdo
+          sharePopup.classList.add('hidden');
+      }
+  });
+
+</script>
+
+</body>
+</html>

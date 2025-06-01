@@ -1134,20 +1134,19 @@ html, body {
 
 /* Cores diferentes para tipos de notificação */
 .notification-type.new-news {
-  background-color: #28a745; /* Verde */
+  background-color: #616161; /* Verde */
 }
 
 .notification-type.new-comment {
-  background-color: #007bff; /* Azul */
+  background-color: #616161; /* Azul */
 }
 
 .notification-type.category-update {
-  background-color: #ffc107; /* Amarelo */
-  color: #333; /* Texto escuro para contraste no amarelo */
+  background-color: #616161; /* Amarelo */
 }
 
 .notification-type.admin-message {
-  background-color: #dc3545; /* Vermelho */
+  background-color: #616161; /* Vermelho */
 }
 
 .close-notifications-button {

@@ -235,18 +235,21 @@ app.get('/main', (req, res) => {
     const selecionada = req.query.categoria || 'Todas';
     const noticias = selecionada === 'Todas' ? todasNoticias : todasNoticias.filter(n => n.categoria === selecionada);
 
+    // Contagem de comentários denunciados para o número de notificações
+    const numNotifications = todosComentarios.filter(c => c.denunciado).length;
+
     // Verifica se o usuário logado é um administrador
     const isAdminUser = (req.session.usuario.email === 'admin@newsstream.com');
 
     res.render('main', {
-      nome: req.session.usuario.nome,
-      categorias,
-      noticias,
-      selecionada,
-      usuario: req.session.usuario,
-      isAdminView: isAdminUser,
-      numNotifications: 5 // Exemplo: um número fixo por enquanto
-  });
+        nome: req.session.usuario.nome,
+        categorias,
+        noticias,
+        selecionada,
+        usuario: req.session.usuario,
+        isAdminView: isAdminUser,
+        numNotifications: numNotifications // Agora passa o número real de notificações
+    });
 });
 
 // Rota para exibir uma notícia individual
@@ -261,6 +264,10 @@ app.get('/noticias/:id', (req, res) => {
     // Filtra os comentários de 'todosComentarios' que pertencem a esta notícia
     const comentariosDaNoticia = todosComentarios.filter(c => c.noticiaId === noticiaId);
 
+    // ADICIONE ESTA LINHA: Calcula o total de comentários denunciados para as notificações
+    const numNotifications = todosComentarios.filter(c => c.denunciado).length; 
+    // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
     // Renderiza a página da notícia com seus comentários
     res.render('noticia', {
         noticia: {
@@ -268,7 +275,9 @@ app.get('/noticias/:id', (req, res) => {
             conteudo: noticia.conteudo // Garante que o conteúdo HTML seja passado
         },
         comentarios: comentariosDaNoticia,
-        usuario: req.session.usuario // Passa informações do usuário logado
+        usuario: req.session.usuario, // Passa informações do usuário logado
+        numNotifications: numNotifications // ADICIONE ESTA PROPRIEDADE AO OBJETO
+        // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     });
 });
 

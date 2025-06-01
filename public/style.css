@@ -1206,6 +1206,14 @@ html, body {
   padding: 2px;
 }
 
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+  /* ADICIONE OU AJUSTE ESTA LINHA: */
+  margin-top: 20px; /* Por exemplo, para criar o espaço */
+}
+
 /* Classe de utilidade para esconder/mostrar */
 .hidden {
   display: none;

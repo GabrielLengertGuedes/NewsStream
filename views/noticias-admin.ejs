@@ -12,7 +12,8 @@
             background: #fff;
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            margin-top: 20px;
+            /* REMOVA OU COMENTE O margin-top: 20px; SE ESTIVER AQUI */
+            /* margin-top: 20px; */ /* Este margin-top é do container em si, não do espaçamento acima da tabela */
         }
 
         .admin-table-container h1 {
@@ -21,25 +22,14 @@
             color: #333;
         }
 
-        .admin-table-container a.add-button {
-            display: inline-block;
-            background-color: #28a745; /* Cor verde para adicionar */
-            color: white;
-            padding: 10px 15px;
-            border-radius: 5px;
-            text-decoration: none;
-            margin-bottom: 20px;
-            transition: background-color 0.3s ease;
-        }
-
-        .admin-table-container a.add-button:hover {
-            background-color: #218838;
-        }
+        /* O BLOCO DE ESTILO DO BOTÃO (a.add-button) JÁ DEVERIA ESTAR REMOVIDO OU COMENTADO DO SEU style.css ou deste <style> */
 
         .admin-table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
+            /* ADICIONE ESTA LINHA PARA RECRIAR O ESPAÇAMENTO: */
+            margin-top: 20px; /* Isso empurrará a tabela para baixo */
         }
 
         .admin-table th, .admin-table td {
@@ -135,28 +125,26 @@
     <div class="sidebar sidebar-dashboard">
         <h2>NewsStream</h2>
         <a href="/dashboard">Dashboard</a>
-        <a href="/noticias" class="active">Notícias</a>
-        <a href="/categorias">Categorias</a>
+        <a href="/noticias" class="active">Notícias</a> <a href="/categorias">Categorias</a>
         <a href="/comentarios">Comentários</a>
         <a href="/usuarios">Usuários</a>
+        <a href="/main">Página inicial</a>
         <a href="/logout">Sair</a>
     </div>
 
     <div class="dashboard-main">
         <header class="dashboard-header">
-            <h1>Gerenciar Notícias</h1>
+            <h1>Gerenciar Notícias Denunciadas</h1>
         </header>
 
         <div class="admin-table-container">
-            <a href="/nova-noticia" class="add-button">Adicionar Nova Notícia</a>
-
             <table class="admin-table">
                 <thead>
                     <tr>
                         <th>ID</th>
                         <th>Título</th>
                         <th>Categoria</th>
-                        <th>Ações</th>
+                        <th>Status Denúncia</th> <th>Ações</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -166,17 +154,22 @@
                                 <td data-label="ID"><%= noticia.id %></td>
                                 <td data-label="Título"><%= noticia.titulo %></td>
                                 <td data-label="Categoria"><%= noticia.categoria %></td>
+                                <td data-label="Status Denúncia"> <%= noticia.denunciado ? 'Denunciada' : 'Normal' %>
+                                    <% if (noticia.motivoDenuncia) { %>
+                                        <br><small>Motivo: <%= noticia.motivoDenuncia %></small>
+                                    <% } %>
+                                </td>
                                 <td data-label="Ações" class="action-buttons">
-                                    <a href="/editar-noticia/<%= noticia.id %>" class="edit-button">Editar</a>
-                                    <form action="/remover-noticia/<%= noticia.id %>" method="POST" style="display:inline;">
-                                        <button type="submit" class="delete-button" onclick="return confirm('Tem certeza que deseja remover esta notícia?');">Excluir</button>
-                                    </form>
+                                        <a href="/editar-noticia/<%= noticia.id %>" class="edit-button">Editar</a>
+                                        <form action="/remover-noticia/<%= noticia.id %>" method="POST" style="display:inline;">
+                                            <button type="submit" class="delete-button" onclick="return confirm('Tem certeza que deseja remover esta notícia?');">Excluir</button>
+                                        </form>
                                 </td>
                             </tr>
                         <% }); %>
                     <% } else { %>
                         <tr>
-                            <td colspan="4" style="text-align: center;">Nenhuma notícia encontrada.</td>
+                            <td colspan="5" style="text-align: center;">Nenhuma notícia denunciada encontrada.</td>
                         </tr>
                     <% } %>
                 </tbody>

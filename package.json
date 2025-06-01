@@ -1,42 +1,15 @@
 {
   "name": "newsstream",
-  "version": "1.0.0",
-  "description": "Sistema NewsStream com funcionalidades de login, cadastro e demais módulos.",
+  "version": "1.0.5",
+  "description": "Sistema de noticias NewsStream com funcionalidades de login, cadastro e demais módulos.",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js",
-    "test:backend": "mocha --timeout 5000 \"test/**/*.js\" --ignore \"test/frontend.test.js\"",
-    "test:frontend": "jest",
-    "test": "npm run test:backend && npm run test:frontend",
-    "coverage": "nyc npm test"
-  },
-  "jest": {
-    "testEnvironment": "jest-environment-jsdom",
-    "testPathIgnorePatterns": [
-      "<rootDir>/test/backend.test.js",
-      "<rootDir>/test/categories.test.js",
-      "<rootDir>/test/feed.test.js",
-      "<rootDir>/test/history.test.js",
-      "<rootDir>/test/likes.test.js",
-      "<rootDir>/test/comments.test.js",
-      "<rootDir>/test/reports.test.js",
-      "<rootDir>/test/follow.test.js",
-      "<rootDir>/test/share.test.js",
-      "<rootDir>/test/admin.test.js"
-    ]
+    "start": "node app.js"
   },
   "dependencies": {
     "ejs": "^3.1.10",
     "express": "^5.1.0",
     "express-session": "^1.18.1",
     "sqlite3": "^5.1.7"
-  },
-  "devDependencies": {
-    "chai": "^5.2.0",
-    "jest": "^29.7.0",
-    "jest-environment-jsdom": "^29.7.0",
-    "mocha": "^11.5.0",
-    "nyc": "^17.1.0",
-    "supertest": "^7.1.1"
   }
 }

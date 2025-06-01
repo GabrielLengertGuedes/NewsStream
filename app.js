@@ -402,10 +402,14 @@ app.get('/noticias', (req, res) => {
         return res.status(403).send("Acesso não autorizado.");
     }
 
+    // Filtra apenas as notícias que foram denunciadas
+    const noticiasDenunciadas = todasNoticias.filter(noticia => noticia.denunciado === true);
+    // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
     // Renderiza a view da tabela de notícias do admin
-    res.render('noticias-admin-table', {
-        todasNoticias: todasNoticias, // Passa todas as notícias para a tabela
-        nome: req.session.usuario.nome // Necessário se o header do dashboard usar o nome
+    res.render('noticias-admin', {
+        todasNoticias: noticiasDenunciadas, // <--- MUDANÇA AQUI: Passa APENAS as notícias denunciadas
+        nome: req.session.usuario.nome
     });
 });
 
@@ -618,11 +622,23 @@ app.get('/denunciar-noticia/:id', (req, res) => {
 
 // Rota POST para processar a denúncia de notícia
 app.post('/denunciar-noticia/:id', (req, res) => {
-    // Aqui você implementaria a lógica para marcar a notícia como denunciada,
-    // talvez em uma nova propriedade 'denunciada: true' na notícia,
-    // ou salvando em um array de denúncias de notícias, assim como nos comentários.
-    // Por enquanto, apenas redireciona para a confirmação.
-    res.render('denuncia-confirmada');
+    const noticiaId = parseInt(req.params.id);
+    const { motivo, detalhes } = req.body; // Se você quiser salvar motivo e detalhes
+
+    // Encontra a notícia no array todasNoticias
+    let noticiaDenunciada = todasNoticias.find(n => n.id === noticiaId);
+
+    if (noticiaDenunciada) {
+        noticiaDenunciada.denunciado = true; // Marca a notícia como denunciada
+        // Se quiser salvar motivo e detalhes da denúncia na notícia:
+        noticiaDenunciada.motivoDenuncia = motivo;
+        noticiaDenunciada.detalhesDenuncia = detalhes;
+        console.log(`Notícia ID ${noticiaId} denunciada. Motivo: ${motivo || 'N/A'}, Detalhes: ${detalhes || 'Nenhum'}`);
+    } else {
+        console.warn(`Tentativa de denunciar notícia não encontrada: ID ${noticiaId}`);
+    }
+
+    res.render('denuncia-confirmada'); // Redireciona para a página de confirmação
 });
 
 // Rota do Painel Administrativo

@@ -284,26 +284,24 @@ app.get('/usuarios', (req, res) => {
         return res.status(403).send("Acesso não autorizado.");
     }
 
-    // ALTERAÇÃO AQUI: USAR db.query para MySQL
-    db.query("SELECT id, nome, email FROM usuarios", [], (err, results) => { // 'results' em vez de 'usuariosCadastrados'
+    db.query("SELECT id, nome, email FROM usuarios", [], (err, results) => { 
         if (err) {
             console.error("Erro ao buscar usuários:", err);
             return res.status(500).send("Erro ao carregar usuários.");
         }
-        res.render('usuarios', { usuariosCadastrados: results }); // Passar 'results' para a view
+        res.render('usuarios', { usuariosCadastrados: results }); 
     });
 });
 
 app.post('/remover-usuario/:id', (req, res) => {
     const usuarioId = parseInt(req.params.id);
 
-    // ALTERAÇÃO AQUI: USAR db.query para MySQL
-    db.query("DELETE FROM usuarios WHERE id = ?", [usuarioId], function(err, result) { // 'result' em vez de 'this' para MySQL
+    db.query("DELETE FROM usuarios WHERE id = ?", [usuarioId], function(err, result) { 
         if (err) {
             console.error("Erro ao remover usuário:", err.message);
             return res.status(500).send(`Erro ao remover usuário: ${err.message}`);
         }
-        console.log(`Usuário ID ${usuarioId} removido com sucesso. Linhas afetadas: ${result.affectedRows}`); // Para MySQL, use result.affectedRows
+        console.log(`Usuário ID ${usuarioId} removido com sucesso. Linhas afetadas: ${result.affectedRows}`); 
         res.redirect('/usuarios'); 
     });
 });
@@ -538,7 +536,6 @@ app.get('/dashboard', (req, res) => {
         total: todasNoticias.filter(n => n.categoria === c).length
     }));
 
-    // Usando o pool diretamente (o 'db' agora é o pool)
     db.query("SELECT COUNT(*) AS totalUsuarios FROM usuarios", (err, results) => {
         if (err) {
             console.error("Erro ao contar usuários do MySQL:", err.message);
@@ -557,7 +554,7 @@ app.get('/dashboard', (req, res) => {
     });
 });
 
-app.use(require('./routes/login')); // Esta linha importa as rotas de login/cadastro definidas em routes/login.js
+app.use(require('./routes/login'));
 
 app.get('/logout', (req, res) => {
     req.session.destroy(() => res.redirect('/login')); 

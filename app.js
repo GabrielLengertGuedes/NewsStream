@@ -1,8 +1,8 @@
 const express = require('express');
 const path = require('path');
-const sqlite3 = require('sqlite3').verbose();
 const session = require('express-session');
 const todasNoticias = require('./data/todas-noticias');
+const db = require('./database/mysql_db'); 
 
 const app = express();
 
@@ -20,19 +20,6 @@ app.set('views', path.join(__dirname, 'views'));
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-const db = new sqlite3.Database('./database/usuarios.db', err => {
-    if (err) console.error("Erro ao conectar ao SQLite:", err.message);
-    else console.log('Conectado ao SQLite.');
-});
-
-db.run(`create table if not exists usuarios (
-    id integer primary key autoincrement,
-    nome text not null,
-    email text unique not null,
-    senha text not null,
-    notificacoes integer
-)`);
-
 const categorias = [
     'Política', 'Tecnologia', 'Esportes', 'Saúde', 'Negócios',
     'Gastronomia', 'Meio Ambiente', 'Entretenimento', 'Justiça',
@@ -44,139 +31,139 @@ let todosComentarios = [
     { id: 1, autor: "André Fernandes", texto: "Ótima notícia! A reforma tributária é muito necessária.", data: "28/05/2025", noticiaId: 1, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 2, autor: "Mariana Costa", texto: "Espero que o cashback realmente ajude as famílias de baixa renda.", data: "27/05/2025", noticiaId: 1, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 69, autor: "Roberto Almeida", texto: "Essa reforma é mais do mesmo, só vai beneficiar os ricos. Falta transparência!", data: "26/05/2025", noticiaId: 1, denunciado: true, motivoDenuncia: "Informação falsa", detalhesDenuncia: "Alegações sem provas sobre benefício a ricos." }, 
-  
+
     { id: 3, autor: "Paulo Henrique", texto: "Que virada espetacular do União FC! Fiquei arrepiado.", data: "28/05/2025", noticiaId: 2, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 4, autor: "Sofia Lima", texto: "Finalmente um título depois de tanto tempo! Parabéns ao time.", data: "27/05/2025", noticiaId: 2, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 70, autor: "Guilherme Sampaio", texto: "Vitória roubada! A arbitragem claramente favoreceu o União FC. Que vergonha!", data: "26/05/2025", noticiaId: 2, denunciado: true, motivoDenuncia: "Discurso de ódio", detalhesDenuncia: "Acusação sem provas e incitação à rivalidade." }, 
-  
+
     { id: 5, autor: "Camila Santos", texto: "A reforma eleitoral é sempre um debate importante. Tomara que avance.", data: "28/05/2025", noticiaId: 3, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 6, autor: "Felipe Rodrigues", texto: "Transparência nas eleições é algo que a gente precisa muito!", data: "27/05/2025", noticiaId: 3, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 71, autor: "Beatriz Nogueira", texto: "Outra reforma só para enganar o povo. Eles nunca mudam de verdade.", data: "26/05/2025", noticiaId: 3, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-  
+
     { id: 7, autor: "Laura Pereira", texto: "Um avanço revolucionário em IA! O futuro chegou.", data: "28/05/2025", noticiaId: 4, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 8, autor: "Rafael Silveira", texto: "Será que essa IA vai nos ajudar no dia a dia? Ansioso para ver.", data: "27/05/2025", noticiaId: 4, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 72, autor: "Isabela Fonseca", texto: "IA é uma moda passageira. Em breve ninguém mais vai falar disso. Puro hype.", data: "26/05/2025", noticiaId: 4, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-  
+
     { id: 9, autor: "Bruno Cardoso", texto: "Convocação da seleção com surpresas? Gosto assim!", data: "28/05/2025", noticiaId: 5, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 10, autor: "Larissa Machado", texto: "Muita expectativa para a Copa do Mundo com esse novo time.", data: "27/05/2025", noticiaId: 5, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 73, autor: "Vinicius Neves", texto: "O técnico é um incompetente! Deixou os melhores de fora. Vamos perder de lavada!", data: "26/05/2025", noticiaId: 5, denunciado: true, motivoDenuncia: "Conteúdo impróprio", detalhesDenuncia: "Ofensas diretas ao técnico." }, 
-  
+
     { id: 11, autor: "Diego Martins", texto: "Otimismo no mercado é um bom sinal para a economia.", data: "28/05/2025", noticiaId: 6, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 12, autor: "Amanda Gomes", texto: "Com as taxas de juros mantidas, o setor de varejo deve sentir o impacto positivo.", data: "27/05/2025", noticiaId: 6, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 74, autor: "Gustavo Mendes", texto: "Esse 'otimismo' é fachada. A inflação ainda é um problema sério que não está sendo abordado.", data: "26/05/2025", noticiaId: 6, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-  
+
     { id: 13, autor: "Fernanda Ribeiro", texto: "Financiamento bilionário em energia limpa é o que precisamos para o futuro!", data: "28/05/2025", noticiaId: 7, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 14, autor: "Thiago Rocha", texto: "É um passo enorme para combater as mudanças climáticas.", data: "27/05/2025", noticiaId: 7, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 75, autor: "Mariana Duarte", texto: "Energia limpa é um conto de fadas para a mídia. Não vai mudar nada no aquecimento global, é tudo natural.", data: "26/05/2025", noticiaId: 7, denunciado: true, motivoDenuncia: "Informação falsa", detalhesDenuncia: "Negação de dados científicos sobre aquecimento global." }, 
-  
+
     { id: 15, autor: "Luciana Braga", texto: "Esses avanços no tratamento do câncer renovam a esperança de muitos pacientes.", data: "28/05/2025", noticiaId: 8, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 16, autor: "Roberto Pires", texto: "A pesquisa médica está cada vez mais promissora. Uma luz no fim do túnel.", data: "27/05/2025", noticiaId: 8, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 76, autor: "Daniel Oliveira", texto: "Mais uma 'promessa'. Nunca vejo esses tratamentos chegarem de verdade ao povo.", data: "26/05/2025", noticiaId: 8, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-  
+
     { id: 17, autor: "Patrícia Assis", texto: "Filme de ficção científica espetacular! Já quero a continuação.", data: "28/05/2025", noticiaId: 9, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 18, autor: "Carlos Eduardo", texto: "Os efeitos visuais são de cair o queixo! Valeu cada centavo.", data: "27/05/2025", noticiaId: 9, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 77, autor: "Julio César", texto: "O enredo é péssimo e os personagens são chatos. Só efeitos especiais não salvam um filme ruim.", data: "26/05/2025", noticiaId: 9, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-  
+
     { id: 19, autor: "Ana Paula", texto: "A decisão sobre liberdade de expressão é crucial para o ambiente online.", data: "28/05/2025", noticiaId: 10, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 20, autor: "Lucas Ferreira", texto: "Finalmente uma regulamentação para o que se posta nas redes.", data: "27/05/2025", noticiaId: 10, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 78, autor: "Clara Guedes", texto: "Essa decisão é um ataque à liberdade de expressão! Vão censurar todo mundo agora.", data: "26/05/2025", noticiaId: 10, denunciado: true, motivoDenuncia: "Informação falsa", detalhesDenuncia: "Alegação de censura generalizada sem base." }, 
-  
+
     { id: 21, autor: "Gabriela Faria", texto: "Que orgulho da chef brasileira! Reconhecimento merecido.", data: "28/05/2025", noticiaId: 11, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 22, autor: "Márcia Azevedo", texto: "Mal posso esperar para provar essa culinária sustentável.", data: "27/05/2025", noticiaId: 11, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 79, autor: "Fernando Lopes", texto: "Restaurante sustentável? Provavelmente comida sem graça e cara demais. Prefiro um bom churrasco.", data: "26/05/2025", noticiaId: 11, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-  
+
     { id: 23, autor: "Professor João", texto: "5G nas escolas vai transformar o ensino. Excelente iniciativa!", data: "28/05/2025", noticiaId: 12, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 24, autor: "Beatriz Oliveira", texto: "Aulas interativas e realidade aumentada? Que demais!", data: "27/05/2025", noticiaId: 12, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 80, autor: "Mônica Viana", texto: "Mais tecnologia? O que precisamos é de mais professores e menos telas!", data: "26/05/2025", noticiaId: 12, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-  
+
     { id: 25, autor: "Sérgio Dutra", texto: "Chip neural é um marco na interação humano-máquina.", data: "28/05/2025", noticiaId: 13, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 26, autor: "Viviane Castro", texto: "As possibilidades para tratamento de doenças são incríveis.", data: "27/05/2025", noticiaId: 13, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 81, autor: "Alexandre Pires", texto: "Vão implantar chips em todo mundo e nos controlar! Isso é o fim da liberdade!", data: "26/05/2025", noticiaId: 13, denunciado: true, motivoDenuncia: "Informação falsa", detalhesDenuncia: "Teoria da conspiração sem base." }, 
-  
+
     { id: 27, autor: "Carolina Farias", texto: "Terapia genética é a fronteira da medicina. Que esperança para os pacientes.", data: "28/05/2025", noticiaId: 14, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 28, autor: "Eduardo Campos", texto: "Notícias como essa nos dão muita força para continuar lutando.", data: "27/05/2025", noticiaId: 14, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 82, autor: "Renato Dantas", texto: "Tudo marketing das farmacêuticas. Nunca vão achar a cura de verdade para vender remédios.", data: "26/05/2025", noticiaId: 14, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-  
+
     { id: 29, autor: "Isabela Rocha", texto: "Dinheiro em startups de energia renovável é um investimento no futuro do planeta.", data: "28/05/2025", noticiaId: 15, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 30, autor: "Paulo Gabriel", texto: "O mercado está se alinhando com a sustentabilidade, e isso é ótimo.", data: "27/05/2025", noticiaId: 15, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 83, autor: "Vitor Hugo", texto: "Isso é só uma bolha. Energia renovável não é tão lucrativa quanto dizem.", data: "26/05/2025", noticiaId: 15, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-  
+
     { id: 31, autor: "Helena Albuquerque", texto: "IA criando receitas personalizadas? Quero experimentar!", data: "28/05/2025", noticiaId: 16, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 32, autor: "André Luiz", texto: "Isso vai transformar a experiência em restaurantes. Genial!", data: "27/05/2025", noticiaId: 16, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 84, autor: "Sandra Regina", texto: "A culinária é arte, não algoritmo! Isso descaracteriza a gastronomia.", data: "26/05/2025", noticiaId: 16, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-  
+
     { id: 33, autor: "Cláudia Miranda", texto: "Documentário sobre exploração espacial que emociona! Recomendo.", data: "28/05/2025", noticiaId: 17, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 34, autor: "Tiago Nogueira", texto: "O filme nos faz sonhar com o que está além do nosso planeta.", data: "27/05/2025", noticiaId: 17, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 85, autor: "Renata Barreto", texto: "Que documentário parado! Só mostra imagem velha e gente chata falando. Não recomendo.", data: "26/05/2025", noticiaId: 17, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-  
+
     { id: 35, autor: "Marcelo Cunha", texto: "As novas regras para crimes digitais são urgentes e necessárias.", data: "28/05/2025", noticiaId: 18, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 36, autor: "Lívia Viana", texto: "Espero que isso traga mais segurança para todos nós online.", data: "27/05/2025", noticiaId: 18, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 86, autor: "Pedro Souza", texto: "Ninguém vai seguir essas regras. A internet é livre! Quero ver pegarem os hackers de verdade!", data: "26/05/2025", noticiaId: 18, denunciado: true, motivoDenuncia: "Discurso de ódio", detalhesDenuncia: "Incitamento à desobediência e ofensa." }, 
-  
+
     { id: 37, autor: "Fernando Guedes", texto: "O campeonato de eSports foi épico! O cenário só cresce.", data: "28/05/2025", noticiaId: 19, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 38, autor: "Gabriela Dias", texto: "Público recorde e premiação gigante! É o reconhecimento que o eSports merece.", data: "27/05/2025", noticiaId: 19, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 87, autor: "Ricardo Pereira", texto: "Esports não é esporte de verdade. É só gente sentada jogando videogame, que ridículo!", data: "26/05/2025", noticiaId: 19, denunciado: true, motivoDenuncia: "Conteúdo impróprio", detalhesDenuncia: "Desrespeito e ataque a um grupo." }, 
-  
+
     { id: 39, autor: "Simone Mendes", texto: "Proteger florestas tropicais é uma luta que vale a pena! Excelente.", data: "28/05/2025", noticiaId: 20, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 40, autor: "Daniel Santos", texto: "Que os acordos sejam implementados com rigor para frear o desmatamento.", data: "27/05/2025", noticiaId: 20, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 88, autor: "Antônio da Silva", texto: "Tudo isso é bobagem. A floresta é para ser usada, não para ficar parada. Vão proibir o progresso?", data: "26/05/2025", noticiaId: 20, denunciado: true, motivoDenuncia: "Discurso de ódio", detalhesDenuncia: "Ataque a valores ambientais e incitação." }, 
-  
+
     { id: 41, autor: "Juliana Rocha", texto: "Um planeta parecido com a Terra! Mal posso esperar para saber mais.", data: "28/05/2025", noticiaId: 21, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 42, autor: "Guilherme S.", texto: "Essa descoberta abre novas fronteiras para a pesquisa de exoplanetas.", data: "27/05/2025", noticiaId: 21, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 89, autor: "Márcio Oliveira", texto: "Mais uma mentira da NASA para nos enganar! O espaço não existe, é tudo uma farsa.", data: "26/05/2025", noticiaId: 21, denunciado: true, motivoDenuncia: "Informação falsa", detalhesDenuncia: "Negação de ciência básica." }, 
-  
+
     { id: 43, autor: "Fábio Dantas", texto: "A reabertura do Museu Nacional é um marco para a cultura e ciência do país.", data: "28/05/2025", noticiaId: 22, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 44, autor: "Aline Pereira", texto: "Quero muito ver a exposição sobre civilizações antigas!", data: "27/05/2025", noticiaId: 22, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 90, autor: "Sergio Almeida", texto: "Dinheiro jogado fora. Ninguém se importa com museus antigos hoje em dia. Deviam construir shoppings.", data: "26/05/2025", noticiaId: 22, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-  
+
     { id: 45, autor: "Cristiane F.", texto: "A operação contra cibercrimes é essencial para proteger os cidadãos online.", data: "28/05/2025", noticiaId: 23, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 46, autor: "Renato Borges", texto: "Fico feliz em ver que estão combatendo esses golpistas da internet.", data: "27/05/2025", noticiaId: 23, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 91, autor: "Natália Rocha", texto: "Nunca vão me pegar! Eu sou muito mais inteligente que esses policiais.", data: "26/05/2025", noticiaId: 23, denunciado: true, motivoDenuncia: "Conteúdo impróprio", detalhesDenuncia: "Confissão/ameaça de atividade ilegal." }, 
-  
+
     { id: 47, autor: "Vanessa Lima", texto: "Destinos sustentáveis são a minha preferência. É bom ver essa popularidade.", data: "28/05/2025", noticiaId: 24, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 48, autor: "André Felipe", texto: "O ecoturismo tem um potencial enorme para o Brasil.", data: "27/05/2025", noticiaId: 24, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 92, autor: "Flávia Cristina", texto: "Sustentabilidade é chato. Quero aventura de verdade, sem essas regras bobas.", data: "26/05/2025", noticiaId: 24, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-  
+
     { id: 49, autor: "Mariana Almeida", texto: "Roupas inteligentes! Mal posso esperar para ver como isso vai mudar o dia a dia.", data: "28/05/2025", noticiaId: 25, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 50, autor: "Thiago Mendes", texto: "A fusão de moda e tecnologia é o caminho para inovações incríveis.", data: "27/05/2025", noticiaId: 25, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 93, autor: "Rodrigo Viana", texto: "Roupas com chip? Que absurdo! Preferia a moda antiga, isso é ridículo.", data: "26/05/2025", noticiaId: 25, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-  
+
     { id: 51, autor: "Patrícia Viana", texto: "900 km de autonomia? Isso é um divisor de águas para os carros elétricos!", data: "28/05/2025", noticiaId: 26, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 52, autor: "Pedro Henrique", texto: "Menos tempo recarregando e mais tempo na estrada. Perfeito!", data: "27/05/2025", noticiaId: 26, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 94, autor: "Ana Clara Silva", texto: "Carro elétrico é brinquedo. Nada supera o ronco de um motor V8. É tudo marketing verde.", data: "26/05/2025", noticiaId: 26, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-  
+
     { id: 53, autor: "João Vitor", texto: "A nova geração de consoles com gráficos ultra-realistas é sensacional. A jogabilidade está no máximo.", data: "28/05/2025", noticiaId: 27, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 54, autor: "Isabela Oliveira", texto: "É um desafio criar para essa potência, mas o resultado final é incrível.", data: "27/05/2025", noticiaId: 27, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 95, autor: "Lucas Gomes", texto: "Os gráficos estão bons, mas a história é repetitiva e o jogo é cheio de bugs! Puro lixo.", data: "26/05/2025", noticiaId: 27, denunciado: true, motivoDenuncia: "Conteúdo impróprio", detalhesDenuncia: "Linguagem ofensiva e desrespeitosa." }, 
-  
+
     { id: 55, autor: "Gabriel Costa", texto: "Programas de bolsas para baixa renda abrem portas para muitos como eu. Uma chance de ouro.", data: "28/05/2025", noticiaId: 28, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 56, autor: "Larissa Almeida", texto: "Investir na educação de todos é o que constrói um futuro melhor para o país.", data: "27/05/2025", noticiaId: 28, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 96, autor: "Manoel Souza", texto: "Bolsas? Que piada! No final, é sempre para os mesmos. A educação no Brasil não tem jeito.", data: "26/05/2025", noticiaId: 28, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-  
+
     { id: 57, autor: "Carolina Farias", texto: "Descobertas de novas formas de vida nas profundezas são fascinantes. O oceano guarda muitos segredos.", data: "28/05/2025", noticiaId: 29, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null },
     { id: 58, autor: "Diego Mendes", texto: "Isso nos faz refletir sobre a diversidade da vida e o que mais existe no universo.", data: "27/05/2025", noticiaId: 29, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 97, autor: "Sara Rodrigues", texto: "Besteira! Não acredito nessas 'novas formas de vida'. É tudo invenção para tirar dinheiro do governo.", data: "26/05/2025", noticiaId: 29, denunciado: true, motivoDenuncia: "Informação falsa", detalhesDenuncia: "Ataque à ciência e alegação de fraude." }, 
-  
+
     { id: 59, autor: "Ana Júlia", texto: "Festival literário é sempre um deleite! Que bom ver autores brasileiros em destaque.", data: "28/05/2025", noticiaId: 30, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 60, autor: "Eduardo Rocha", texto: "Eventos assim inspiram e dão voz a novos talentos. Muito importante.", data: "27/05/2025", noticiaId: 30, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 98, autor: "Sandra Dias", texto: "Literatura brasileira é fraca. Só fazem livros chatos e sem criatividade. Deviam ler mais clássicos estrangeiros.", data: "26/05/2025", noticiaId: 30, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-  
+
     { id: 61, autor: "Felipe Goulart", texto: "Tecnologia de reconhecimento facial nos aeroportos é um avanço para a segurança.", data: "28/05/2025", noticiaId: 31, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 62, autor: "Mariana Barreto", texto: "Agilidade e controle são essenciais em ambientes como aeroportos.", data: "27/05/2025", noticiaId: 31, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 99, autor: "Carlos Alberto", texto: "Isso é invasão de privacidade! Não quero meu rosto em nenhum banco de dados do governo. Absurdo!", data: "26/05/2025", noticiaId: 31, denunciado: true, motivoDenuncia: "Conteúdo impróprio", detalhesDenuncia: "Linguagem agressiva e alarmista." }, 
-  
+
     { id: 63, autor: "Renata Cintra", texto: "Voos com combustível sustentável! É um futuro mais verde para a aviação.", data: "28/05/2025", noticiaId: 32, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 64, autor: "Marcelo Queiroz", texto: "A tecnologia está avançando rapidamente para tornar as viagens aéreas mais ecológicas.", data: "27/05/2025", noticiaId: 32, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 100, autor: "Vanessa Nogueira", texto: "Isso é pura propaganda! As empresas só querem parecer verdes, mas continuam poluindo.", data: "26/05/2025", noticiaId: 32, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-  
+
     { id: 65, autor: "Beatriz Mota", texto: "IA revolucionando o design de roupas é ótimo para personalização e sustentabilidade.", data: "28/05/2025", noticiaId: 33, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 66, autor: "Luana Gomes", texto: "As possibilidades são infinitas quando a tecnologia se une à criatividade na moda.", data: "27/05/2025", noticiaId: 33, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 101, autor: "Felipe Costa", texto: "Roupas feitas por IA? Que horror! Vão ser todas iguais e sem alma. A moda está morrendo.", data: "26/05/2025", noticiaId: 33, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-  
+
     { id: 67, autor: "Gustavo Ferreira", texto: "Carros voadores para reduzir congestionamentos? Parece um sonho, mas está perto!", data: "28/05/2025", noticiaId: 34, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 68, autor: "Clara Guedes", texto: "A mobilidade aérea urbana pode realmente mudar o cenário das grandes metrópoles.", data: "27/05/2025", noticiaId: 34, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
     { id: 102, autor: "Alexandre Barros", texto: "Carros voadores são uma fantasia cara. Não vão resolver o trânsito e só vão criar mais problemas no ar.", data: "26/05/2025", noticiaId: 34, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null },
-  ];
+];
 
 app.get('/', (req, res) => res.redirect('/login'));
 
@@ -297,24 +284,26 @@ app.get('/usuarios', (req, res) => {
         return res.status(403).send("Acesso não autorizado.");
     }
 
-    db.all("SELECT id, nome, email FROM usuarios", [], (err, usuariosCadastrados) => {
+    // ALTERAÇÃO AQUI: USAR db.query para MySQL
+    db.query("SELECT id, nome, email FROM usuarios", [], (err, results) => { // 'results' em vez de 'usuariosCadastrados'
         if (err) {
             console.error("Erro ao buscar usuários:", err);
             return res.status(500).send("Erro ao carregar usuários.");
         }
-        res.render('usuarios', { usuariosCadastrados });
+        res.render('usuarios', { usuariosCadastrados: results }); // Passar 'results' para a view
     });
 });
 
 app.post('/remover-usuario/:id', (req, res) => {
     const usuarioId = parseInt(req.params.id);
 
-    db.run("DELETE FROM usuarios WHERE id = ?", [usuarioId], function(err) {
+    // ALTERAÇÃO AQUI: USAR db.query para MySQL
+    db.query("DELETE FROM usuarios WHERE id = ?", [usuarioId], function(err, result) { // 'result' em vez de 'this' para MySQL
         if (err) {
             console.error("Erro ao remover usuário:", err.message);
             return res.status(500).send(`Erro ao remover usuário: ${err.message}`);
         }
-        console.log(`Usuário ID ${usuarioId} removido com sucesso.`);
+        console.log(`Usuário ID ${usuarioId} removido com sucesso. Linhas afetadas: ${result.affectedRows}`); // Para MySQL, use result.affectedRows
         res.redirect('/usuarios'); 
     });
 });
@@ -549,17 +538,26 @@ app.get('/dashboard', (req, res) => {
         total: todasNoticias.filter(n => n.categoria === c).length
     }));
 
-    res.render('dashboard', {
-      totalUsuarios: 5, 
-      totalNoticias: todasNoticias.length,
-      categorias: noticiasPorCategoria,
-      todasNoticias: todasNoticias,
-      totalComentarios: todosComentarios.filter(c => c.denunciado).length, 
-      numNotifications: todosComentarios.filter(c => c.denunciado).length 
-  });
+    // Usando o pool diretamente (o 'db' agora é o pool)
+    db.query("SELECT COUNT(*) AS totalUsuarios FROM usuarios", (err, results) => {
+        if (err) {
+            console.error("Erro ao contar usuários do MySQL:", err.message);
+            return res.status(500).send("Erro ao carregar dados do dashboard.");
+        }
+        const totalUsuarios = results[0].totalUsuarios;
+
+        res.render('dashboard', {
+            totalUsuarios: totalUsuarios,
+            totalNoticias: todasNoticias.length,
+            categorias: noticiasPorCategoria,
+            todasNoticias: todasNoticias,
+            totalComentarios: todosComentarios.filter(c => c.denunciado).length,
+            numNotifications: todosComentarios.filter(c => c.denunciado).length
+        });
+    });
 });
 
-app.use(require('./routes/login'));
+app.use(require('./routes/login')); // Esta linha importa as rotas de login/cadastro definidas em routes/login.js
 
 app.get('/logout', (req, res) => {
     req.session.destroy(() => res.redirect('/login')); 

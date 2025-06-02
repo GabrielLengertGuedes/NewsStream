@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../database/db');
+const db = require('../database/mysql_db'); // Certifique-se que o caminho está correto
 
 router.get('/login', (req, res) => {
   res.render('acesso', {
@@ -32,16 +32,23 @@ router.post('/cadastro', (req, res) => {
     });
   }
 
-  const sql = 'insert into usuarios (nome, email, senha) values (?,?,?)';
-  db.run(sql, [nome, email, senha], err => {
+  // **ALTERAÇÃO AQUI: PARA MySQL**
+  const sql = 'INSERT INTO usuarios (nome, email, senha, notificacoes) VALUES (?, ?, ?, ?)';
+  db.query(sql, [nome, email, senha, 0], (err, result) => {
     if (err) {
+      console.error('Erro ao cadastrar usuário no MySQL:', err.message);
+      let mensagemErro = 'Erro ao cadastrar!';
+      if (err.code === 'ER_DUP_ENTRY') { // Código de erro para entrada duplicada no MySQL
+        mensagemErro = 'Erro ao cadastrar! E-mail já está em uso.';
+      }
       return res.render('acesso', {
         tela: 'cadastro',
-        mensagem: 'Erro ao cadastrar! E-mail já está em uso.',
+        mensagem: mensagemErro,
         mostrarCadastro: true,
         sucesso: false
       });
     }
+    console.log('Usuário cadastrado no MySQL com ID:', result.insertId); // Para MySQL, use result.insertId
     res.render('acesso', {
       tela: 'login',
       mensagem: 'Cadastro realizado com sucesso! Faça o login.',
@@ -53,10 +60,11 @@ router.post('/cadastro', (req, res) => {
 
 router.post('/login', (req, res) => {
   const { email, senha } = req.body;
-  const sql = 'select * from usuarios where email = ? and senha = ?';
-
-  db.get(sql, [email, senha], (err, usuario) => {
+  // **ALTERAÇÃO AQUI: PARA MySQL**
+  const sql = 'SELECT id, nome, email, notificacoes FROM usuarios WHERE email = ? AND senha = ?'; // Incluído 'notificacoes'
+  db.query(sql, [email, senha], (err, results) => {
     if (err) {
+      console.error('Erro no login do MySQL:', err.message);
       return res.render('acesso', {
         tela: 'login',
         mensagem: 'Erro no servidor!',
@@ -64,6 +72,8 @@ router.post('/login', (req, res) => {
         sucesso: false
       });
     }
+
+    const usuario = results[0]; // O primeiro elemento do array é o usuário, se encontrado
 
     if (!usuario) {
       return res.render('acesso', {
@@ -78,7 +88,7 @@ router.post('/login', (req, res) => {
       id: usuario.id,
       nome: usuario.nome,
       email: usuario.email,
-      notificacoes: usuario.notificacoes
+      notificacoes: usuario.notificacoes // Certifique-se que o campo notificacoes está sendo salvo na sessão
     };
 
     return res.redirect('/main');

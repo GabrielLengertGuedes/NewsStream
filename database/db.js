@@ -3,7 +3,7 @@ const db = new sqlite3.Database('./database/usuarios.db');
 
 db.serialize(() => {
   db.run(`
-    CREATE TABLE IF NOT EXISTS usuarios (
+    create table if not exists usuarios (
       id integer primary key autoincrement,
       nome text not null,
       email text unique not null,

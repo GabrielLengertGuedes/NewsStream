@@ -89,6 +89,18 @@ html, body {
   display: none !important;
 }
 
+.tags .category-link {
+  text-decoration: none;
+  color: #333; 
+  font-weight: bold; 
+  padding-right: 10px; 
+}
+
+.tags .category-link:hover {
+  text-decoration: underline; 
+  color: #1d4ed8;
+}
+
 .main-container {
   display: flex;
   min-height: calc(100vh - 80px);

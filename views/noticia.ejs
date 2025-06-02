@@ -45,12 +45,12 @@
     </div>
     <section class="news-container">
         <div class="tags">
-            <span><%= noticia.categoria %></span>
+            <a href="/main?categoria=<%= encodeURIComponent(noticia.categoria) %>" class="category-link">NewsStream / <%= noticia.categoria %></a>
             <button id="followBtn" class="follow-button">🔔 Seguir</button>
-        </div>
+            </div>
 
         <h1><%= noticia.titulo %></h1>
-        <p class="news-meta">Publicado em 12 de Janeiro de 2025 | Fonte: NewsStream</p>
+        <p class="news-meta">Publicado em <%= noticia.data %> | Fonte: NewsStream</p>
 
         <img src="<%= noticia.imagemUrl %>" alt="<%= noticia.titulo %>">
 
@@ -139,7 +139,7 @@
 
             likeBtn.addEventListener('click', () => {
                 curtido = !curtido; 
-                localStorage.setItem(storageKeyCurtido, curtido); // Salva o novo estado
+                localStorage.setItem(storageKeyCurtido, curtido);
                 likeBtn.textContent = curtido ? 'Curtido 👍' : 'Curtir 👍';
                 likeBtn.style.backgroundColor = curtido ? '#6b7280' : '#1d4ed8';
             });
@@ -158,7 +158,7 @@
     <script>
         const shareBtn = document.querySelector('.interaction-button.share');
         const sharePopup = document.getElementById('share-popup');
-        const closeSharePopupButton = sharePopup ? sharePopup.querySelector('.close-popup-button') : null; // Renomeado para evitar conflito
+        const closeSharePopupButton = sharePopup ? sharePopup.querySelector('.close-popup-button') : null;
 
         function copyPageUrl() {
             const currentUrl = window.location.href;

@@ -107,13 +107,17 @@ html, body {
 }
 
 .sidebar-main {
-  position: relative;
-  margin-top: 100px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  margin-top: 80px;
   background-color: #111827;
   color: white;
   padding: 20px;
   width: 250px;
-  min-height: 100vh;
+  height: calc(100vh - 80px);
+  overflow-y: auto;
+  z-index: 999;
 }
 
 .sidebar-dashboard {

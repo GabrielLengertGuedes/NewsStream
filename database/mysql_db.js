@@ -5,9 +5,9 @@ const pool = mysql.createPool({
     user: 'root',
     password: '',
     database: 'newsstream_db',
-    waitForConnections: true, 
-    connectionLimit: 10,    
-    queueLimit: 0           
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
 });
 
 pool.getConnection((err, connection) => {
@@ -25,7 +25,6 @@ pool.getConnection((err, connection) => {
         process.exit(1);
     }
     if (connection) {
-        console.log('Conectado ao pool de MySQL com o ID da conexão:', connection.threadId);
 
         const createTableSql = `
             create table if not exists usuarios (
@@ -40,9 +39,9 @@ pool.getConnection((err, connection) => {
             if (err) {
                 console.error('Erro ao verificar/criar tabela de usuários no MySQL:', err.message);
             } else {
-                console.log('Tabela "usuarios" verificada/criada (se não existia).');
+
             }
-            connection.release(); 
+            connection.release();
         });
     }
 });

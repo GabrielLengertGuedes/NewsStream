@@ -2,15 +2,15 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Denúncia de Notícia</title>
-  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/style.css" />
   <style>
     body {
       display: flex;
       justify-content: center;
       align-items: center;
-      min-height: 100vh;
+      min-height: 100dvh;
       background: #e5e7eb;
       margin: 0;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -22,7 +22,7 @@
       background: #fff;
       padding: 40px;
       border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
     }
 
     .report-container h1 {
@@ -101,10 +101,10 @@
 
     <div class="comentario-denunciado">
       <strong>Notícia denunciada:</strong>
-      <%= noticia.titulo %>
+      <%= noticia && noticia.titulo ? noticia.titulo : 'Título não disponível' %>
     </div>
 
-    <form method="POST" action="/denunciar-noticia/<%= noticia.id %>">
+    <form id="denunciaForm" method="POST" action="/denunciar-noticia/<%= noticia.id %>">
       <div class="motivos">
         <label><input type="radio" name="motivo" value="Discurso de ódio" required> Discurso de ódio</label>
         <label><input type="radio" name="motivo" value="Assédio ou bullying"> Assédio ou bullying</label>
@@ -121,10 +121,22 @@
 
       <div class="botoes">
         <button type="button" onclick="window.history.back()" class="cancelar">Cancelar</button>
-        <button type="submit" class="enviar">Enviar Denúncia</button>
+        <button type="submit" class="enviar" id="enviarDenunciaBtn">Enviar Denúncia</button>
       </div>
     </form>
   </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const form = document.getElementById('denunciaForm');
+      if (form) {
+        console.log('URL de ação do formulário:', form.action);
+        console.log('ID da Notícia no EJS:', '<%= noticia.id %>');
+      } else {
+        console.error('Formulário com ID "denunciaForm" não encontrado.');
+      }
+    });
+  </script>
 
 </body>
 </html>

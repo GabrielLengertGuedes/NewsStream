@@ -5,6 +5,32 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>NewsStream – Página Principal</title>
     <link rel="stylesheet" href="/style.css" />
+    <style>
+        /* Estilo para o botão Limpar Todas as Notificações */
+        .clear-all-notifications-button {
+            background-color: #f44336; /* Um tom de vermelho para indicar ação de limpar */
+            color: white;
+            padding: 10px 18px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+            width: 100%; /* Ocupa a largura total do pop-up */
+            margin-top: 15px; /* Espaçamento acima */
+            margin-bottom: 10px; /* Espaçamento abaixo */
+        }
+
+        .clear-all-notifications-button:hover {
+            background-color: #d32f2f; /* Um tom mais escuro no hover */
+        }
+
+        /* Ajuste para espaçamento entre os botões no pop-up */
+        .notifications-content .close-popup-button {
+            margin-top: 0; /* Remove a margem superior se houver */
+        }
+    </style>
 </head>
 <body>
 
@@ -14,17 +40,18 @@
         <div class="logo">NewsStream</div>
         <div class="auth-buttons">
             <div class="notification-wrapper">
-                <button class="notification-button" id="notificationButton">
+                <button class="notification-button" id="notificationButton"> 
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bell-fill" viewBox="0 0 16 16">
                         <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2m.995-14.901a1 1 0 1 0-1.99 0A5 5 0 0 0 3 6c0 1.098-.5 6-2 7h12c-1.5-1-2-5.902-2-7s-.995-14.901a1 1 1 0 1 0-1.99 0z"/>
                     </svg>
                     <span>Notificações</span> 
-                    <span class="notification-count <%= numNotifications > 0 ? '' : 'hidden' %>"><%= numNotifications %></span>
+                    <!-- O contador agora é atualizado por JS -->
+                    <span class="notification-count <%= numNotifications > 0 ? '' : 'hidden' %>" id="notificationCount"><%= numNotifications %></span>
                 </button>
             </div>
-            <button onclick="location.href='/main'">Home</button>
-            <% if (usuario && usuario.email === 'admin@newsstream.com') { %>
-                <button onclick="location.href='/dashboard'" class="interaction-button">
+            <button onclick="location.href='/main'" class="<%= currentPath.startsWith('/main') ? 'active' : '' %>">Home</button>
+            <% if (usuario && usuario.isAdmin === 1) { %>
+                <button onclick="location.href='/dashboard'" class="interaction-button <%= currentPath.startsWith('/dashboard') ? 'active' : '' %>">
                     Painel Admin
                 </button>
             <% } %>
@@ -32,26 +59,33 @@
         </div>
     </header>
 
+    <!-- Pop-up de Notificações (agora preenchido dinamicamente) -->
     <div id="notifications-popup" class="popup-overlay hidden">
         <div class="popup-content notifications-content">
             <h3>Suas Notificações</h3>
-            <ul class="notifications-list">
-                <li><span class="notification-type new-comment">Novo Comentário:</span> Seu comentário na notícia "Congresso Aprova..." foi curtido!</li>
-                <li><span class="notification-type new-news">Nova Notícia:</span> Uma nova notícia de 'Tecnologia' foi publicada: "Cientistas Revelam Avanço..."</li>
-                <li><span class="notification-type category-update">Atualização de Categoria:</span> A categoria 'Esportes' foi renomeada.</li>
-                <li><span class="notification-type admin-message">Mensagem do Admin:</span> Seu comentário foi revisado e aprovado.</li>
-                <li><span class="notification-type new-comment">Denúncia:</span> O comentário "Vitória roubada..." na notícia "União FC..." foi denunciado.</li>
+            <ul class="notifications-list" id="notificationsList">
+                <!-- Notificações serão inseridas aqui via JavaScript -->
+                <li class="no-notifications-message" style="text-align: center; color: #777; font-style: italic;">Nenhuma notificação nova.</li>
             </ul>
+            <!-- NOVO BOTÃO: Limpar Todas as Notificações -->
+            <button class="clear-all-notifications-button" id="clearAllNotificationsButton">Limpar Todas</button>
             <button class="close-popup-button" id="closeNotificationsButton">Fechar</button>
         </div>
     </div>
+    
     <div class="main-container">
         <aside class="sidebar sidebar-main">
             <h2>Categorias</h2>
             <ul class="category-list">
+                <!-- CORREÇÃO AQUI: selectedCategory mudado para selecionada -->
                 <li><a href="/main" class="<%= selecionada === 'Todas' ? 'active' : '' %>">Todas</a></li>
                 <% categorias.forEach(cat => { %>
-                    <li><a href="/main?categoria=<%= encodeURIComponent(cat) %>" class="<%= selecionada === cat ? 'active' : '' %>"><%= cat %></a></li>
+                    <li>
+                        <!-- CORREÇÃO AQUI: selectedCategory mudado para selecionada -->
+                        <a href="/main?categoria=<%= encodeURIComponent(cat.nome) %>" class="<%= selecionada === cat.nome ? 'active' : '' %>">
+                            <%= cat.nome %>
+                        </a>
+                    </li>
                 <% }) %>
             </ul>
         </aside>
@@ -71,7 +105,8 @@
                                 <h3>
                                     <a href="/noticias/<%= item.id %>"><%= item.titulo %></a>
                                 </h3>
-                                <p><%= item.resumo %></p>
+                                <!-- CORREÇÃO AQUI: Removida a tag <p> externa. item.resumo já deve conter HTML. -->
+                                <%- item.resumo %> 
                             </div>
                         </article>
                     <% }) %>
@@ -81,30 +116,122 @@
     </div>
 
     <script>
+        // Mover a função toggleSidebar para o escopo global ou acessível
         function toggleSidebar() {
             document.querySelector('.sidebar-main').classList.toggle('oculta');
+            document.querySelector('.content').classList.toggle('content-expanded');
         }
 
-        const notificationButton = document.getElementById('notificationButton');
-        const notificationsPopup = document.getElementById('notifications-popup');
-        const closeNotificationsButton = document.getElementById('closeNotificationsButton');
-        const notificationCountSpan = document.querySelector('.notification-count');
-        notificationButton.addEventListener('click', () => {
-            notificationsPopup.classList.remove('hidden');
-            if (notificationCountSpan) {
-                notificationCountSpan.classList.add('hidden');
-            }
-        });
+        document.addEventListener('DOMContentLoaded', function() {
+            const notificationButton = document.getElementById('notificationButton');
+            const notificationsPopup = document.getElementById('notifications-popup');
+            const closeNotificationsButton = document.getElementById('closeNotificationsButton');
+            const notificationCountSpan = document.getElementById('notificationCount'); // Pegar pelo ID
+            const notificationsList = document.getElementById('notificationsList');
+            const clearAllNotificationsButton = document.getElementById('clearAllNotificationsButton'); // NOVO: Botão Limpar Todas
 
-        closeNotificationsButton.addEventListener('click', () => {
-            notificationsPopup.classList.add('hidden');
-        });
+            // Função para buscar e exibir notificações
+            async function fetchAndDisplayNotifications() {
+                try {
+                    const response = await fetch('/api/notificacoes');
+                    const data = await response.json();
 
-        notificationsPopup.addEventListener('click', (event) => {
-            if (event.target === notificationsPopup) { 
-                notificationsPopup.classList.add('hidden');
+                    if (data.success && data.notificacoes.length > 0) {
+                        notificationsList.innerHTML = ''; // Limpa a mensagem "Nenhuma notificação"
+                        data.notificacoes.forEach(notif => {
+                            const li = document.createElement('li');
+                            li.innerHTML = `<span class="notification-type">${notif.lida ? '' : '• Nova '}</span> ${notif.mensagem} <a href="${notif.link || '#'}">${notif.link ? '(Ver)' : ''}</a>`;
+                            if (!notif.lida) {
+                                li.style.fontWeight = 'bold'; // Destaca não lidas
+                            }
+                            li.addEventListener('click', async () => {
+                                if (!notif.lida) {
+                                    await fetch(`/api/notificacoes/marcar-lida/${notif.id}`, { method: 'POST' });
+                                    notif.lida = true;
+                                    li.style.fontWeight = 'normal'; // Remove destaque
+                                    updateNotificationCount(-1); // Decrementa o contador
+                                }
+                                if (notif.link) {
+                                    window.location.href = notif.link; // Redireciona se houver link
+                                }
+                            });
+                            notificationsList.appendChild(li);
+                        });
+                        // Atualiza o contador na navbar
+                        updateNotificationCount(data.notificacoes.filter(n => !n.lida).length);
+                    } else {
+                        notificationsList.innerHTML = '<li class="no-notifications-message" style="text-align: center; color: #777; font-style: italic;">Nenhuma notificação nova.</li>';
+                        updateNotificationCount(0);
+                    }
+                } catch (error) {
+                    console.error('Erro ao buscar notificações:', error);
+                    notificationsList.innerHTML = '<li style="color: red;">Erro ao carregar notificações.</li>';
+                }
             }
-        });
+
+            // Função para atualizar o contador na UI
+            function updateNotificationCount(count) {
+                if (notificationCountSpan) {
+                    if (count > 0) {
+                        notificationCountSpan.textContent = count;
+                        notificationCountSpan.classList.remove('hidden');
+                    } else {
+                        notificationCountSpan.classList.add('hidden');
+                    }
+                }
+            }
+
+            // Exibir/Ocultar pop-up de notificações
+            if (notificationButton) {
+                notificationButton.addEventListener('click', () => {
+                    if (notificationsPopup.classList.contains('hidden')) {
+                        fetchAndDisplayNotifications(); // Busca e exibe ao abrir
+                        notificationsPopup.classList.remove('hidden');
+                    } else {
+                        notificationsPopup.classList.add('hidden');
+                    }
+                });
+            }
+        
+            if (closeNotificationsButton) {
+                closeNotificationsButton.addEventListener('click', () => {
+                    notificationsPopup.classList.add('hidden');
+                });
+            }
+            
+            // NOVO: Lógica para o botão Limpar Todas as Notificações
+            if (clearAllNotificationsButton) {
+                clearAllNotificationsButton.addEventListener('click', async () => {
+                    try {
+                        const response = await fetch('/api/notificacoes/limpar-todas', { method: 'POST' });
+                        const data = await response.json();
+
+                        if (data.success) {
+                            notificationsList.innerHTML = '<li class="no-notifications-message" style="text-align: center; color: #777; font-style: italic;">Nenhuma notificação nova.</li>';
+                            updateNotificationCount(0);
+                            alert('Todas as notificações foram limpas!');
+                        } else {
+                            alert('Erro ao limpar notificações: ' + data.message);
+                        }
+                    } catch (error) {
+                        console.error('Erro ao limpar notificações:', error);
+                        alert('Erro de comunicação ao limpar notificações.');
+                    }
+                });
+            }
+        
+            // Lógica para fechar o pop-up ao clicar fora dele
+            if (notificationsPopup) {
+                notificationsPopup.addEventListener('click', (event) => {
+                    if (event.target === notificationsPopup) { 
+                        notificationsPopup.classList.add('hidden');
+                    }
+                });
+            }    
+        
+            // Chamar a função para buscar notificações ao carregar a página (para o contador inicial)
+            fetchAndDisplayNotifications();
+        }); 
     </script>
 
 </body>

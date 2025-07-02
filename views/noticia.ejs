@@ -5,23 +5,30 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>NewsStream – <%= noticia.titulo %></title>
     <link rel="stylesheet" href="/style.css" />
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script> 
 </head>
-<body>
+<body 
+    data-noticia-id="<%= (noticia && noticia.id) ? noticia.id : '' %>"
+    data-curtido-pelo-usuario="<%= (typeof curtidoPeloUsuario !== 'undefined' && curtidoPeloUsuario) ? 'true' : 'false' %>"
+    data-seguindo-categoria-pelo-usuario="<%= (typeof seguindoCategoriaPeloUsuario !== 'undefined' && seguindoCategoriaPeloUsuario) ? 'true' : 'false' %>"
+    data-categoria-noticia-detalhes-id="<%= (categoriaNoticiaDetalhes && categoriaNoticiaDetalhes.id) ? categoriaNoticiaDetalhes.id : '' %>"
+>
 
     <header class="navbar">
         <div class="logo">NewsStream</div>
         <div class="auth-buttons">
             <div class="notification-wrapper">
-                <button class="notification-button" id="notificationButton"> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bell-fill" viewBox="0 0 16 16">
+                <button class="notification-button" id="notificationButton"> 
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bell-fill" viewBox="0 0 16 16">
                         <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2m.995-14.901a1 1 0 1 0-1.99 0A5 5 0 0 0 3 6c0 1.098-.5 6-2 7h12c-1.5-1-2-5.902-2-7s-.995-14.901a1 1 1 0 1 0-1.99 0z"/>
                     </svg>
                     <span>Notificações</span>
-                    <span class="notification-count <%= numNotifications > 0 ? '' : 'hidden' %>"><%= numNotifications %></span>
+                    <!-- O contador agora é atualizado por JS -->
+                    <span class="notification-count <%= numNotifications > 0 ? '' : 'hidden' %>" id="notificationCount"><%= numNotifications %></span>
                 </button>
             </div>
             <button onclick="location.href='/main'">Home</button>
-            <% if (usuario && usuario.email === 'admin@newsstream.com') { %>
+            <% if (usuario && usuario.isAdmin === 1) { %>
                 <button onclick="location.href='/dashboard'" class="interaction-button">
                     Painel Admin
                 </button>
@@ -30,27 +37,34 @@
         </div>
     </header>
 
+    <!-- Pop-up de Notificações (agora preenchido dinamicamente) -->
     <div id="notifications-popup" class="popup-overlay hidden">
         <div class="popup-content notifications-content">
             <h3>Suas Notificações</h3>
-            <ul class="notifications-list">
-                <li><span class="notification-type new-comment">Novo Comentário:</span> Seu comentário na notícia "Congresso Aprova..." foi curtido!</li>
-                <li><span class="notification-type new-news">Nova Notícia:</span> Uma nova notícia de 'Tecnologia' foi publicada: "Cientistas Revelam Avanço..."</li>
-                <li><span class="notification-type category-update">Atualização de Categoria:</span> A categoria 'Esportes' foi renomeada.</li>
-                <li><span class="notification-type admin-message">Mensagem do Admin:</span> Seu comentário foi revisado e aprovado.</li>
-                <li><span class="notification-type new-comment">Denúncia:</span> O comentário "Vitória roubada..." na notícia "União FC..." foi denunciado.</li>
+            <ul class="notifications-list" id="notificationsList">
+                <!-- Notificações serão inseridas aqui via JavaScript -->
+                <li class="no-notifications-message" style="text-align: center; color: #777; font-style: italic;">Nenhuma notificação nova.</li>
             </ul>
             <button class="close-popup-button" id="closeNotificationsButton">Fechar</button>
         </div>
     </div>
+
     <section class="news-container">
         <div class="tags">
             <a href="/main?categoria=<%= encodeURIComponent(noticia.categoria) %>" class="category-link">NewsStream / <%= noticia.categoria %></a>
-            <button id="followBtn" class="follow-button">🔔 Seguir</button>
-            </div>
+            <% if (categoriaNoticiaDetalhes && categoriaNoticiaDetalhes.id) { %> 
+                <button id="followBtn" class="follow-button <%= (typeof seguindoCategoriaPeloUsuario !== 'undefined' && seguindoCategoriaPeloUsuario) ? 'following' : '' %>" data-categoria-id="<%= categoriaNoticiaDetalhes.id %>">
+                    <%= (typeof seguindoCategoriaPeloUsuario !== 'undefined' && seguindoCategoriaPeloUsuario) ? 'Seguindo' : '🔔 Seguir' %>
+                </button>
+            <% } else { %>
+                <button id="followBtn" class="follow-button" data-categoria-id=""> 
+                    🔔 Seguir
+                </button>
+            <% } %>
+        </div>
 
         <h1><%= noticia.titulo %></h1>
-        <p class="news-meta">Publicado em <%= noticia.data %> | Fonte: NewsStream</p>
+        <p class="news-meta">Publicado em <%= new Date(noticia.data_publicacao).toLocaleDateString('pt-BR') %> | Autor: <%= noticia.autor %></p>
 
         <img src="<%= noticia.imagemUrl %>" alt="<%= noticia.titulo %>">
 
@@ -60,11 +74,19 @@
 
         <div class="news-interaction">
             <div class="button-group">
-                <button id="likeBtn" class="interaction-button like">Curtir 👍</button>
+                <% if (typeof curtidoPeloUsuario !== 'undefined') { %>
+                    <button id="likeBtn" class="interaction-button like <%= curtidoPeloUsuario ? 'liked' : '' %>" data-noticia-id="<%= noticia.id %>">
+                        <%= curtidoPeloUsuario ? 'Curtido 👍' : 'Curtir 👍' %>
+                    </button>
+                <% } else { %>
+                    <button id="likeBtn" class="interaction-button like" data-noticia-id="<%= noticia.id %>">
+                        Curtir 👍
+                    </button>
+                <% } %>
                 <button class="interaction-button share">Compartilhar 📤</button>
-                <form method="GET" action="/denunciar-noticia/<%= noticia.id %>" style="display: inline;">
-                    <button type="submit" class="interaction-button report">Denunciar 🚫</button>
-                </form>
+                <a href="/denunciar-noticia/<%= noticia.id %>" class="interaction-button report" style="text-decoration: none;">
+                    Denunciar 🚫
+                </a>
             </div>
         </div>
 
@@ -89,7 +111,7 @@
                             <form method="GET" action="/denunciar-comentario/<%= noticia.id %>/<%= comentario.id %>" class="report-comment-form">
                                 <button type="submit" class="report-button" title="Denunciar comentário">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-flag-fill" viewBox="0 0 16 16">
-                                        <path d="M14.778.085A.5.5 0 0 1 15 .5V14a.5.5 0 0 1-.085.223l-1.406 2.812A.5.5 0 0 1 13 16H3a.5.5 0 0 1-.475-.31L.085 4.887A.5.5 0 0 1 .5 4h10.325l-4.215-3.372A.5.5 0 0 1 5.465.5z"/>
+                                        <path d="M14.778.085A.5.5 0 0 1 15 .5V14a.5.5 0 0 1-.085.223l-1.406 2.812A.5.5 0 0 1 13 16H3a.5.5 0.5 0 0 1-.475-.31L.085 4.887A.5.5 0 0 1 .5 4h10.325l-4.215-3.372A.5.5 0 0 1 5.465.5z"/>
                                     </svg>
                                     Denunciar
                                 </button>
@@ -103,49 +125,6 @@
         </div>
     </section>
 
-    <script>
-        const noticiaId = parseInt('<%= noticia.id %>');
-        const categoriaNoticia = '<%= noticia.categoria %>';
-
-        const followBtn = document.getElementById('followBtn');
-        const likeBtn = document.getElementById('likeBtn');
-
-        const storageKeySeguindo = 'seguindo_categoria_' + categoriaNoticia;
-        const storageKeyCurtido = 'curtido_noticia_' + noticiaId;
-
-        let seguindo = localStorage.getItem(storageKeySeguindo) === 'true';
-        let curtido = localStorage.getItem(storageKeyCurtido) === 'true';
-
-        if (followBtn) { 
-            if (seguindo) {
-                followBtn.textContent = 'Seguindo';
-                followBtn.style.backgroundColor = '#6b7280';
-            }
-
-            followBtn.addEventListener('click', () => {
-                seguindo = !seguindo; 
-                localStorage.setItem(storageKeySeguindo, seguindo); 
-                followBtn.textContent = seguindo ? 'Seguindo' : '🔔 Seguir';
-                followBtn.style.backgroundColor = seguindo ? '#6b7280' : '#1d4ed8';
-            });
-        }
-
-
-        if (likeBtn) { 
-            if (curtido) {
-                likeBtn.textContent = 'Curtido 👍';
-                likeBtn.style.backgroundColor = '#6b7280';
-            }
-
-            likeBtn.addEventListener('click', () => {
-                curtido = !curtido; 
-                localStorage.setItem(storageKeyCurtido, curtido);
-                likeBtn.textContent = curtido ? 'Curtido 👍' : 'Curtir 👍';
-                likeBtn.style.backgroundColor = curtido ? '#6b7280' : '#1d4ed8';
-            });
-        }
-    </script>
-
     <div id="share-popup" class="popup-overlay hidden">
         <div class="popup-content">
             <h3>Notícia Compartilhada!</h3>
@@ -156,90 +135,216 @@
     </div>
 
     <script>
-        const shareBtn = document.querySelector('.interaction-button.share');
-        const sharePopup = document.getElementById('share-popup');
-        const closeSharePopupButton = sharePopup ? sharePopup.querySelector('.close-popup-button') : null;
+        document.addEventListener('DOMContentLoaded', function() {
+            const likeBtn = document.getElementById('likeBtn');
+            const followBtn = document.getElementById('followBtn'); 
+            const noticiaId = "<%= (noticia && noticia.id) ? noticia.id : '' %>"; 
 
-        function copyPageUrl() {
-            const currentUrl = window.location.href;
-            navigator.clipboard.writeText(currentUrl)
-                .then(() => {
-                    console.log('URL copiado com sucesso!');
-                })
-                .catch(err => {
-                    console.error('Erro ao copiar URL: ', err);
-                    const textArea = document.createElement("textarea");
-                    textArea.value = currentUrl;
-                    document.body.appendChild(textArea);
-                    textArea.focus();
-                    textArea.select();
-                    try {
-                        document.execCommand('copy');
-                        console.log('Fallback: URL copiado com sucesso!');
-                    } catch (err) {
-                        console.error('Fallback: Falha ao copiar URL', err);
+            const bodyDataset = document.body.dataset;
+            const initialCurtidoPeloUsuario = bodyDataset.curtidoPeloUsuario === 'true';
+            const initialSeguindoCategoriaPeloUsuario = bodyDataset.seguindoCategoriaPeloUsuario === 'true';
+            const categoriaId = bodyDataset.categoriaNoticiaDetalhesId; 
+
+            const notificationButton = document.getElementById('notificationButton');
+            const notificationsPopup = document.getElementById('notifications-popup');
+            const closeNotificationsButton = document.getElementById('closeNotificationsButton');
+            const notificationCountSpan = document.getElementById('notificationCount'); // Pegar pelo ID
+            const notificationsList = document.getElementById('notificationsList');
+
+            // Função para buscar e exibir notificações
+            async function fetchAndDisplayNotifications() {
+                try {
+                    const response = await fetch('/api/notificacoes');
+                    const data = await response.json();
+
+                    if (data.success && data.notificacoes.length > 0) {
+                        notificationsList.innerHTML = ''; // Limpa a mensagem "Nenhuma notificação"
+                        data.notificacoes.forEach(notif => {
+                            const li = document.createElement('li');
+                            li.innerHTML = `<span class="notification-type">${notif.lida ? '' : '• Nova '}</span> ${notif.mensagem} <a href="${notif.link || '#'}">${notif.link ? '(Ver)' : ''}</a>`;
+                            if (!notif.lida) {
+                                li.style.fontWeight = 'bold'; // Destaca não lidas
+                            }
+                            li.addEventListener('click', async () => {
+                                if (!notif.lida) {
+                                    await fetch(`/api/notificacoes/marcar-lida/${notif.id}`, { method: 'POST' });
+                                    notif.lida = true;
+                                    li.style.fontWeight = 'normal'; // Remove destaque
+                                    updateNotificationCount(-1); // Decrementa o contador
+                                }
+                                if (notif.link) {
+                                    window.location.href = notif.link; // Redireciona se houver link
+                                }
+                            });
+                            notificationsList.appendChild(li);
+                        });
+                        // Atualiza o contador na navbar
+                        updateNotificationCount(data.notificacoes.filter(n => !n.lida).length);
+                    } else {
+                        notificationsList.innerHTML = '<li class="no-notifications-message" style="text-align: center; color: #777; font-style: italic;">Nenhuma notificação nova.</li>';
+                        updateNotificationCount(0);
                     }
-                    document.body.removeChild(textArea);
-                });
-        }
-
-        if (shareBtn) {
-            shareBtn.addEventListener('click', () => {
-                copyPageUrl();
-                if (sharePopup) {
-                    sharePopup.classList.remove('hidden');
+                } catch (error) {
+                    console.error('Erro ao buscar notificações:', error);
+                    notificationsList.innerHTML = '<li style="color: red;">Erro ao carregar notificações.</li>';
                 }
-            });
-        }
+            }
 
-        if (closeSharePopupButton) {
-            closeSharePopupButton.addEventListener('click', () => {
-                if (sharePopup) {
-                    sharePopup.classList.add('hidden');
-                }
-            });
-        }
-
-        if (sharePopup) {
-            sharePopup.addEventListener('click', (event) => {
-                if (event.target === sharePopup) {
-                    sharePopup.classList.add('hidden');
-                }
-            });
-        }
-
-        const notificationButton = document.getElementById('notificationButton');
-        const notificationsPopup = document.getElementById('notifications-popup');
-        const closeNotificationsButton = document.getElementById('closeNotificationsButton');
-        const notificationCountSpan = document.querySelector('.notification-count');
-
-
-        if (notificationButton) {
-            notificationButton.addEventListener('click', () => {
-                if (notificationsPopup) {
-                    notificationsPopup.classList.remove('hidden'); 
-                }
+            // Função para atualizar o contador na UI
+            function updateNotificationCount(count) {
                 if (notificationCountSpan) {
-                    notificationCountSpan.classList.add('hidden'); 
+                    if (count > 0) {
+                        notificationCountSpan.textContent = count;
+                        notificationCountSpan.classList.remove('hidden');
+                    } else {
+                        notificationCountSpan.classList.add('hidden');
+                    }
                 }
-            });
-        }
+            }
 
-        if (closeNotificationsButton) {
-            closeNotificationsButton.addEventListener('click', () => {
-                if (notificationsPopup) {
-                    notificationsPopup.classList.add('hidden'); 
-                }
-            });
-        }
-
-        if (notificationsPopup) {
-            notificationsPopup.addEventListener('click', (event) => {
-                if (event.target === notificationsPopup) { 
+            // Exibir/Ocultar pop-up de notificações
+            if (notificationButton) {
+                notificationButton.addEventListener('click', () => {
+                    if (notificationsPopup.classList.contains('hidden')) {
+                        fetchAndDisplayNotifications(); // Busca e exibe ao abrir
+                        notificationsPopup.classList.remove('hidden');
+                    } else {
+                        notificationsPopup.classList.add('hidden');
+                    }
+                });
+            }
+        
+            if (closeNotificationsButton) {
+                closeNotificationsButton.addEventListener('click', () => {
                     notificationsPopup.classList.add('hidden');
+                });
+            }
+        
+            // Lógica para fechar o pop-up ao clicar fora dele
+            if (notificationsPopup) {
+                notificationsPopup.addEventListener('click', (event) => {
+                    if (event.target === notificationsPopup) { 
+                        notificationsPopup.classList.add('hidden');
+                    }
+                });
+            }    
+        
+            function updateLikeButtonAppearance() {
+                if (likeBtn) {
+                    if (initialCurtidoPeloUsuario) { 
+                        likeBtn.textContent = 'Curtido 👍';
+                        likeBtn.style.backgroundColor = '#6b7280'; 
+                    } else {
+                        likeBtn.textContent = 'Curtir 👍';
+                        likeBtn.style.backgroundColor = '#1d4ed8'; 
+                    }
                 }
-            });
-        }
+            }
+        
+            function updateFollowButtonAppearance() {
+                if (followBtn) {
+                    if (initialSeguindoCategoriaPeloUsuario) { 
+                        followBtn.textContent = 'Seguindo';
+                        followBtn.style.backgroundColor = '#6b7280'; 
+                    } else {
+                        followBtn.textContent = '🔔 Seguir';
+                        followBtn.style.backgroundColor = '#1d4ed8'; 
+                    }
+                }
+            }
+        
+            // Chamar as funções ao carregar a página para definir o estado inicial
+            updateLikeButtonAppearance();
+            updateFollowButtonAppearance();
+        
+            // Event Listener para o botão "Curtir"
+            if (likeBtn) { 
+                likeBtn.addEventListener('click', async () => {
+                    try {
+                        const response = await fetch(`/api/noticia/${noticiaId}/curtir`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' }
+                        });
+                        const data = await response.json();
+                        if (data.success) {
+                            if (data.curtido) {
+                                likeBtn.classList.add('liked');
+                                likeBtn.textContent = 'Curtido 👍';
+                                likeBtn.style.backgroundColor = '#6b7280'; 
+                            } else {
+                                likeBtn.classList.remove('liked');
+                                likeBtn.textContent = 'Curtir 👍';
+                                likeBtn.style.backgroundColor = '#1d4ed8'; 
+                            }
+                        } else {
+                            alert('Erro ao processar sua solicitação: ' + data.message);
+                        }
+                    } catch (error) {
+                        console.error('Erro ao curtir/descurtir notícia:', error);
+                        alert('Erro de comunicação com o servidor ao curtir/descurtir notícia.');
+                    }
+                });
+            }
+        
+            // Event Listener para o botão "Seguir" (na página da notícia)
+            if (followBtn) { 
+                followBtn.addEventListener('click', async () => {
+                    try {
+                        const response = await fetch(`/api/categoria/${categoriaId}/seguir`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' }
+                        });
+                        const data = await response.json();
+                        if (data.success) {
+                            if (data.seguindo) {
+                                followBtn.classList.add('following');
+                                followBtn.textContent = 'Seguindo';
+                                followBtn.style.backgroundColor = '#6b7280'; 
+                            } else {
+                                followBtn.classList.remove('following');
+                                followBtn.textContent = '🔔 Seguir';
+                                followBtn.style.backgroundColor = '#1d4ed8'; 
+                            }
+                        } else {
+                            alert('Erro ao processar sua solicitação: ' + data.message);
+                        }
+                    } catch (error) {
+                        console.error('Erro ao seguir/desseguir categoria:', error);
+                        alert('Erro de comunicação com o servidor ao seguir/deixar de seguir.');
+                    }
+                });
+            }
+        
+            // Lógica de Compartilhar (mantida como estava)
+            const shareBtn = document.querySelector('.interaction-button.share');
+            const sharePopup = document.getElementById('share-popup');
+            const closeSharePopupButton = sharePopup ? sharePopup.querySelector('.close-popup-button') : null;
+        
+            function copyPageUrl() {
+                const currentUrl = window.location.href;
+                document.execCommand('copy'); // Usando execCommand para compatibilidade em iframes
+                if (sharePopup) { sharePopup.classList.remove('hidden'); }
+            }
+        
+            if (shareBtn) {
+                shareBtn.addEventListener('click', () => {
+                    copyPageUrl();
+                    if (sharePopup) { sharePopup.classList.remove('hidden'); }
+                });
+            }
+        
+            if (closeSharePopupButton) {
+                closeSharePopupButton.addEventListener('click', () => {
+                    if (sharePopup) { sharePopup.classList.add('hidden'); }
+                });
+            }
+        
+            if (sharePopup) {
+                sharePopup.addEventListener('click', (event) => {
+                    if (event.target === sharePopup) { sharePopup.classList.add('hidden'); }
+                });
+            }
+        }); 
     </script>
 
 </body>

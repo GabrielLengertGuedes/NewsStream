@@ -10,7 +10,7 @@
             padding: 20px;
             background: #fff;
             border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         .admin-table-container h1 {
@@ -22,11 +22,11 @@
         .admin-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
-            margin-top: 20px; 
+            margin: 20px 0;
         }
 
-        .admin-table th, .admin-table td {
+        .admin-table th,
+        .admin-table td {
             border: 1px solid #ddd;
             padding: 12px;
             text-align: left;
@@ -46,59 +46,26 @@
             background-color: #f1f1f1;
         }
 
-        .admin-table .action-buttons {
-            display: flex;
-            gap: 8px;
-        }
-
-        .admin-table .action-buttons button,
-        .admin-table .action-buttons a {
-            padding: 6px 10px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            text-decoration: none;
-            font-size: 0.85em;
-            transition: background-color 0.3s ease;
-        }
-
-        .admin-table .action-buttons .edit-button {
-            background-color: #007bff;
-            color: white;
-        }
-
-        .admin-table .action-buttons .edit-button:hover {
-            background-color: #0056b3;
-        }
-
-        .admin-table .action-buttons .delete-button {
-            background-color: #dc3545;
-            color: white;
-        }
-
-        .admin-table .action-buttons .delete-button:hover {
-            background-color: #c82333;
-        }
-
         @media (max-width: 768px) {
-            .admin-table, .admin-table tbody, .admin-table tr, .admin-table td {
+            .admin-table,
+            .admin-table tbody,
+            .admin-table tr,
+            .admin-table td {
                 display: block;
                 width: 100%;
             }
+
             .admin-table thead {
                 display: none;
             }
+
             .admin-table tr {
                 margin-bottom: 15px;
                 border: 1px solid #ddd;
                 border-radius: 5px;
-                box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
             }
-            .admin-table td {
-                text-align: right;
-                padding-left: 50%;
-                position: relative;
-            }
+
             .admin-table td::before {
                 content: attr(data-label);
                 position: absolute;
@@ -107,9 +74,73 @@
                 text-align: left;
                 font-weight: bold;
             }
+
             .admin-table .action-buttons {
                 justify-content: flex-end;
             }
+        }
+
+        /* Estilos do Pop-up (Modal) */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .popup-content {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+            text-align: left;
+            max-width: 500px;
+            width: 90%;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .popup-content h3 {
+            margin-top: 0;
+            color: #2563eb;
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .popup-content p {
+            color: #555;
+            font-size: 1rem;
+            line-height: 1.6;
+            white-space: pre-wrap; /* Preserva quebras de linha e espaços */
+        }
+
+        .close-popup-button {
+            background-color: #6c757d;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: background-color 0.2s ease;
+            align-self: center; /* Centraliza o botão no modal */
+        }
+
+        .close-popup-button:hover {
+            background-color: #5a6268;
+        }
+
+        .hidden {
+            display: none !important;
         }
     </style>
 </head>
@@ -117,17 +148,22 @@
 
     <div class="sidebar sidebar-dashboard">
         <h2>NewsStream</h2>
-        <a href="/dashboard">Dashboard</a>
-        <a href="/noticias" class="active">Notícias</a> <a href="/categorias">Categorias</a>
-        <a href="/comentarios">Comentários</a>
-        <a href="/usuarios">Usuários</a>
-        <a href="/main">Página inicial</a>
+        <a href="/dashboard" class="<%= currentPath.startsWith('/dashboard') ? 'active' : '' %>">Dashboard</a>
+        <a href="/noticias" class="<%= currentPath.startsWith('/noticias') ? 'active' : '' %>">Notícias</a>
+        <a href="/categorias" class="<%= currentPath.startsWith('/categorias') ? 'active' : '' %>">Categorias</a>
+        <a href="/comentarios" class="<%= currentPath.startsWith('/comentarios') ? 'active' : '' %>">Comentários</a>
+        <a href="/usuarios" class="<%= currentPath.startsWith('/usuarios') ? 'active' : '' %>">Usuários</a>
+        <a href="/admin/noticias-mais-curtidas" class="<%= currentPath.startsWith('/admin/noticias-mais-curtidas') ? 'active' : '' %>">Notícias Mais Curtidas</a>
+        <a href="/admin/usuarios-engajados" class="<%= currentPath.startsWith('/admin/usuarios-engajados') ? 'active' : '' %>">Usuários Engajados</a>
+        <a href="/admin/noticias-mais-comentadas" class="<%= currentPath.startsWith('/admin/noticias-mais-comentadas') ? 'active' : '' %>">Notícias Mais Comentadas</a>
+        <a href="/admin/categorias-seguidas-por-usuario" class="<%= currentPath.startsWith('/admin/categorias-seguidas-por-usuario') ? 'active' : '' %>">Categorias Seguidas por Usuário</a>
+        <a href="/main" class="<%= currentPath.startsWith('/main') ? 'active' : '' %>">Página inicial</a>
         <a href="/logout">Sair</a>
     </div>
 
     <div class="dashboard-main">
         <header class="dashboard-header">
-            <h1>Gerenciar Notícias Denunciadas</h1>
+            <h1>Notícias Denunciadas</h1>
         </header>
 
         <div class="admin-table-container">
@@ -137,7 +173,10 @@
                         <th>ID</th>
                         <th>Título</th>
                         <th>Categoria</th>
-                        <th>Status Denúncia</th> <th>Ações</th>
+                        <th>Status Denúncia</th>
+                        <th>Motivo Denúncia</th>
+                        <th>Detalhes</th> <!-- NOVA COLUNA PARA DETALHES -->
+                        <th>Ações</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -147,28 +186,77 @@
                                 <td data-label="ID"><%= noticia.id %></td>
                                 <td data-label="Título"><%= noticia.titulo %></td>
                                 <td data-label="Categoria"><%= noticia.categoria %></td>
-                                <td data-label="Status Denúncia"> <%= noticia.denunciado ? 'Denunciada' : 'Normal' %>
-                                    <% if (noticia.motivoDenuncia) { %>
-                                        <br><small>Motivo: <%= noticia.motivoDenuncia %></small>
+                                <td data-label="Status Denúncia"><%= noticia.denunciado ? 'Denunciada' : 'Normal' %></td>
+                                <td data-label="Motivo Denúncia"><%= noticia.motivoDenuncia || 'N/A' %></td>
+                                <td data-label="Detalhes">
+                                    <% if (noticia.detalhesDenuncia) { %>
+                                        <button class="action-button-base button-primary view-details-button" data-details="<%= noticia.detalhesDenuncia %>">Ver Detalhes</button>
+                                    <% } else { %>
+                                        N/A
                                     <% } %>
                                 </td>
                                 <td data-label="Ações" class="action-buttons">
-                                        <a href="/editar-noticia/<%= noticia.id %>" class="edit-button">Editar</a>
-                                        <form action="/remover-noticia/<%= noticia.id %>" method="POST" style="display:inline;">
-                                            <button type="submit" class="delete-button" onclick="return confirm('Tem certeza que deseja remover esta notícia?');">Excluir</button>
-                                        </form>
+                                    <a href="/editar-noticia/<%= noticia.id %>" class="action-button-base button-primary">Editar</a>
+                                    <form action="/retirar-denuncia-noticia/<%= noticia.id %>" method="POST" style="display:inline;">
+                                        <button type="submit" class="action-button-base button-success" onclick="return confirm('Tem certeza que deseja retirar a denúncia desta notícia?');">Retirar Denúncia</button>
+                                    </form>
+                                    <form action="/remover-noticia/<%= noticia.id %>" method="POST" style="display:inline;">
+                                        <button type="submit" class="action-button-base button-danger" onclick="return confirm('Tem certeza que deseja remover esta notícia?');">Excluir</button>
+                                    </form>
                                 </td>
                             </tr>
                         <% }); %>
                     <% } else { %>
                         <tr>
-                            <td colspan="5" style="text-align: center;">Nenhuma notícia denunciada encontrada.</td>
+                            <td colspan="7" style="text-align: center;">Nenhuma notícia encontrada.</td> <!-- Colspan ajustado para 7 -->
                         </tr>
                     <% } %>
                 </tbody>
             </table>
         </div>
     </div>
+
+    <!-- Pop-up (Modal) para exibir Detalhes da Denúncia -->
+    <div id="details-popup-overlay" class="popup-overlay hidden">
+        <div class="popup-content">
+            <h3>Detalhes da Denúncia</h3>
+            <p id="details-popup-text"></p>
+            <button class="close-popup-button">Fechar</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const detailsPopupOverlay = document.getElementById('details-popup-overlay');
+            const detailsPopupText = document.getElementById('details-popup-text');
+            const closeDetailsPopupButton = detailsPopupOverlay.querySelector('.close-popup-button');
+            
+            // Event listener para os botões "Ver Detalhes"
+            document.querySelectorAll('.view-details-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    const details = this.dataset.details; // Pega o texto dos detalhes do atributo data-details
+                    detailsPopupText.textContent = details; // Define o texto no pop-up
+                    detailsPopupOverlay.classList.remove('hidden'); // Mostra o pop-up
+                });
+            });
+
+            // Event listener para fechar o pop-up
+            if (closeDetailsPopupButton) {
+                closeDetailsPopupButton.addEventListener('click', function() {
+                    detailsPopupOverlay.classList.add('hidden'); // Esconde o pop-up
+                });
+            }
+
+            // Event listener para fechar o pop-up ao clicar fora (no overlay)
+            if (detailsPopupOverlay) {
+                detailsPopupOverlay.addEventListener('click', function(event) {
+                    if (event.target === detailsPopupOverlay) {
+                        detailsPopupOverlay.classList.add('hidden');
+                    }
+                });
+            }
+        });
+    </script>
 
 </body>
 </html>

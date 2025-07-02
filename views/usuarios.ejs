@@ -1,55 +1,287 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gerenciar Usuários - NewsStream</title>
-  <link rel="stylesheet" href="/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Usuários - NewsStream</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        /* Estilos do Pop-up (Modal) */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .popup-content {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+            text-align: left;
+            max-width: 500px;
+            width: 90%;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .popup-content h3 {
+            margin-top: 0;
+            color: #2563eb;
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .popup-content label {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .popup-content input[type="text"],
+        .popup-content input[type="email"],
+        .popup-content input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1em;
+            box-sizing: border-box; /* Garante que o padding não aumente a largura total */
+        }
+
+        .popup-content .form-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .popup-content .form-buttons button {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .popup-content .form-buttons .cancel-button {
+            background: #6c757d;
+            color: white;
+        }
+
+        .popup-content .form-buttons .cancel-button:hover {
+            background: #5a6268;
+        }
+
+        .popup-content .form-buttons .save-button {
+            background: #28a745;
+            color: white;
+        }
+
+        .popup-content .form-buttons .save-button:hover {
+            background: #218838;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Estilo para o checkbox de admin */
+        .admin-checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+        .admin-checkbox-container input[type="checkbox"] {
+            width: auto; /* Para não ocupar 100% da largura */
+            transform: scale(1.2); /* Aumenta um pouco o tamanho do checkbox */
+        }
+    </style>
 </head>
 <body>
 
-  <div class="sidebar sidebar-dashboard">
-    <h2>NewsStream</h2>
-    <a href="/dashboard">Dashboard</a>
-    <a href="/noticias">Notícias</a>
-    <a href="/categorias">Categorias</a>
-    <a href="/comentarios">Comentários</a>
-    <a href="/usuarios" class="active">Usuários</a>
-    <a href="/main">Página inicial</a>
-    <a href="/logout">Sair</a>
-  </div>
+    <div class="sidebar sidebar-dashboard">
+        <h2>NewsStream</h2>
+        <a href="/dashboard" class="<%= currentPath.startsWith('/dashboard') ? 'active' : '' %>">Dashboard</a>
+        <a href="/noticias" class="<%= currentPath.startsWith('/noticias') ? 'active' : '' %>">Notícias</a>
+        <a href="/categorias" class="<%= currentPath.startsWith('/categorias') ? 'active' : '' %>">Categorias</a>
+        <a href="/comentarios" class="<%= currentPath.startsWith('/comentarios') ? 'active' : '' %>">Comentários</a>
+        <a href="/usuarios" class="<%= currentPath.startsWith('/usuarios') ? 'active' : '' %>">Usuários</a>
+        <a href="/admin/noticias-mais-curtidas" class="<%= currentPath.startsWith('/admin/noticias-mais-curtidas') ? 'active' : '' %>">Notícias Mais Curtidas</a>
+        <a href="/admin/usuarios-engajados" class="<%= currentPath.startsWith('/admin/usuarios-engajados') ? 'active' : '' %>">Usuários Engajados</a>
+        <a href="/admin/noticias-mais-comentadas" class="<%= currentPath.startsWith('/admin/noticias-mais-comentadas') ? 'active' : '' %>">Notícias Mais Comentadas</a>
+        <a href="/admin/categorias-seguidas-por-usuario" class="<%= currentPath.startsWith('/admin/categorias-seguidas-por-usuario') ? 'active' : '' %>">Categorias Seguidas por Usuário</a>
+        <a href="/main" class="<%= currentPath.startsWith('/main') ? 'active' : '' %>">Página inicial</a>
+        <a href="/logout">Sair</a>
+    </div>
 
-  <div class="dashboard-main">
-    <header class="dashboard-header">
-      <h1>Usuários Cadastrados</h1>
-    </header>
+    <div class="dashboard-main">
+        <header class="dashboard-header">
+            <h1>Usuários Cadastrados</h1>
+        </header>
 
-    <table class="users-table">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Nome</th>
-          <th>Email</th>
-          <th>Ações</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% usuariosCadastrados.forEach(usuario => { %>
-          <tr>
-            <td><%= usuario.id %></td>
-            <td><%= usuario.nome %></td>
-            <td><%= usuario.email %></td>
-            <td>
-              <form action="/remover-usuario/<%= usuario.id %>" method="POST">
-                <button type="submit" class="delete-button">Excluir</button>
-              </form>
-            </td>
-          </tr>
-        <% }); %>
-      </tbody>
-    </table>
-    
-  </div>
+        <table class="users-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nome</th>
+                    <th>Email</th>
+                    <th>Tipo</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% usuariosCadastrados.forEach(usuario => { %>
+                    <tr>
+                        <td><%= usuario.id %></td>
+                        <td><%= usuario.nome %></td>
+                        <td><%= usuario.email %></td>
+                        <td><%= usuario.isAdmin === 1 ? 'Administrador' : 'Comum' %></td>
+                        <td class="action-buttons">
+                            <!-- Botão de Atualizar -->
+                            <button class="action-button-base button-primary update-user-button"
+                                data-user-id="<%= usuario.id %>"
+                                data-user-nome="<%= usuario.nome %>"
+                                data-user-email="<%= usuario.email %>"
+                                data-user-isadmin="<%= usuario.isAdmin %>"> <!-- Passando isAdmin -->
+                                Atualizar
+                            </button>
+                            <!-- Botão de Excluir -->
+                            <form action="/remover-usuario/<%= usuario.id %>" method="POST" style="display:inline;">
+                                <button type="submit" class="delete-button" onclick="return confirm('Tem certeza que deseja remover o usuário <%= usuario.nome %>?');">Excluir</button>
+                            </form>
+                        </td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+        
+    </div>
+
+    <!-- Pop-up (Modal) para Edição de Usuário -->
+    <div id="edit-user-popup-overlay" class="popup-overlay hidden">
+        <div class="popup-content">
+            <h3>Editar Usuário</h3>
+            <form id="edit-user-form">
+                <input type="hidden" id="edit-user-id" name="id">
+                
+                <label for="edit-user-nome">Nome:</label>
+                <input type="text" id="edit-user-nome" name="nome" required>
+
+                <label for="edit-user-email">Email:</label>
+                <input type="email" id="edit-user-email" name="email" required>
+
+                <label for="edit-user-senha">Nova Senha (deixe em branco para não alterar):</label>
+                <input type="password" id="edit-user-senha" name="senha">
+
+                <!-- NOVO CAMPO: Checkbox para isAdmin -->
+                <div class="admin-checkbox-container">
+                    <input type="checkbox" id="edit-user-isadmin" name="isAdmin">
+                    <label for="edit-user-isadmin" style="margin-bottom: 0;">Tornar Administrador</label>
+                </div>
+
+                <div class="form-buttons">
+                    <button type="button" class="cancel-button">Cancelar</button>
+                    <button type="submit" class="save-button">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const editUserPopupOverlay = document.getElementById('edit-user-popup-overlay');
+            const editUserForm = document.getElementById('edit-user-form');
+            const editUserId = document.getElementById('edit-user-id');
+            const editUserNome = document.getElementById('edit-user-nome');
+            const editUserEmail = document.getElementById('edit-user-email');
+            const editUserSenha = document.getElementById('edit-user-senha');
+            const editUserIsAdmin = document.getElementById('edit-user-isadmin'); // NOVO: Campo isAdmin
+            const cancelButton = editUserPopupOverlay.querySelector('.cancel-button');
+
+            // Função para abrir o modal e preencher os dados
+            document.querySelectorAll('.update-user-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    const userId = this.dataset.userId;
+                    const userNome = this.dataset.userNome;
+                    const userEmail = this.dataset.userEmail;
+                    const userIsAdmin = this.dataset.userIsadmin === '1'; // NOVO: Pega o status isAdmin
+
+                    editUserId.value = userId;
+                    editUserNome.value = userNome;
+                    editUserEmail.value = userEmail;
+                    editUserSenha.value = ''; // Limpa o campo de senha por segurança
+                    editUserIsAdmin.checked = userIsAdmin; // NOVO: Define o estado do checkbox
+
+                    editUserPopupOverlay.classList.remove('hidden'); // Mostra o modal
+                });
+            });
+
+            // Função para fechar o modal
+            if (cancelButton) {
+                cancelButton.addEventListener('click', function() {
+                    editUserPopupOverlay.classList.add('hidden');
+                });
+            }
+
+            // Fechar modal ao clicar fora
+            if (editUserPopupOverlay) {
+                editUserPopupOverlay.addEventListener('click', function(event) {
+                    if (event.target === editUserPopupOverlay) {
+                        editUserPopupOverlay.classList.add('hidden');
+                    }
+                });
+            }
+
+            // Lidar com o envio do formulário de edição
+            if (editUserForm) {
+                editUserForm.addEventListener('submit', async function(event) {
+                    event.preventDefault(); // Impede o envio padrão do formulário
+
+                    const userId = editUserId.value;
+                    const nome = editUserNome.value;
+                    const email = editUserEmail.value;
+                    const senha = editUserSenha.value; // Pode ser vazio se não for alterada
+                    const isAdmin = editUserIsAdmin.checked ? 1 : 0; // NOVO: Pega o valor do checkbox
+
+                    try {
+                        const response = await fetch(`/atualizar-usuario/${userId}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ nome, email, senha, isAdmin }) // NOVO: Envia isAdmin
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            alert('Usuário atualizado com sucesso!');
+                            editUserPopupOverlay.classList.add('hidden'); // Esconde o modal
+                            window.location.reload(); // Recarrega a página para ver as alterações
+                        } else {
+                            alert('Erro ao atualizar usuário: ' + result.message);
+                        }
+                    } catch (error) {
+                        console.error('Erro na requisição de atualização:', error);
+                        alert('Erro de comunicação com o servidor ao atualizar usuário.');
+                    }
+                });
+            }
+        });
+    </script>
 
 </body>
 </html>

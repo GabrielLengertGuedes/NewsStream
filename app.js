@@ -1,361 +1,616 @@
+// 1. Importações de Módulos
 const express = require('express');
 const path = require('path');
 const session = require('express-session');
-const todasNoticias = require('./data/todas-noticias');
-const db = require('./database/mysql_db'); 
+const db = require('./database/mysql_db'); // Seu módulo de conexão com o MySQL
+
+// Importe os routers separados
+const loginRoutes = require('./routes/login');
+const mainRoutes = require('./routes/main'); // O router que conterá as rotas principais (usuário)
+//console.log('app.js: mainRoutes importado.'); // LOG: Confirma importação
 
 const app = express();
 
+// 2. Configuração de Middlewares Globais
 app.use(session({
-    secret: 'newsstream_secret',
-    resave: false, 
-    saveUninitialized: true 
+    secret: 'newsstream_secret_super_secreto_e_longo_para_producao', // Use uma string mais segura em produção!
+    resave: false, // Evita salvar a sessão se não houver modificações
+    saveUninitialized: true, // Salva sessões "novas" que não foram modificadas
+    cookie: { 
+        maxAge: 1000 * 60 * 60 * 24 // 1 dia de duração do cookie da sessão
+    }
 }));
 
-app.use(express.json()); 
-app.use(express.urlencoded({ extended: true })); 
+app.use(express.json()); // Permite que o Express parseie corpos de requisição JSON
+app.use(express.urlencoded({ extended: true })); // Permite que o Express parseie corpos de requisição de formulários HTML
 
+// 3. Configuração do Template Engine (EJS)
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views')); 
+app.set('views', path.join(__dirname, 'views')); // Define a pasta onde estão seus arquivos .ejs
 
-app.use(express.static(path.join(__dirname, 'public')));
+// 4. Servir Arquivos Estáticos
+app.use(express.static(path.join(__dirname, 'public'))); 
+//console.log('app.js: Servindo arquivos estáticos de /public.'); // LOG: Confirma static files
 
-const categorias = [
-    'Política', 'Tecnologia', 'Esportes', 'Saúde', 'Negócios',
-    'Gastronomia', 'Meio Ambiente', 'Entretenimento', 'Justiça',
-    'Educação', 'Ciência', 'Cultura', 'Segurança Pública',
-    'Turismo', 'Moda', 'Automóveis', 'Jogos'
-];
-
-let todosComentarios = [
-    { id: 1, autor: "André Fernandes", texto: "Ótima notícia! A reforma tributária é muito necessária.", data: "28/05/2025", noticiaId: 1, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 2, autor: "Mariana Costa", texto: "Espero que o cashback realmente ajude as famílias de baixa renda.", data: "27/05/2025", noticiaId: 1, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 69, autor: "Roberto Almeida", texto: "Essa reforma é mais do mesmo, só vai beneficiar os ricos. Falta transparência!", data: "26/05/2025", noticiaId: 1, denunciado: true, motivoDenuncia: "Informação falsa", detalhesDenuncia: "Alegações sem provas sobre benefício a ricos." }, 
-
-    { id: 3, autor: "Paulo Henrique", texto: "Que virada espetacular do União FC! Fiquei arrepiado.", data: "28/05/2025", noticiaId: 2, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 4, autor: "Sofia Lima", texto: "Finalmente um título depois de tanto tempo! Parabéns ao time.", data: "27/05/2025", noticiaId: 2, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 70, autor: "Guilherme Sampaio", texto: "Vitória roubada! A arbitragem claramente favoreceu o União FC. Que vergonha!", data: "26/05/2025", noticiaId: 2, denunciado: true, motivoDenuncia: "Discurso de ódio", detalhesDenuncia: "Acusação sem provas e incitação à rivalidade." }, 
-
-    { id: 5, autor: "Camila Santos", texto: "A reforma eleitoral é sempre um debate importante. Tomara que avance.", data: "28/05/2025", noticiaId: 3, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 6, autor: "Felipe Rodrigues", texto: "Transparência nas eleições é algo que a gente precisa muito!", data: "27/05/2025", noticiaId: 3, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 71, autor: "Beatriz Nogueira", texto: "Outra reforma só para enganar o povo. Eles nunca mudam de verdade.", data: "26/05/2025", noticiaId: 3, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-
-    { id: 7, autor: "Laura Pereira", texto: "Um avanço revolucionário em IA! O futuro chegou.", data: "28/05/2025", noticiaId: 4, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 8, autor: "Rafael Silveira", texto: "Será que essa IA vai nos ajudar no dia a dia? Ansioso para ver.", data: "27/05/2025", noticiaId: 4, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 72, autor: "Isabela Fonseca", texto: "IA é uma moda passageira. Em breve ninguém mais vai falar disso. Puro hype.", data: "26/05/2025", noticiaId: 4, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-
-    { id: 9, autor: "Bruno Cardoso", texto: "Convocação da seleção com surpresas? Gosto assim!", data: "28/05/2025", noticiaId: 5, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 10, autor: "Larissa Machado", texto: "Muita expectativa para a Copa do Mundo com esse novo time.", data: "27/05/2025", noticiaId: 5, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 73, autor: "Vinicius Neves", texto: "O técnico é um incompetente! Deixou os melhores de fora. Vamos perder de lavada!", data: "26/05/2025", noticiaId: 5, denunciado: true, motivoDenuncia: "Conteúdo impróprio", detalhesDenuncia: "Ofensas diretas ao técnico." }, 
-
-    { id: 11, autor: "Diego Martins", texto: "Otimismo no mercado é um bom sinal para a economia.", data: "28/05/2025", noticiaId: 6, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 12, autor: "Amanda Gomes", texto: "Com as taxas de juros mantidas, o setor de varejo deve sentir o impacto positivo.", data: "27/05/2025", noticiaId: 6, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 74, autor: "Gustavo Mendes", texto: "Esse 'otimismo' é fachada. A inflação ainda é um problema sério que não está sendo abordado.", data: "26/05/2025", noticiaId: 6, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-
-    { id: 13, autor: "Fernanda Ribeiro", texto: "Financiamento bilionário em energia limpa é o que precisamos para o futuro!", data: "28/05/2025", noticiaId: 7, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 14, autor: "Thiago Rocha", texto: "É um passo enorme para combater as mudanças climáticas.", data: "27/05/2025", noticiaId: 7, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 75, autor: "Mariana Duarte", texto: "Energia limpa é um conto de fadas para a mídia. Não vai mudar nada no aquecimento global, é tudo natural.", data: "26/05/2025", noticiaId: 7, denunciado: true, motivoDenuncia: "Informação falsa", detalhesDenuncia: "Negação de dados científicos sobre aquecimento global." }, 
-
-    { id: 15, autor: "Luciana Braga", texto: "Esses avanços no tratamento do câncer renovam a esperança de muitos pacientes.", data: "28/05/2025", noticiaId: 8, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 16, autor: "Roberto Pires", texto: "A pesquisa médica está cada vez mais promissora. Uma luz no fim do túnel.", data: "27/05/2025", noticiaId: 8, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 76, autor: "Daniel Oliveira", texto: "Mais uma 'promessa'. Nunca vejo esses tratamentos chegarem de verdade ao povo.", data: "26/05/2025", noticiaId: 8, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-
-    { id: 17, autor: "Patrícia Assis", texto: "Filme de ficção científica espetacular! Já quero a continuação.", data: "28/05/2025", noticiaId: 9, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 18, autor: "Carlos Eduardo", texto: "Os efeitos visuais são de cair o queixo! Valeu cada centavo.", data: "27/05/2025", noticiaId: 9, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 77, autor: "Julio César", texto: "O enredo é péssimo e os personagens são chatos. Só efeitos especiais não salvam um filme ruim.", data: "26/05/2025", noticiaId: 9, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-
-    { id: 19, autor: "Ana Paula", texto: "A decisão sobre liberdade de expressão é crucial para o ambiente online.", data: "28/05/2025", noticiaId: 10, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 20, autor: "Lucas Ferreira", texto: "Finalmente uma regulamentação para o que se posta nas redes.", data: "27/05/2025", noticiaId: 10, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 78, autor: "Clara Guedes", texto: "Essa decisão é um ataque à liberdade de expressão! Vão censurar todo mundo agora.", data: "26/05/2025", noticiaId: 10, denunciado: true, motivoDenuncia: "Informação falsa", detalhesDenuncia: "Alegação de censura generalizada sem base." }, 
-
-    { id: 21, autor: "Gabriela Faria", texto: "Que orgulho da chef brasileira! Reconhecimento merecido.", data: "28/05/2025", noticiaId: 11, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 22, autor: "Márcia Azevedo", texto: "Mal posso esperar para provar essa culinária sustentável.", data: "27/05/2025", noticiaId: 11, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 79, autor: "Fernando Lopes", texto: "Restaurante sustentável? Provavelmente comida sem graça e cara demais. Prefiro um bom churrasco.", data: "26/05/2025", noticiaId: 11, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-
-    { id: 23, autor: "Professor João", texto: "5G nas escolas vai transformar o ensino. Excelente iniciativa!", data: "28/05/2025", noticiaId: 12, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 24, autor: "Beatriz Oliveira", texto: "Aulas interativas e realidade aumentada? Que demais!", data: "27/05/2025", noticiaId: 12, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 80, autor: "Mônica Viana", texto: "Mais tecnologia? O que precisamos é de mais professores e menos telas!", data: "26/05/2025", noticiaId: 12, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-
-    { id: 25, autor: "Sérgio Dutra", texto: "Chip neural é um marco na interação humano-máquina.", data: "28/05/2025", noticiaId: 13, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 26, autor: "Viviane Castro", texto: "As possibilidades para tratamento de doenças são incríveis.", data: "27/05/2025", noticiaId: 13, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 81, autor: "Alexandre Pires", texto: "Vão implantar chips em todo mundo e nos controlar! Isso é o fim da liberdade!", data: "26/05/2025", noticiaId: 13, denunciado: true, motivoDenuncia: "Informação falsa", detalhesDenuncia: "Teoria da conspiração sem base." }, 
-
-    { id: 27, autor: "Carolina Farias", texto: "Terapia genética é a fronteira da medicina. Que esperança para os pacientes.", data: "28/05/2025", noticiaId: 14, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 28, autor: "Eduardo Campos", texto: "Notícias como essa nos dão muita força para continuar lutando.", data: "27/05/2025", noticiaId: 14, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 82, autor: "Renato Dantas", texto: "Tudo marketing das farmacêuticas. Nunca vão achar a cura de verdade para vender remédios.", data: "26/05/2025", noticiaId: 14, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-
-    { id: 29, autor: "Isabela Rocha", texto: "Dinheiro em startups de energia renovável é um investimento no futuro do planeta.", data: "28/05/2025", noticiaId: 15, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 30, autor: "Paulo Gabriel", texto: "O mercado está se alinhando com a sustentabilidade, e isso é ótimo.", data: "27/05/2025", noticiaId: 15, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 83, autor: "Vitor Hugo", texto: "Isso é só uma bolha. Energia renovável não é tão lucrativa quanto dizem.", data: "26/05/2025", noticiaId: 15, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-
-    { id: 31, autor: "Helena Albuquerque", texto: "IA criando receitas personalizadas? Quero experimentar!", data: "28/05/2025", noticiaId: 16, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 32, autor: "André Luiz", texto: "Isso vai transformar a experiência em restaurantes. Genial!", data: "27/05/2025", noticiaId: 16, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 84, autor: "Sandra Regina", texto: "A culinária é arte, não algoritmo! Isso descaracteriza a gastronomia.", data: "26/05/2025", noticiaId: 16, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-
-    { id: 33, autor: "Cláudia Miranda", texto: "Documentário sobre exploração espacial que emociona! Recomendo.", data: "28/05/2025", noticiaId: 17, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 34, autor: "Tiago Nogueira", texto: "O filme nos faz sonhar com o que está além do nosso planeta.", data: "27/05/2025", noticiaId: 17, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 85, autor: "Renata Barreto", texto: "Que documentário parado! Só mostra imagem velha e gente chata falando. Não recomendo.", data: "26/05/2025", noticiaId: 17, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-
-    { id: 35, autor: "Marcelo Cunha", texto: "As novas regras para crimes digitais são urgentes e necessárias.", data: "28/05/2025", noticiaId: 18, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 36, autor: "Lívia Viana", texto: "Espero que isso traga mais segurança para todos nós online.", data: "27/05/2025", noticiaId: 18, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 86, autor: "Pedro Souza", texto: "Ninguém vai seguir essas regras. A internet é livre! Quero ver pegarem os hackers de verdade!", data: "26/05/2025", noticiaId: 18, denunciado: true, motivoDenuncia: "Discurso de ódio", detalhesDenuncia: "Incitamento à desobediência e ofensa." }, 
-
-    { id: 37, autor: "Fernando Guedes", texto: "O campeonato de eSports foi épico! O cenário só cresce.", data: "28/05/2025", noticiaId: 19, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 38, autor: "Gabriela Dias", texto: "Público recorde e premiação gigante! É o reconhecimento que o eSports merece.", data: "27/05/2025", noticiaId: 19, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 87, autor: "Ricardo Pereira", texto: "Esports não é esporte de verdade. É só gente sentada jogando videogame, que ridículo!", data: "26/05/2025", noticiaId: 19, denunciado: true, motivoDenuncia: "Conteúdo impróprio", detalhesDenuncia: "Desrespeito e ataque a um grupo." }, 
-
-    { id: 39, autor: "Simone Mendes", texto: "Proteger florestas tropicais é uma luta que vale a pena! Excelente.", data: "28/05/2025", noticiaId: 20, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 40, autor: "Daniel Santos", texto: "Que os acordos sejam implementados com rigor para frear o desmatamento.", data: "27/05/2025", noticiaId: 20, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 88, autor: "Antônio da Silva", texto: "Tudo isso é bobagem. A floresta é para ser usada, não para ficar parada. Vão proibir o progresso?", data: "26/05/2025", noticiaId: 20, denunciado: true, motivoDenuncia: "Discurso de ódio", detalhesDenuncia: "Ataque a valores ambientais e incitação." }, 
-
-    { id: 41, autor: "Juliana Rocha", texto: "Um planeta parecido com a Terra! Mal posso esperar para saber mais.", data: "28/05/2025", noticiaId: 21, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 42, autor: "Guilherme S.", texto: "Essa descoberta abre novas fronteiras para a pesquisa de exoplanetas.", data: "27/05/2025", noticiaId: 21, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 89, autor: "Márcio Oliveira", texto: "Mais uma mentira da NASA para nos enganar! O espaço não existe, é tudo uma farsa.", data: "26/05/2025", noticiaId: 21, denunciado: true, motivoDenuncia: "Informação falsa", detalhesDenuncia: "Negação de ciência básica." }, 
-
-    { id: 43, autor: "Fábio Dantas", texto: "A reabertura do Museu Nacional é um marco para a cultura e ciência do país.", data: "28/05/2025", noticiaId: 22, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 44, autor: "Aline Pereira", texto: "Quero muito ver a exposição sobre civilizações antigas!", data: "27/05/2025", noticiaId: 22, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 90, autor: "Sergio Almeida", texto: "Dinheiro jogado fora. Ninguém se importa com museus antigos hoje em dia. Deviam construir shoppings.", data: "26/05/2025", noticiaId: 22, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-
-    { id: 45, autor: "Cristiane F.", texto: "A operação contra cibercrimes é essencial para proteger os cidadãos online.", data: "28/05/2025", noticiaId: 23, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 46, autor: "Renato Borges", texto: "Fico feliz em ver que estão combatendo esses golpistas da internet.", data: "27/05/2025", noticiaId: 23, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 91, autor: "Natália Rocha", texto: "Nunca vão me pegar! Eu sou muito mais inteligente que esses policiais.", data: "26/05/2025", noticiaId: 23, denunciado: true, motivoDenuncia: "Conteúdo impróprio", detalhesDenuncia: "Confissão/ameaça de atividade ilegal." }, 
-
-    { id: 47, autor: "Vanessa Lima", texto: "Destinos sustentáveis são a minha preferência. É bom ver essa popularidade.", data: "28/05/2025", noticiaId: 24, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 48, autor: "André Felipe", texto: "O ecoturismo tem um potencial enorme para o Brasil.", data: "27/05/2025", noticiaId: 24, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 92, autor: "Flávia Cristina", texto: "Sustentabilidade é chato. Quero aventura de verdade, sem essas regras bobas.", data: "26/05/2025", noticiaId: 24, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-
-    { id: 49, autor: "Mariana Almeida", texto: "Roupas inteligentes! Mal posso esperar para ver como isso vai mudar o dia a dia.", data: "28/05/2025", noticiaId: 25, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 50, autor: "Thiago Mendes", texto: "A fusão de moda e tecnologia é o caminho para inovações incríveis.", data: "27/05/2025", noticiaId: 25, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 93, autor: "Rodrigo Viana", texto: "Roupas com chip? Que absurdo! Preferia a moda antiga, isso é ridículo.", data: "26/05/2025", noticiaId: 25, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-
-    { id: 51, autor: "Patrícia Viana", texto: "900 km de autonomia? Isso é um divisor de águas para os carros elétricos!", data: "28/05/2025", noticiaId: 26, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 52, autor: "Pedro Henrique", texto: "Menos tempo recarregando e mais tempo na estrada. Perfeito!", data: "27/05/2025", noticiaId: 26, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 94, autor: "Ana Clara Silva", texto: "Carro elétrico é brinquedo. Nada supera o ronco de um motor V8. É tudo marketing verde.", data: "26/05/2025", noticiaId: 26, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-
-    { id: 53, autor: "João Vitor", texto: "A nova geração de consoles com gráficos ultra-realistas é sensacional. A jogabilidade está no máximo.", data: "28/05/2025", noticiaId: 27, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 54, autor: "Isabela Oliveira", texto: "É um desafio criar para essa potência, mas o resultado final é incrível.", data: "27/05/2025", noticiaId: 27, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 95, autor: "Lucas Gomes", texto: "Os gráficos estão bons, mas a história é repetitiva e o jogo é cheio de bugs! Puro lixo.", data: "26/05/2025", noticiaId: 27, denunciado: true, motivoDenuncia: "Conteúdo impróprio", detalhesDenuncia: "Linguagem ofensiva e desrespeitosa." }, 
-
-    { id: 55, autor: "Gabriel Costa", texto: "Programas de bolsas para baixa renda abrem portas para muitos como eu. Uma chance de ouro.", data: "28/05/2025", noticiaId: 28, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 56, autor: "Larissa Almeida", texto: "Investir na educação de todos é o que constrói um futuro melhor para o país.", data: "27/05/2025", noticiaId: 28, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 96, autor: "Manoel Souza", texto: "Bolsas? Que piada! No final, é sempre para os mesmos. A educação no Brasil não tem jeito.", data: "26/05/2025", noticiaId: 28, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-
-    { id: 57, autor: "Carolina Farias", texto: "Descobertas de novas formas de vida nas profundezas são fascinantes. O oceano guarda muitos segredos.", data: "28/05/2025", noticiaId: 29, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null },
-    { id: 58, autor: "Diego Mendes", texto: "Isso nos faz refletir sobre a diversidade da vida e o que mais existe no universo.", data: "27/05/2025", noticiaId: 29, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 97, autor: "Sara Rodrigues", texto: "Besteira! Não acredito nessas 'novas formas de vida'. É tudo invenção para tirar dinheiro do governo.", data: "26/05/2025", noticiaId: 29, denunciado: true, motivoDenuncia: "Informação falsa", detalhesDenuncia: "Ataque à ciência e alegação de fraude." }, 
-
-    { id: 59, autor: "Ana Júlia", texto: "Festival literário é sempre um deleite! Que bom ver autores brasileiros em destaque.", data: "28/05/2025", noticiaId: 30, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 60, autor: "Eduardo Rocha", texto: "Eventos assim inspiram e dão voz a novos talentos. Muito importante.", data: "27/05/2025", noticiaId: 30, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 98, autor: "Sandra Dias", texto: "Literatura brasileira é fraca. Só fazem livros chatos e sem criatividade. Deviam ler mais clássicos estrangeiros.", data: "26/05/2025", noticiaId: 30, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-
-    { id: 61, autor: "Felipe Goulart", texto: "Tecnologia de reconhecimento facial nos aeroportos é um avanço para a segurança.", data: "28/05/2025", noticiaId: 31, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 62, autor: "Mariana Barreto", texto: "Agilidade e controle são essenciais em ambientes como aeroportos.", data: "27/05/2025", noticiaId: 31, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 99, autor: "Carlos Alberto", texto: "Isso é invasão de privacidade! Não quero meu rosto em nenhum banco de dados do governo. Absurdo!", data: "26/05/2025", noticiaId: 31, denunciado: true, motivoDenuncia: "Conteúdo impróprio", detalhesDenuncia: "Linguagem agressiva e alarmista." }, 
-
-    { id: 63, autor: "Renata Cintra", texto: "Voos com combustível sustentável! É um futuro mais verde para a aviação.", data: "28/05/2025", noticiaId: 32, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 64, autor: "Marcelo Queiroz", texto: "A tecnologia está avançando rapidamente para tornar as viagens aéreas mais ecológicas.", data: "27/05/2025", noticiaId: 32, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 100, autor: "Vanessa Nogueira", texto: "Isso é pura propaganda! As empresas só querem parecer verdes, mas continuam poluindo.", data: "26/05/2025", noticiaId: 32, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-
-    { id: 65, autor: "Beatriz Mota", texto: "IA revolucionando o design de roupas é ótimo para personalização e sustentabilidade.", data: "28/05/2025", noticiaId: 33, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 66, autor: "Luana Gomes", texto: "As possibilidades são infinitas quando a tecnologia se une à criatividade na moda.", data: "27/05/2025", noticiaId: 33, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 101, autor: "Felipe Costa", texto: "Roupas feitas por IA? Que horror! Vão ser todas iguais e sem alma. A moda está morrendo.", data: "26/05/2025", noticiaId: 33, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-
-    { id: 67, autor: "Gustavo Ferreira", texto: "Carros voadores para reduzir congestionamentos? Parece um sonho, mas está perto!", data: "28/05/2025", noticiaId: 34, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 68, autor: "Clara Guedes", texto: "A mobilidade aérea urbana pode realmente mudar o cenário das grandes metrópoles.", data: "27/05/2025", noticiaId: 34, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null }, 
-    { id: 102, autor: "Alexandre Barros", texto: "Carros voadores são uma fantasia cara. Não vão resolver o trânsito e só vão criar mais problemas no ar.", data: "26/05/2025", noticiaId: 34, denunciado: false, motivoDenuncia: null, detalhesDenuncia: null },
-];
-
-app.get('/', (req, res) => res.redirect('/login'));
-
-app.get('/main', (req, res) => {
+// 5. Middlewares de Autenticação e Autorização (podem ser movidos para um arquivo separado, ex: 'middlewares/auth.js')
+const checkAuth = (req, res, next) => {
     if (!req.session.usuario) {
+        // Redireciona para a página de login se o usuário não estiver logado
         return res.redirect('/login');
     }
+    next(); // Continua para a próxima função middleware ou rota
+};
 
-    const selecionada = req.query.categoria || 'Todas';
-    const noticias = selecionada === 'Todas' ? todasNoticias : todasNoticias.filter(n => n.categoria === selecionada);
-    const numNotifications = todosComentarios.filter(c => c.denunciado).length;
-    const isAdminUser = (req.session.usuario.email === 'admin@newsstream.com');
-
-    res.render('main', {
-        nome: req.session.usuario.nome,
-        categorias,
-        noticias,
-        selecionada,
-        usuario: req.session.usuario,
-        isAdminView: isAdminUser,
-        numNotifications: numNotifications 
-    });
-});
-
-app.get('/noticias/:id', (req, res) => {
-    const noticiaId = parseInt(req.params.id);
-    const noticia = todasNoticias.find(n => n.id === noticiaId); 
-
-    if (!noticia) {
-        return res.status(404).send("Notícia não encontrada.");
+const checkAdmin = (req, res, next) => {
+    // Apenas permite acesso se o usuário estiver logado E for admin
+    if (!req.session.usuario || req.session.usuario.isAdmin !== 1) {
+        // Retorna um erro 403 (Forbidden) se não for admin
+        return res.status(403).send("Acesso não autorizado. Você não é um administrador.");
     }
+    next(); // Continua para a próxima função middleware ou rota
+};
 
-    const comentariosDaNoticia = todosComentarios.filter(c => c.noticiaId === noticiaId);
-    const numNotifications = todosComentarios.filter(c => c.denunciado).length; 
+// Função auxiliar para obter o número de notificações não lidas
+async function getUnreadNotificationsCount(usuarioId) {
+    if (!usuarioId) return 0;
+    try {
+        const [rows] = await db.promise().query('SELECT COUNT(*) AS total FROM notificacoes WHERE usuario_id = ? AND lida = FALSE', [usuarioId]);
+        return rows[0].total;
+    } catch (err) {
+        console.error('Erro ao buscar contagem de notificações não lidas:', err);
+        return 0;
+    }
+}
 
-    res.render('noticia', {
-        noticia: {
-            ...noticia,
-            conteudo: noticia.conteudo 
-        },
-        comentarios: comentariosDaNoticia,
-        usuario: req.session.usuario, 
-        numNotifications: numNotifications 
-    });
+
+// 6. Definição das Rotas
+
+// Redirecionamento da raiz para a página de login
+app.get('/', (req, res) => res.redirect('/login'));
+
+// **PRIORIDADE 1: Rotas Administrativas MUITO ESPECÍFICAS**
+// Estas rotas devem vir ANTES de `app.use('/', mainRoutes);` para evitar conflitos com :id
+// Rotas de gerenciamento de notícias (nova, salvar, editar, atualizar, remover, retirar denúncia)
+app.get('/nova-noticia', checkAdmin, async (req, res) => {
+    //console.log('app.js: Acessando rota /nova-noticia.'); // LOG
+    try {
+        const [categoriasRows] = await db.promise().query('SELECT nome FROM categorias ORDER BY nome ASC');
+        const categoriasDisponiveis = categoriasRows.map(row => row.nome);
+        
+        const numNotifications = await getUnreadNotificationsCount(req.session.usuario.id); // Obter notificações para o admin
+        
+        res.render('nova-noticia', { 
+            categorias: categoriasDisponiveis,
+            currentPath: req.path, // Adicionado currentPath
+            numNotifications: numNotifications
+        });
+    } catch (err) {
+        console.error('Erro ao carregar categorias para nova notícia:', err);
+        res.status(500).send('Erro ao carregar formulário de nova notícia.');
+    }
 });
 
-app.get('/nova-noticia', (req, res) => {
-    res.render('nova-noticia', { categorias });
+app.post('/salvar-noticia', checkAdmin, async (req, res) => {
+    //console.log('app.js: Acessando rota POST /salvar-noticia.'); // LOG
+    const { titulo, autor, categoria, conteudo, imagem } = req.body; 
+
+    const imagemUrl = imagem && imagem.trim() !== '' ? imagem : '/images/default.jpg'; 
+    const dataAtual = new Date().toISOString().slice(0, 10);
+
+    try {
+        await db.promise().execute(
+            'INSERT INTO noticias (titulo, resumo, conteudo, categoria, imagemUrl, data_publicacao, autor, denunciado) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+            [titulo, conteudo.substring(0, 200) + '...', conteudo, categoria, imagemUrl, dataAtual, autor, false]
+        );
+        res.redirect('/dashboard');
+    } catch (err) {
+        console.error('Erro ao salvar nova notícia no DB:', err);
+        res.status(500).send('Erro ao salvar a notícia.');
+    }
 });
 
-app.post('/salvar-noticia', (req, res) => {
+app.get('/editar-noticia/:id', checkAdmin, async (req, res) => {
+    //console.log('app.js: Acessando rota /editar-noticia/:id.'); // LOG
+    const noticiaId = parseInt(req.params.id);
+    try {
+        const [noticiaRows] = await db.promise().query('SELECT * FROM noticias WHERE id = ?', [noticiaId]);
+        const noticia = noticiaRows[0];
+
+        if (!noticia) {
+            return res.status(404).send("Notícia não encontrada para edição.");
+        }
+
+        const [categoriasRows] = await db.promise().query('SELECT nome FROM categorias ORDER BY nome ASC');
+        const categoriasDisponiveis = categoriasRows.map(row => row.nome);
+
+        const numNotifications = await getUnreadNotificationsCount(req.session.usuario.id); // Obter notificações para o admin
+
+        res.render('editar-noticia', { 
+            noticia, 
+            categorias: categoriasDisponiveis,
+            currentPath: req.path, // Adicionado currentPath
+            numNotifications: numNotifications
+        });
+    } catch (err) {
+        console.error('Erro ao carregar notícia para edição:', err);
+        res.status(500).send('Erro ao carregar formulário de edição.');
+    }
+});
+
+app.post('/atualizar-noticia/:id', checkAdmin, async (req, res) => {
+    //console.log('app.js: Acessando rota POST /atualizar-noticia/:id.'); // LOG
+    const noticiaId = parseInt(req.params.id);
     const { titulo, autor, categoria, conteudo } = req.body;
-    const dataAtual = new Date().toLocaleDateString('pt-BR');
-    const newId = todasNoticias.length > 0 ? Math.max(...todasNoticias.map(n => n.id)) + 1 : 1;
 
-    todasNoticias.push({
-        id: newId,
-        titulo,
-        autor: autor,
-        categoria,
-        resumo: conteudo.substring(0, 100) + '...',
-        imagemUrl: '/images/default.jpg',
-        data: dataAtual,
-        conteudo: conteudo,
-        status: "Publicado"
-    });
-
-    res.redirect('/dashboard');
+    try {
+        await db.promise().execute(
+            'UPDATE noticias SET titulo = ?, autor = ?, categoria = ?, resumo = ?, conteudo = ? WHERE id = ?',
+            [titulo, autor, categoria, conteudo.substring(0, 200) + '...', conteudo, noticiaId] 
+        );
+        res.redirect('/dashboard');
+    } catch (err) {
+        console.error('Erro ao atualizar notícia no DB:', err);
+        res.status(500).send('Erro ao atualizar a notícia.');
+    }
 });
 
-app.get('/editar-noticia/:id', (req, res) => {
+app.post('/remover-noticia/:id', checkAdmin, async (req, res) => {
+    //console.log('app.js: Acessando rota POST /remover-noticia/:id.'); // LOG
     const noticiaId = parseInt(req.params.id);
-    const noticia = todasNoticias.find(n => n.id === noticiaId);
-
-    if (!noticia) {
-        return res.status(404).send("Notícia não encontrada.");
+    try {
+        await db.promise().execute('DELETE FROM noticias WHERE id = ?', [noticiaId]);
+        console.log(`Notícia ID ${noticiaId} removida do DB.`);
+        res.redirect('/noticias'); 
     }
-
-    res.render('editar-noticia', { noticia, categorias });
+    catch (err) {
+        console.error('Erro ao remover notícia do DB:', err);
+        res.status(500).send('Erro ao remover a notícia.');
+    }
 });
 
-app.post('/atualizar-noticia/:id', (req, res) => {
+app.post('/retirar-denuncia-noticia/:id', checkAdmin, async (req, res) => {
+    //console.log('app.js: Acessando rota POST /retirar-denuncia-noticia/:id.');
     const noticiaId = parseInt(req.params.id);
-    const { titulo, autor, categoria, conteudo } = req.body;
+    try {
+        const [result] = await db.promise().execute(
+            'UPDATE noticias SET denunciado = FALSE, motivoDenuncia = NULL, detalhesDenuncia = NULL WHERE id = ?',
+            [noticiaId]
+        );
 
-    const noticia = todasNoticias.find(n => n.id === noticiaId);
-
-    if (!noticia) {
-        return res.status(404).send("Notícia não encontrada.");
+        if (result.affectedRows === 0) {
+            console.warn(`Tentativa de retirar denúncia de notícia não encontrada ou não denunciada: ID ${noticiaId}`);
+        } else {
+            console.log(`Denúncia da Notícia ID ${noticiaId} retirada do DB.`);
+        }
+        res.redirect('/noticias'); 
+    } catch (err) {
+        console.error('Erro ao retirar denúncia da notícia no DB:', err);
+        res.status(500).send('Erro ao retirar a denúncia da notícia.');
     }
-    noticia.titulo = titulo;
-    noticia.autor = autor;
-    noticia.categoria = categoria;
-    noticia.resumo = conteudo.substring(0, 100) + '...';
-    noticia.conteudo = conteudo; 
-
-    res.redirect('/dashboard'); 
 });
 
-app.get('/comentarios', (req, res) => {
-    if (!req.session.usuario || req.session.usuario.email !== 'admin@newsstream.com') {
-        return res.status(403).send("Acesso não autorizado.");
+// Rotas para as "Consultas Complexas" (relatórios)
+app.get('/admin/noticias-mais-curtidas', checkAdmin, async (req, res) => {
+    //console.log('app.js: Acessando rota /admin/noticias-mais-curtidas.');
+    try {
+        const query = `
+            SELECT
+                n.titulo AS titulo_noticia,
+                c.nome AS categoria,
+                COUNT(curt.id) AS total_curtidas,
+                n.data_publicacao AS data_publicacao
+            FROM
+                noticias n
+            JOIN
+                categorias c ON n.categoria = c.nome
+            LEFT JOIN
+                curtidas curt ON n.id = curt.noticia_id
+            WHERE
+                n.data_publicacao BETWEEN '2025-01-01' AND '2025-06-30'
+            GROUP BY
+                n.id, n.titulo, c.nome, n.data_publicacao
+            ORDER BY
+                total_curtidas DESC, categoria ASC;
+        `;
+        const [results] = await db.promise().query(query);
+
+        const numNotifications = await getUnreadNotificationsCount(req.session.usuario.id); // Obter notificações para o admin
+
+        res.render('relatorio_noticias_curtidas', {
+            relatorio: results,
+            usuario: req.session.usuario,
+            currentPath: req.path, // Adicionado currentPath
+            numNotifications: numNotifications
+        });
+
+    } catch (err) {
+        console.error("Erro ao gerar relatório de notícias mais curtidas:", err);
+        res.status(500).send("Erro ao gerar relatório de notícias mais curtidas.");
     }
-
-    const comentariosDenunciados = todosComentarios.filter(c => c.denunciado === true);
-
-    res.render('comentarios', { comentariosDenunciados });
 });
 
-app.post('/remover-comentario/:id', (req, res) => {
+app.get('/admin/usuarios-engajados', checkAdmin, async (req, res) => {
+    //console.log('app.js: Acessando rota /admin/usuarios-engajados.');
+    try {
+        const query = `
+            SELECT DISTINCT
+                u.nome AS nome_usuario,
+                u.email AS email_usuario,
+                n.titulo AS titulo_noticia,
+                cat.nome AS categoria_noticia,
+                com.texto AS comentario_usuario,
+                curt.data_curtida AS data_curtida
+            FROM
+                usuarios u
+            JOIN
+                comentarios com ON u.id = com.usuario_id
+            JOIN
+                noticias n ON com.noticia_id = n.id
+            JOIN
+                categorias cat ON n.categoria = cat.nome
+            JOIN
+                categorias_seguidas cs ON u.id = cs.usuario_id AND cat.id = cs.categoria_id
+            LEFT JOIN
+                curtidas curt ON u.id = curt.usuario_id AND n.id = curt.noticia_id
+            WHERE
+                com.denunciado = 0
+            ORDER BY
+                nome_usuario, data_curtida DESC;
+        `;
+        const [results] = await db.promise().query(query);
+
+        const numNotifications = await getUnreadNotificationsCount(req.session.usuario.id); // Obter notificações para o admin
+
+        res.render('relatorio_usuarios_engajados', {
+            relatorio: results,
+            usuario: req.session.usuario,
+            currentPath: req.path, // Adicionado currentPath
+            numNotifications: numNotifications
+        });
+
+    } catch (err) {
+        console.error("Erro ao gerar relatório de usuários engajados:", err);
+        res.status(500).send("Erro ao gerar relatório de usuários engajados.");
+    }
+});
+
+app.get('/admin/noticias-mais-comentadas', checkAdmin, async (req, res) => {
+    //console.log('app.js: Acessando rota /admin/noticias-mais-comentadas.');
+    try {
+        const query = `
+            SELECT
+                n.titulo AS titulo_noticia,
+                c.nome AS categoria_noticia,
+                n.autor AS autor_noticia,
+                COUNT(com.id) AS total_comentarios
+            FROM
+                noticias n
+            JOIN
+                categorias c ON n.categoria = c.nome
+            LEFT JOIN
+                comentarios com ON n.id = com.noticia_id
+            WHERE
+                com.denunciado = 0 OR com.denunciado IS NULL
+            GROUP BY
+                n.id, n.titulo, c.nome, n.autor
+            ORDER BY
+                total_comentarios DESC;
+        `;
+        const [results] = await db.promise().query(query);
+
+        const numNotifications = await getUnreadNotificationsCount(req.session.usuario.id); // Obter notificações para o admin
+
+        res.render('relatorio_noticias_comentadas', {
+            relatorio: results,
+            usuario: req.session.usuario,
+            currentPath: req.path, // Adicionado currentPath
+            numNotifications: numNotifications
+        });
+
+    } catch (err) {
+        console.error("Erro ao gerar relatório de notícias mais comentadas:", err);
+        res.status(500).send("Erro ao gerar relatório de notícias mais comentadas.");
+    }
+});
+
+app.get('/admin/categorias-seguidas-por-usuario', checkAdmin, async (req, res) => {
+    //console.log('app.js: Acessando rota /admin/categorias-seguidas-por-usuario.');
+    try {
+        const [categoriasSeguidasPorUsuario] = await db.promise().query('SELECT * FROM view_usuarios_categorias_seguidas ORDER BY nome_usuario, data_seguida DESC');
+        
+        const numNotifications = await getUnreadNotificationsCount(req.session.usuario.id); // Obter notificações para o admin
+
+        res.render('relatorio_categorias_seguidas', {
+            categoriasSeguidas: categoriasSeguidasPorUsuario,
+            usuario: req.session.usuario,
+            currentPath: req.path, // Adicionado currentPath
+            numNotifications: numNotifications
+        });
+    } catch (err) {
+        console.error('Erro ao carregar categorias seguidas por usuário:', err);
+        res.status(500).send('Erro ao carregar relatório.');
+    }
+});
+
+
+// **PRIORIDADE 2: Rotas de Autenticação/Cadastro:** Usando o router de login
+app.use('/', loginRoutes); 
+//console.log('app.js: loginRoutes configurado.'); // LOG: Confirma loginRoutes
+
+// **PRIORIDADE 3: Rotas Principais da Aplicação (Usuários Comuns):** Usando o router mainRoutes
+app.use('/', mainRoutes); 
+//console.log('app.js: mainRoutes configurado.'); // LOG: Confirma mainRoutes
+
+
+// **PRIORIDADE 4: Outras Rotas Administrativas (gerais, que não conflitam com :id em mainRoutes)**
+// As rotas de admin precisam do middleware checkAdmin
+app.get('/dashboard', checkAdmin, async (req, res) => {
+    //console.log('app.js: Acessando rota /dashboard.'); // LOG
+    try {
+        // Consulta para a View de Notícias com Engajamento
+        const [noticiasEngajamentoResults] = await db.promise().query('SELECT * FROM view_noticias_engajamento ORDER BY total_curtidas DESC, total_comentarios DESC LIMIT 10'); // Exemplo: top 10
+
+        const [totalUsuariosResult] = await db.promise().query("SELECT COUNT(*) AS totalUsuarios FROM usuarios");
+        const totalUsuarios = totalUsuariosResult[0].totalUsuarios;
+
+        const [totalNoticiasPublicadasResult] = await db.promise().query("SELECT COUNT(*) AS totalNoticiasPublicadas FROM noticias");
+        const totalNoticiasPublicadas = totalNoticiasPublicadasResult[0].totalNoticiasPublicadas;
+
+        const [totalComentariosDenunciadosResult] = await db.promise().query("SELECT COUNT(*) AS totalComentariosDenunciados FROM comentarios WHERE denunciado = TRUE");
+        const totalComentariosDenunciados = totalComentariosDenunciadosResult[0].totalComentariosDenunciados;
+
+        const [todasAsNoticias] = await db.promise().query("SELECT id, titulo, categoria, denunciado, motivoDenuncia FROM noticias ORDER BY data_publicacao DESC");
+
+        const [totalCategoriasResult] = await db.promise().query("SELECT COUNT(*) AS totalCategorias FROM categorias");
+        const totalCategorias = totalCategoriasResult[0].totalCategorias;
+
+        const hoje = new Date().toISOString().slice(0, 10);
+        const [acessosHojeResult] = await db.promise().query('SELECT total_acessos FROM acessos WHERE data_acesso = ?', [hoje]);
+        const acessosHoje = acessosHojeResult.length > 0 ? acessosHojeResult[0].total_acessos : 0;
+
+        const [noticiasPorCategoriaResults] = await db.promise().query(
+            'SELECT categoria, COUNT(*) AS total FROM noticias GROUP BY categoria ORDER BY total DESC'
+        );
+        const noticiasPorCategoriaData = {
+            labels: noticiasPorCategoriaResults.map(row => row.categoria),
+            data: noticiasPorCategoriaResults.map(row => row.total)
+        };
+
+        const [usuariosPorCategoriaResults] = await db.promise().query(
+            `SELECT c.nome AS categoria_nome, COUNT(cs.usuario_id) AS total_seguidores
+             FROM categorias_seguidas cs
+             JOIN categorias c ON cs.categoria_id = c.id
+             GROUP BY c.nome
+             ORDER BY total_seguidores DESC`
+        );
+        const usuariosPorCategoriaData = {
+            labels: usuariosPorCategoriaResults.map(row => row.categoria_nome),
+            data: usuariosPorCategoriaResults.map(row => row.total_seguidores)
+        };
+
+        res.render('dashboard', {
+            nome: req.session.usuario.nome,
+            totalUsuarios: totalUsuarios,
+            totalNoticiasPublicadas: totalNoticiasPublicadas,
+            totalComentariosDenunciados: totalComentariosDenunciados,
+            noticiasDenunciadas: todasAsNoticias,
+            totalCategorias: totalCategorias,
+            numNotifications: totalComentariosDenunciados + todasAsNoticias.filter(n => n.denunciado).length,
+            acessosHoje: acessosHoje,
+            noticiasPorCategoriaData: noticiasPorCategoriaData,
+            usuariosPorCategoriaData: usuariosPorCategoriaData,
+            noticiasEngajamento: noticiasEngajamentoResults,
+            currentPath: req.path // Adicionado currentPath
+        });
+    } catch (err) {
+        console.error("Erro ao carregar dados do dashboard do DB:", err);
+        res.status(500).send("Erro ao carregar dados do dashboard.");
+    }
+});
+
+app.get('/noticias', checkAdmin, async (req, res) => { 
+    //console.log('app.js: Acessando rota /noticias (admin) - Notícias Denunciadas.'); 
+    try {
+        const [noticiasDenunciadasAdmin] = await db.promise().query(
+            "SELECT id, titulo, categoria, denunciado, motivoDenuncia, detalhesDenuncia FROM noticias WHERE denunciado = TRUE ORDER BY data_publicacao DESC" // <--- Campo 'detalhesDenuncia' adicionado aqui
+        );
+        
+        const numNotifications = await getUnreadNotificationsCount(req.session.usuario.id); // Obter notificações para o admin
+
+        res.render('noticias-admin', {
+            todasNoticias: noticiasDenunciadasAdmin,
+            nome: req.session.usuario.nome,
+            currentPath: req.path, // Adicionado currentPath
+            numNotifications: numNotifications
+        });
+    } catch (err) {
+        console.error('Erro ao buscar notícias do DB para admin:', err);
+        res.status(500).send('Erro ao carregar notícias para gerenciamento.');
+    }
+});
+
+app.post('/remover-comentario/:id', checkAdmin, async (req, res) => {
+    //console.log('app.js: Acessando rota POST /remover-comentario/:id.'); // LOG
     const comentarioId = parseInt(req.params.id);
-    todosComentarios = todosComentarios.filter(c => c.id !== comentarioId);
-    res.redirect('/comentarios'); 
-});
+    try {
+        // 1. Obter detalhes do comentário antes de remover para notificação
+        const [comentarioRows] = await db.promise().query('SELECT usuario_id, texto, noticia_id FROM comentarios WHERE id = ?', [comentarioId]);
+        const comentario = comentarioRows[0];
 
-app.get('/usuarios', (req, res) => {
-    if (!req.session.usuario || req.session.usuario.email !== 'admin@newsstream.com') {
-        return res.status(403).send("Acesso não autorizado.");
-    }
+        await db.promise().execute('DELETE FROM comentarios WHERE id = ?', [comentarioId]);
+        //console.log(`Comentário ID ${comentarioId} removido do DB.`);
 
-    db.query("SELECT id, nome, email FROM usuarios", [], (err, results) => { 
-        if (err) {
-            console.error("Erro ao buscar usuários:", err);
-            return res.status(500).send("Erro ao carregar usuários.");
+        // 2. Inserir notificação para o usuário que fez o comentário
+        if (comentario && comentario.usuario_id) {
+            const mensagemNotificacao = `Seu comentário "${comentario.texto.substring(0, 50)}..." foi removido por um administrador.`;
+            await db.promise().execute(
+                'INSERT INTO notificacoes (usuario_id, tipo_notificacao, mensagem, link) VALUES (?, ?, ?, ?)',
+                [comentario.usuario_id, 'comentario_removido', mensagemNotificacao, `/noticias/${comentario.noticia_id}`]
+            );
         }
-        res.render('usuarios', { usuariosCadastrados: results }); 
-    });
+
+        res.redirect('/comentarios'); 
+    } catch (err) {
+        console.error('Erro ao remover comentário do DB:', err);
+        res.status(500).send('Erro ao remover o comentário.');
+    }
 });
 
-app.post('/remover-usuario/:id', (req, res) => {
+app.post('/retirar-denuncia-comentario/:id', checkAdmin, async (req, res) => {
+    //console.log('app.js: Acessando rota POST /retirar-denuncia-comentario/:id.');
+    const comentarioId = parseInt(req.params.id);
+    try {
+        // 1. Obter detalhes do comentário antes de retirar a denúncia para notificação
+        const [comentarioRowsBeforeUpdate] = await db.promise().query('SELECT usuario_id, texto, noticia_id FROM comentarios WHERE id = ?', [comentarioId]);
+        const comentarioBeforeUpdate = comentarioRowsBeforeUpdate[0];
+
+        const [result] = await db.promise().execute(
+            'UPDATE comentarios SET denunciado = FALSE, motivoDenuncia = NULL, detalhesDenuncia = NULL WHERE id = ?',
+            [comentarioId]
+        );
+
+        if (result.affectedRows === 0) {
+            //console.warn(`Tentativa de retirar denúncia de comentário não encontrado ou não denunciado: ID ${comentarioId}`);
+        } else {
+            //console.log(`Denúncia do Comentário ID ${comentarioId} retirada do DB.`);
+            // 2. Inserir notificação para o usuário que fez o comentário (se ele existir e não for o admin denunciando o próprio)
+            if (comentarioBeforeUpdate && comentarioBeforeUpdate.usuario_id && comentarioBeforeUpdate.usuario_id !== req.session.usuario.id) {
+                const mensagemNotificacao = `A denúncia do seu comentário "${comentarioBeforeUpdate.texto.substring(0, 50)}..." foi retirada.`;
+                await db.promise().execute(
+                    'INSERT INTO notificacoes (usuario_id, tipo_notificacao, mensagem, link) VALUES (?, ?, ?, ?)',
+                    [comentarioBeforeUpdate.usuario_id, 'denuncia_comentario_retirada', mensagemNotificacao, `/noticias/${comentarioBeforeUpdate.noticia_id}`]
+                );
+            }
+        }
+        res.redirect('/comentarios'); 
+    } catch (err) {
+        console.error('Erro ao retirar denúncia do comentário no DB:', err);
+        res.status(500).send('Erro ao retirar a denúncia do comentário.');
+    }
+});
+
+app.get('/comentarios', checkAdmin, async (req, res) => {
+    //console.log('app.js: Acessando rota /comentarios (admin).'); // LOG
+    try {
+        const [comentariosDenunciados] = await db.promise().query('SELECT c.*, n.titulo AS noticiaTitulo FROM comentarios c JOIN noticias n ON c.noticia_id = n.id WHERE c.denunciado = TRUE ORDER BY c.data_comentario DESC');
+        comentariosDenunciados.forEach(c => {
+            c.data = new Date(c.data_comentario).toLocaleDateString('pt-BR');
+        });
+
+        const numNotifications = await getUnreadNotificationsCount(req.session.usuario.id); // Obter notificações para o admin
+
+        res.render('comentarios', { 
+            comentariosDenunciados,
+            currentPath: req.path, // Adicionado currentPath
+            numNotifications: numNotifications
+        });
+    } catch (err) {
+        console.error('Erro ao buscar comentários denunciados do DB:', err);
+        res.status(500).send('Erro ao carregar comentários denunciados.');
+    }
+});
+
+app.get('/usuarios', checkAdmin, async (req, res) => {
+    // console.log('app.js: Acessando rota /usuarios (admin).'); // LOG
+    try {
+        const [usuariosCadastrados] = await db.promise().query("SELECT id, nome, email, isAdmin FROM usuarios ORDER BY id ASC"); 
+        
+        const numNotifications = await getUnreadNotificationsCount(req.session.usuario.id); // Obter notificações para o admin
+
+        res.render('usuarios', { 
+            usuariosCadastrados,
+            currentPath: req.path // Adicionado currentPath
+        });
+    } catch (err) {
+        console.error("Erro ao buscar usuários do DB:", err);
+        res.status(500).send("Erro ao carregar usuários.");
+    }
+});
+
+// Rota para atualizar informações de um usuário (incluindo isAdmin)
+app.post('/atualizar-usuario/:id', checkAdmin, async (req, res) => {
+    //console.log('app.js: Acessando rota POST /atualizar-usuario/:id.');
+    const userId = parseInt(req.params.id);
+    const { nome, email, senha, isAdmin } = req.body; // Recebe isAdmin do frontend
+
+    try {
+        let query = 'UPDATE usuarios SET nome = ?, email = ?, isAdmin = ?'; // Inclui isAdmin na query
+        const params = [nome, email, isAdmin]; // Adiciona isAdmin aos parâmetros
+
+        // Se uma nova senha foi fornecida, inclua-a na atualização
+        if (senha && senha.trim() !== '') {
+            query += ', senha = ?';
+            params.push(senha);
+        }
+
+        query += ' WHERE id = ?';
+        params.push(userId);
+
+        const [result] = await db.promise().execute(query, params);
+
+        if (result.affectedRows === 0) {
+            return res.json({ success: false, message: 'Usuário não encontrado ou nenhum dado alterado.' });
+        }
+
+        res.json({ success: true, message: 'Usuário atualizado com sucesso!' });
+
+    } catch (err) {
+        console.error('Erro ao atualizar usuário no DB:', err);
+        // Verifica se o erro é por email duplicado
+        if (err.code === 'ER_DUP_ENTRY') {
+            return res.status(400).json({ success: false, message: 'Erro: Este e-mail já está em uso por outro usuário.' });
+        }
+        res.status(500).json({ success: false, message: 'Erro interno do servidor ao atualizar usuário.' });
+    }
+});
+
+
+app.post('/remover-usuario/:id', checkAdmin, async (req, res) => {
+    //console.log('app.js: Acessando rota POST /remover-usuario/:id.'); // LOG
     const usuarioId = parseInt(req.params.id);
-
-    db.query("DELETE FROM usuarios WHERE id = ?", [usuarioId], function(err, result) { 
-        if (err) {
-            console.error("Erro ao remover usuário:", err.message);
-            return res.status(500).send(`Erro ao remover usuário: ${err.message}`);
+    try {
+        if (req.session.usuario.id === usuarioId && req.session.usuario.isAdmin === 1) {
+            console.warn(`Tentativa de remover o próprio usuário admin ID ${usuarioId}. Operação não permitida.`);
+            return res.status(403).send("Você não pode remover sua própria conta de administrador.");
         }
-        console.log(`Usuário ID ${usuarioId} removido com sucesso. Linhas afetadas: ${result.affectedRows}`); 
+
+        const [result] = await db.promise().execute("DELETE FROM usuarios WHERE id = ?", [usuarioId]); 
+        //console.log(`Usuário ID ${usuarioId} removido com sucesso. Linhas afetadas: ${result.affectedRows}`); 
         res.redirect('/usuarios'); 
-    });
+    } catch (err) {
+        console.error("Erro ao remover usuário do DB:", err.message);
+        res.status(500).send(`Erro ao remover usuário: ${err.message}`);
+    }
 });
 
-app.get('/noticias', (req, res) => {
-    if (!req.session.usuario || req.session.usuario.email !== 'admin@newsstream.com') {
-        return res.status(403).send("Acesso não autorizado.");
-    }
-
-    const noticiasDenunciadas = todasNoticias.filter(noticia => noticia.denunciado === true);
-
-    res.render('noticias-admin', {
-        todasNoticias: noticiasDenunciadas, 
-        nome: req.session.usuario.nome
-    });
-});
-
-app.post('/remover-noticia/:id', (req, res) => {
-    const noticiaId = parseInt(req.params.id);
-
-    const indexParaRemover = todasNoticias.findIndex(n => n.id === noticiaId);
-    if (indexParaRemover !== -1) {
-        todasNoticias.splice(indexParaRemover, 1);
-        console.log(`Notícia ID ${noticiaId} removida do array em memória.`);
-    } else {
-        console.warn(`Notícia ID ${noticiaId} não encontrada no array em memória.`);
-    }
-
-    res.redirect('/dashboard'); 
-});
-
-app.get('/categorias', (req, res) => {
-    if (!req.session.usuario || req.session.usuario.email !== 'admin@newsstream.com') {
-        return res.status(403).send("Acesso não autorizado.");
-    }
-
+app.get('/categorias', checkAdmin, async (req, res) => {
+    //console.log('app.js: Acessando rota /categorias (admin).'); // LOG
     const mensagem = req.session.mensagem;
     const sucesso = req.session.sucesso;
 
-    if (req.session.mensagem) {
-        delete req.session.mensagem;
-    }
-    if (req.session.sucesso !== undefined) {
-        delete req.session.sucesso;
-    }
+    if (req.session.mensagem) { delete req.session.mensagem; }
+    if (req.session.sucesso !== undefined) { delete req.session.sucesso; }
 
-    res.render('categorias', { categorias, mensagem, sucesso });
+    try {
+        const [categoriasRows] = await db.promise().query('SELECT id, nome FROM categorias ORDER BY nome ASC');
+        const categoriasDisponiveis = categoriasRows; 
+        
+        const numNotifications = await getUnreadNotificationsCount(req.session.usuario.id); // Obter notificações para o admin
+
+        res.render('categorias', { 
+            categorias: categoriasDisponiveis, 
+            mensagem, 
+            sucesso,
+            currentPath: req.path // Adicionado currentPath
+        });
+    } catch (err) {
+        console.error('Erro ao carregar categorias do DB:', err);
+        res.status(500).send('Erro ao carregar categorias.');
+    }
 });
 
-app.post('/adicionar-categoria', (req, res) => {
-    if (!req.session.usuario || req.session.usuario.email !== 'admin@newsstream.com') {
-        return res.status(403).send("Acesso não autorizado.");
-    }
-
+app.post('/adicionar-categoria', checkAdmin, async (req, res) => {
+    //console.log('app.js: Acessando rota POST /adicionar-categoria.'); // LOG
     const { novaCategoriaNome } = req.body;
 
     if (!novaCategoriaNome || novaCategoriaNome.trim() === '') {
@@ -364,27 +619,26 @@ app.post('/adicionar-categoria', (req, res) => {
         return res.redirect('/categorias');
     }
 
-    const categoriaExistente = categorias.some(cat => cat.toLowerCase() === novaCategoriaNome.trim().toLowerCase());
-
-    if (categoriaExistente) {
-        req.session.mensagem = `A categoria "${novaCategoriaNome}" já existe.`;
+    try {
+        const [result] = await db.promise().execute('INSERT IGNORE INTO categorias (nome) VALUES (?)', [novaCategoriaNome.trim()]);
+        if (result.affectedRows === 0) {
+            req.session.mensagem = `A categoria "${novaCategoriaNome}" já existe.`;
+            req.session.sucesso = false;
+        } else {
+            req.session.mensagem = `Categoria "${novaCategoriaNome}" adicionada com sucesso!`;
+            req.session.sucesso = true;
+        }
+        res.redirect('/categorias');
+    } catch (err) {
+        console.error('Erro ao adicionar categoria no DB:', err);
+        req.session.mensagem = 'Erro ao adicionar categoria.';
         req.session.sucesso = false;
-        return res.redirect('/categorias');
+        res.redirect('/categorias');
     }
-
-    categorias.push(novaCategoriaNome.trim());
-    categorias.sort((a, b) => a.localeCompare(b));
-
-    req.session.mensagem = `Categoria "${novaCategoriaNome}" adicionada com sucesso!`;
-    req.session.sucesso = true;
-    res.redirect('/categorias');
 });
 
-app.post('/remover-categoria', (req, res) => {
-    if (!req.session.usuario || req.session.usuario.email !== 'admin@newsstream.com') {
-        return res.status(403).send("Acesso não autorizado.");
-    }
-
+app.post('/remover-categoria', checkAdmin, async (req, res) => {
+    //console.log('app.js: Acessando rota POST /remover-categoria.'); // LOG
     const { categoriaParaRemover } = req.body;
 
     if (!categoriaParaRemover || categoriaParaRemover.trim() === '') {
@@ -393,172 +647,123 @@ app.post('/remover-categoria', (req, res) => {
         return res.redirect('/categorias');
     }
 
-    const index = categorias.indexOf(categoriaParaRemover.trim());
-
-    if (index !== -1) {
-        categorias.splice(index, 1);
-        req.session.mensagem = `Categoria "${categoriaParaRemover}" removida com sucesso!`;
-        req.session.sucesso = true;
-        console.log(`Categoria '${categoriaParaRemover}' removida.`);
-    } else {
-        req.session.mensagem = `Categoria "${categoriaParaRemover}" não encontrada.`;
+    try {
+        const [categoriaRows] = await db.promise().query('SELECT id FROM categorias WHERE nome = ?', [categoriaParaRemover.trim()]);
+        if (categoriaRows.length === 0) {
+            req.session.mensagem = `Categoria "${categoriaParaRemover}" não encontrada.`;
+            req.session.sucesso = false;
+            //console.warn(`Tentativa de remover categoria não existente: '${categoriaParaRemover}'`);
+        } else {
+            req.session.mensagem = `Categoria "${categoriaParaRemover}" removida com sucesso! Notícias associadas foram movidas para 'Outros'.`;
+            req.session.sucesso = true;
+            //console.log(`Categoria '${categoriaParaRemover}' removida do DB.`);
+        }
+        res.redirect('/categorias');
+    } catch (err) {
+        console.error('Erro ao remover categoria do DB:', err);
+        req.session.mensagem = 'Erro ao remover categoria.';
         req.session.sucesso = false;
-        console.warn(`Tentativa de remover categoria não existente: '${categoriaParaRemover}'`);
+        res.redirect('/categorias');
     }
-
-    res.redirect('/categorias');
 });
 
-app.post('/editar-categoria', (req, res) => {
-    if (!req.session.usuario || req.session.usuario.email !== 'admin@newsstream.com') {
-        return res.status(403).send("Acesso não autorizado.");
-    }
+app.post('/editar-categoria', checkAdmin, async (req, res) => {
+    //console.log('app.js: Acessando rota POST /editar-categoria.'); // LOG
     const { categoriaAtual, novaCategoria } = req.body;
 
-    if (!novaCategoria.trim()) {
-        req.session.mensagem = "O nome da categoria não pode estar vazio.";
+    if (!novaCategoria || novaCategoria.trim() === '') {
+        req.session.mensagem = "O novo nome da categoria não pode estar vazio.";
         req.session.sucesso = false;
         return res.redirect('/categorias');
     }
 
-    const index = categorias.indexOf(categoriaAtual);
-    if (index !== -1) {
-        categorias[index] = novaCategoria; 
-        req.session.mensagem = `Categoria "${categoriaAtual}" alterada para "${novaCategoria}" com sucesso!`;
-        req.session.sucesso = true;
-        console.log(`Categoria '${categoriaAtual}' alterada para '${novaCategoria}'`);
-    } else {
-        req.session.mensagem = `Categoria "${categoriaAtual}" não encontrada para edição.`;
-        req.session.sucesso = false;
-        console.warn(`Tentativa de editar categoria não existente: '${categoriaAtual}'`);
-    }
-
-    res.redirect('/categorias'); 
-});
-
-app.post('/comentar/:id', (req, res) => {
-    const noticiaId = parseInt(req.params.id);
-    const textoComentario = req.body.comentario;
-    const autorComentario = req.session.usuario ? req.session.usuario.nome : "Anônimo";
-
-    const newCommentId = todosComentarios.length > 0
-        ? Math.max(...todosComentarios.map(c => c.id)) + 1
-        : 1;
-
-    const novoComentario = {
-        id: newCommentId,
-        autor: autorComentario,
-        texto: textoComentario,
-        data: new Date().toLocaleDateString('pt-BR'), 
-        noticiaId: noticiaId,
-        denunciado: false,
-        motivoDenuncia: null,
-        detalhesDenuncia: null
-    };
-
-    todosComentarios.push(novoComentario);
-
-    res.redirect(`/noticias/${noticiaId}`);
-});
-
-app.get('/denunciar-comentario/:noticiaId/:comentarioId', (req, res) => {
-    const noticiaId = parseInt(req.params.noticiaId);
-    const comentarioId = parseInt(req.params.comentarioId);
-
-    let comentarioEncontrado = todosComentarios.find(c =>
-        c.noticiaId === noticiaId && c.id === comentarioId
-    );
-
-    if (!comentarioEncontrado) {
-        return res.status(404).send("Comentário não encontrado para denúncia.");
-    }
-
-    res.render('denunciar', {
-        comentarioDenunciado: comentarioEncontrado.texto,
-        noticiaId: noticiaId,
-        comentarioId: comentarioId
-    });
-});
-
-app.post('/denunciar-comentario/:noticiaId/:comentarioId', (req, res) => {
-    const { noticiaId, comentarioId } = req.params;
-    const { motivo, detalhes } = req.body; 
-
-    let comentarioDenunciado = todosComentarios.find(c =>
-        c.noticiaId === parseInt(noticiaId) && c.id === parseInt(comentarioId)
-    );
-
-    if (comentarioDenunciado) {
-        comentarioDenunciado.denunciado = true;
-        comentarioDenunciado.motivoDenuncia = motivo; 
-        comentarioDenunciado.detalhesDenuncia = detalhes; 
-        console.log(`Comentário ID ${comentarioId} da notícia ID ${noticiaId} denunciado. Motivo: ${motivo}, Detalhes: ${detalhes || 'Nenhum'}`);
-    } else {
-        console.warn(`Tentativa de denunciar comentário não encontrado: Notícia ID ${noticiaId}, Comentário ID ${comentarioId}`);
-    }
-
-    res.render('denuncia-confirmada'); 
-});
-
-app.get('/denunciar-noticia/:id', (req, res) => {
-    const noticiaId = parseInt(req.params.id);
-    const noticia = todasNoticias.find(n => n.id === noticiaId); 
-
-    if (!noticia) return res.status(404).send("Notícia não encontrada para denúncia.");
-    res.render('denunciar-noticia', { noticia });
-});
-
-app.post('/denunciar-noticia/:id', (req, res) => {
-    const noticiaId = parseInt(req.params.id);
-    const { motivo, detalhes } = req.body; 
-
-    let noticiaDenunciada = todasNoticias.find(n => n.id === noticiaId);
-
-    if (noticiaDenunciada) {
-        noticiaDenunciada.denunciado = true; 
-        noticiaDenunciada.motivoDenuncia = motivo;
-        noticiaDenunciada.detalhesDenuncia = detalhes;
-        console.log(`Notícia ID ${noticiaId} denunciada. Motivo: ${motivo || 'N/A'}, Detalhes: ${detalhes || 'Nenhum'}`);
-    } else {
-        console.warn(`Tentativa de denunciar notícia não encontrada: ID ${noticiaId}`);
-    }
-
-    res.render('denuncia-confirmada'); 
-});
-
-app.get('/dashboard', (req, res) => {
-    if (!req.session.usuario || req.session.usuario.email !== 'admin@newsstream.com') {
-        return res.status(403).send("Acesso não autorizado.");
-    }
-
-    const noticiasPorCategoria = categorias.map(c => ({
-        categoria: c,
-        total: todasNoticias.filter(n => n.categoria === c).length
-    }));
-
-    db.query("SELECT COUNT(*) AS totalUsuarios FROM usuarios", (err, results) => {
-        if (err) {
-            console.error("Erro ao contar usuários do MySQL:", err.message);
-            return res.status(500).send("Erro ao carregar dados do dashboard.");
+    try {
+        const [existingCategory] = await db.promise().query('SELECT id FROM categorias WHERE nome = ? AND nome != ?', [novaCategoria, categoriaAtual]);
+        if (existingCategory.length > 0) {
+            req.session.mensagem = `A categoria "${novaCategoria}" já existe. Por favor, escolha outro nome.`;
+            req.session.sucesso = false;
+            return res.redirect('/categorias');
         }
-        const totalUsuarios = results[0].totalUsuarios;
 
-        res.render('dashboard', {
-            totalUsuarios: totalUsuarios,
-            totalNoticias: todasNoticias.length,
-            categorias: noticiasPorCategoria,
-            todasNoticias: todasNoticias,
-            totalComentarios: todosComentarios.filter(c => c.denunciado).length,
-            numNotifications: todosComentarios.filter(c => c.denunciado).length
-        });
-    });
+        const [updateCategoryResult] = await db.promise().execute('UPDATE categorias SET nome = ? WHERE nome = ?', [novaCategoria, categoriaAtual]);
+
+        if (updateCategoryResult.affectedRows === 0) {
+            req.session.mensagem = `Categoria "${categoriaAtual}" não encontrada para edição.`;
+            req.session.sucesso = false;
+            //console.warn(`Tentativa de editar categoria não existente: '${categoriaAtual}'`);
+        } else {
+            await db.promise().execute('UPDATE noticias SET categoria = ? WHERE categoria = ?', [novaCategoria, categoriaAtual]);
+            
+            req.session.mensagem = `Categoria "${categoriaAtual}" alterada para "${novaCategoria}" com sucesso!`;
+            req.session.sucesso = true;
+            //console.log(`Categoria '${categoriaAtual}' alterada para '${novaCategoria}' no DB e notícias associadas atualizadas.`);
+        }
+        res.redirect('/categorias'); 
+    } catch (err) {
+        console.error('Erro ao editar categoria no DB:', err);
+        req.session.mensagem = 'Erro ao editar categoria.';
+        req.session.sucesso = false;
+        res.redirect('/categorias');
+    }
 });
 
-app.use(require('./routes/login'));
-
-app.get('/logout', (req, res) => {
-    req.session.destroy(() => res.redirect('/login')); 
+// Nova rota para buscar notificações de um usuário
+app.get('/api/notificacoes', checkAuth, async (req, res) => {
+    //console.log('app.js: Acessando rota GET /api/notificacoes.');
+    const usuarioId = req.session.usuario.id;
+    try {
+        const [notificacoes] = await db.promise().query(
+            'SELECT id, mensagem, link, data_criacao, lida FROM notificacoes WHERE usuario_id = ? ORDER BY data_criacao DESC LIMIT 10',
+            [usuarioId]
+        );
+        res.json({ success: true, notificacoes: notificacoes });
+    } catch (err) {
+        console.error('Erro ao buscar notificações:', err);
+        res.status(500).json({ success: false, message: 'Erro ao buscar notificações.' });
+    }
 });
 
+// Nova rota para marcar notificações como lidas
+app.post('/api/notificacoes/marcar-lida/:id', checkAuth, async (req, res) => {
+    //console.log('app.js: Acessando rota POST /api/notificacoes/marcar-lida/:id.');
+    const notificacaoId = parseInt(req.params.id);
+    const usuarioId = req.session.usuario.id; // Garante que o usuário só possa marcar suas próprias notificações
+
+    try {
+        const [result] = await db.promise().execute(
+            'UPDATE notificacoes SET lida = TRUE WHERE id = ? AND usuario_id = ?',
+            [notificacaoId, usuarioId]
+        );
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ success: false, message: 'Notificação não encontrada ou não pertence ao usuário.' });
+        }
+        res.json({ success: true, message: 'Notificação marcada como lida.' });
+    } catch (err) {
+        console.error('Erro ao marcar notificação como lida:', err);
+        res.status(500).json({ success: false, message: 'Erro interno ao marcar notificação como lida.' });
+    }
+});
+
+// NOVO: Rota para limpar todas as notificações de um usuário
+app.post('/api/notificacoes/limpar-todas', checkAuth, async (req, res) => {
+    //console.log('app.js: Acessando rota POST /api/notificacoes/limpar-todas.');
+    const usuarioId = req.session.usuario.id;
+
+    try {
+        // Deleta todas as notificações do usuário
+        const [result] = await db.promise().execute(
+            'DELETE FROM notificacoes WHERE usuario_id = ?',
+            [usuarioId]
+        );
+
+        res.json({ success: true, message: `Foram limpas ${result.affectedRows} notificações.` });
+    } catch (err) {
+        console.error('Erro ao limpar todas as notificações:', err);
+        res.status(500).json({ success: false, message: 'Erro interno ao limpar notificações.' });
+    }
+});
+
+
+// 7. Início do Servidor
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Servidor rodando em http://localhost:${PORT}`));

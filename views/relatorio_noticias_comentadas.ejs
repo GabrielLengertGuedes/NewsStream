@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Relatório de Notícias Mais Comentadas</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="sidebar sidebar-dashboard">
+        <h2>NewsStream</h2>
+        <a href="/dashboard" class="<%= currentPath.startsWith('/dashboard') ? 'active' : '' %>">Dashboard</a>
+        <a href="/noticias" class="<%= currentPath.startsWith('/noticias') ? 'active' : '' %>">Notícias</a>
+        <a href="/categorias" class="<%= currentPath.startsWith('/categorias') ? 'active' : '' %>">Categorias</a>
+        <a href="/comentarios" class="<%= currentPath.startsWith('/comentarios') ? 'active' : '' %>">Comentários</a>
+        <a href="/usuarios" class="<%= currentPath.startsWith('/usuarios') ? 'active' : '' %>">Usuários</a>
+        <a href="/admin/noticias-mais-curtidas" class="<%= currentPath.startsWith('/admin/noticias-mais-curtidas') ? 'active' : '' %>">Notícias Mais Curtidas</a>
+        <a href="/admin/usuarios-engajados" class="<%= currentPath.startsWith('/admin/usuarios-engajados') ? 'active' : '' %>">Usuários Engajados</a>
+        <a href="/admin/noticias-mais-comentadas" class="<%= currentPath.startsWith('/admin/noticias-mais-comentadas') ? 'active' : '' %>">Notícias Mais Comentadas</a>
+        <a href="/admin/categorias-seguidas-por-usuario" class="<%= currentPath.startsWith('/admin/categorias-seguidas-por-usuario') ? 'active' : '' %>">Categorias Seguidas por Usuário</a>
+        <a href="/main" class="<%= currentPath.startsWith('/main') ? 'active' : '' %>">Página inicial</a>
+        <a href="/logout">Sair</a>
+    </div>
+    <div class="dashboard-main">
+        <h1>Notícias com Mais Comentários (não denunciados)</h1>
+        <% if (relatorio && relatorio.length > 0) { %>
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Título</th>
+                        <th>Categoria</th>
+                        <th>Autor</th>
+                        <th>Total de Comentários</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% relatorio.forEach(item => { %>
+                        <tr>
+                            <td><%= item.titulo_noticia %></td>
+                            <td><%= item.categoria_noticia %></td>
+                            <td><%= item.autor_noticia %></td>
+                            <td><%= item.total_comentarios %></td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        <% } else { %>
+            <p>Nenhuma notícia com comentários encontrada.</p>
+        <% } %>
+    </div>
+</body>
+</html>

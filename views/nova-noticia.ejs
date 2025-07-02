@@ -1,60 +1,43 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Criar Nova Notícia - NewsStream</title>
-  <link rel="stylesheet" href="/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar Nova Notícia - NewsStream</title>
+    <link rel="stylesheet" href="/style.css">
 </head>
 <body>
 
-  <div class="container-form">
-    <div class="dashboard-header">
-      <h1>Criar Nova Notícia</h1>
+    <div class="container-form">
+        <div class="dashboard-header">
+            <h1>Criar Nova Notícia</h1>
+        </div>
+
+        <div class="news-form">
+            <form action="/salvar-noticia" method="POST">
+                <label for="titulo">Título:</label>
+                <input type="text" id="titulo" name="titulo" required>
+
+                <label for="autor">Autor:</label>
+                <input type="text" id="autor" name="autor" required>
+
+                <label for="categoria">Categoria:</label>
+                <select id="categoria" name="categoria">
+                    <% categorias.forEach(cat => { %>
+                        <option value="<%= cat %>"><%= cat %></option>
+                    <% }); %>
+                </select>
+
+                <label for="conteudo">Conteúdo:</label>
+                <textarea id="conteudo" name="conteudo" rows="5" required></textarea>
+
+                <label for="imagem">URL da Imagem:</label>
+                <input type="text" id="imagem" name="imagem" placeholder="Ex: /images/Politicaa.jpg">
+
+                <button type="submit" class="save-button">Salvar Notícia</button>
+            </form>
+        </div>
     </div>
-
-    <div class="news-form">
-      <form action="/salvar-noticia" method="POST">
-        <label for="titulo">Título:</label>
-        <input type="text" id="titulo" name="titulo" required>
-
-        <label for="autor">Autor:</label>
-        <input type="text" id="autor" name="autor" required>
-
-        <label for="categoria">Categoria:</label>
-        <select id="categoria" name="categoria">
-          <option value="Política">Política</option>
-          <option value="Tecnologia">Tecnologia</option>
-          <option value="Esportes">Esportes</option>
-          <option value="Saúde">Saúde</option>
-          <option value="Negócios">Negócios</option>
-          <option value="Gastronomia">Gastronomia</option>
-          <option value="Meio Ambiente">Meio Ambiente</option>
-          <option value="Entretenimento">Entretenimento</option>
-          <option value="Justiça">Justiça</option>
-          <option value="Educação">Educação</option>
-          <option value="Ciência">Ciência</option>
-          <option value="Cultura">Cultura</option>
-          <option value="Segurança Pública">Segurança Pública</option>
-          <option value="Turismo">Turismo</option>
-          <option value="Moda">Moda</option>
-          <option value="Automóveis">Automóveis</option>
-          <option value="Jogos">Jogos</option>
-          <option value="Música">Música</option>
-          <option value="Espaço e Astronomia">Espaço e Astronomia</option>
-          <option value="História">História</option>
-        </select>
-
-        <label for="conteudo">Conteúdo:</label>
-        <textarea id="conteudo" name="conteudo" rows="5" required></textarea>
-
-        <label for="imagem">Imagem:</label>
-        <input type="file" id="imagem" name="imagem">
-
-        <button type="submit" class="save-button">Salvar Notícia</button>
-      </form>
-    </div>
-  </div>
 
 </body>
 </html>

@@ -152,12 +152,11 @@
                                     updateNotificationCount(-1); // Decrementa o contador
                                 }
                                 if (notif.link) {
-                                    window.location.href = notif.link; // Redireciona se houver link
+                                    window.location.href = notif.link;
                                 }
                             });
                             notificationsList.appendChild(li);
                         });
-                        // Atualiza o contador na navbar
                         updateNotificationCount(data.notificacoes.filter(n => !n.lida).length);
                     } else {
                         notificationsList.innerHTML = '<li class="no-notifications-message" style="text-align: center; color: #777; font-style: italic;">Nenhuma notificação nova.</li>';
@@ -169,7 +168,6 @@
                 }
             }
 
-            // Função para atualizar o contador na UI
             function updateNotificationCount(count) {
                 if (notificationCountSpan) {
                     if (count > 0) {
@@ -181,11 +179,10 @@
                 }
             }
 
-            // Exibir/Ocultar pop-up de notificações
             if (notificationButton) {
                 notificationButton.addEventListener('click', () => {
                     if (notificationsPopup.classList.contains('hidden')) {
-                        fetchAndDisplayNotifications(); // Busca e exibe ao abrir
+                        fetchAndDisplayNotifications();
                         notificationsPopup.classList.remove('hidden');
                     } else {
                         notificationsPopup.classList.add('hidden');
@@ -198,8 +195,7 @@
                     notificationsPopup.classList.add('hidden');
                 });
             }
-            
-            // NOVO: Lógica para o botão Limpar Todas as Notificações
+
             if (clearAllNotificationsButton) {
                 clearAllNotificationsButton.addEventListener('click', async () => {
                     try {
@@ -220,7 +216,6 @@
                 });
             }
         
-            // Lógica para fechar o pop-up ao clicar fora dele
             if (notificationsPopup) {
                 notificationsPopup.addEventListener('click', (event) => {
                     if (event.target === notificationsPopup) { 
@@ -228,8 +223,7 @@
                     }
                 });
             }    
-        
-            // Chamar a função para buscar notificações ao carregar a página (para o contador inicial)
+
             fetchAndDisplayNotifications();
         }); 
     </script>

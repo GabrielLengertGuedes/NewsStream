@@ -80,7 +80,6 @@
             }
         }
 
-        /* Estilos do Pop-up (Modal) */
         .popup-overlay {
             position: fixed;
             top: 0;
@@ -119,7 +118,7 @@
             color: #555;
             font-size: 1rem;
             line-height: 1.6;
-            white-space: pre-wrap; /* Preserva quebras de linha e espaços */
+            white-space: pre-wrap;
         }
 
         .close-popup-button {
@@ -132,7 +131,7 @@
             font-size: 1rem;
             font-weight: bold;
             transition: background-color 0.2s ease;
-            align-self: center; /* Centraliza o botão no modal */
+            align-self: center;
         }
 
         .close-popup-button:hover {
@@ -175,7 +174,7 @@
                         <th>Categoria</th>
                         <th>Status Denúncia</th>
                         <th>Motivo Denúncia</th>
-                        <th>Detalhes</th> <!-- NOVA COLUNA PARA DETALHES -->
+                        <th>Detalhes</th>
                         <th>Ações</th>
                     </tr>
                 </thead>
@@ -208,7 +207,7 @@
                         <% }); %>
                     <% } else { %>
                         <tr>
-                            <td colspan="7" style="text-align: center;">Nenhuma notícia encontrada.</td> <!-- Colspan ajustado para 7 -->
+                            <td colspan="7" style="text-align: center;">Nenhuma notícia encontrada.</td>
                         </tr>
                     <% } %>
                 </tbody>
@@ -216,7 +215,6 @@
         </div>
     </div>
 
-    <!-- Pop-up (Modal) para exibir Detalhes da Denúncia -->
     <div id="details-popup-overlay" class="popup-overlay hidden">
         <div class="popup-content">
             <h3>Detalhes da Denúncia</h3>
@@ -230,24 +228,21 @@
             const detailsPopupOverlay = document.getElementById('details-popup-overlay');
             const detailsPopupText = document.getElementById('details-popup-text');
             const closeDetailsPopupButton = detailsPopupOverlay.querySelector('.close-popup-button');
-            
-            // Event listener para os botões "Ver Detalhes"
+
             document.querySelectorAll('.view-details-button').forEach(button => {
                 button.addEventListener('click', function() {
-                    const details = this.dataset.details; // Pega o texto dos detalhes do atributo data-details
-                    detailsPopupText.textContent = details; // Define o texto no pop-up
-                    detailsPopupOverlay.classList.remove('hidden'); // Mostra o pop-up
+                    const details = this.dataset.details;
+                    detailsPopupText.textContent = details;
+                    detailsPopupOverlay.classList.remove('hidden');
                 });
             });
 
-            // Event listener para fechar o pop-up
             if (closeDetailsPopupButton) {
                 closeDetailsPopupButton.addEventListener('click', function() {
-                    detailsPopupOverlay.classList.add('hidden'); // Esconde o pop-up
+                    detailsPopupOverlay.classList.add('hidden');
                 });
             }
 
-            // Event listener para fechar o pop-up ao clicar fora (no overlay)
             if (detailsPopupOverlay) {
                 detailsPopupOverlay.addEventListener('click', function(event) {
                     if (event.target === detailsPopupOverlay) {

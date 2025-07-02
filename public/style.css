@@ -1,4 +1,3 @@
-/* Estilos globais e reset */
 * {
     margin: 0;
     padding: 0;
@@ -8,11 +7,10 @@
 html, body {
     height: 100%;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #f5f6fa; /* Cor de fundo padrão para o site */
+    background: #f5f6fa;
     color: #333;
 }
- 
-/* Navbar (cabeçalho) */
+
 .navbar {
     background: black;
     color: #fff;
@@ -20,14 +18,14 @@ html, body {
     display: flex;
     justify-content: center;
     align-items: center;
-    position: fixed; /* Fixa a navbar no topo */
+    position: fixed;
     top: 0;
     left: 0;
     right: 0;
     z-index: 1000;
 }
  
-.navbar::after { /* Sombra ou efeito visual abaixo da navbar */
+.navbar::after { 
     content: "";
     display: block;
     position: absolute;
@@ -55,7 +53,7 @@ html, body {
 .auth-buttons button {
     background: transparent;
     border: none;
-    color: #c4b5fd; /* Cor dos botões de auth */
+    color: #c4b5fd;
     font-weight: bold;
     cursor: pointer;
     font-size: 1rem;
@@ -64,11 +62,10 @@ html, body {
 .auth-buttons button:hover {
     text-decoration: underline;
 }
- 
-/* Estilos para Notificações no Navbar */
+
 .notification-wrapper {
     position: relative; 
-    margin-right: 15px; /* Ajustado para melhor espaçamento com outros botões */
+    margin-right: 15px;
 }
  
 .notification-count {
@@ -84,12 +81,12 @@ html, body {
     justify-content: center;
     align-items: center;
     position: absolute; 
-    top: -8px; /* Ajustado para melhor posicionamento */
-    right: -10px; /* Ajustado para melhor posicionamento */
+    top: -8px;
+    right: -10px;
     padding: 2px; 
     transform: translate(50%, 0); 
     z-index: 1; 
-    display: none !important; /* Controlado por JS */
+    display: none !important;
 }
  
 .notifications-content {
@@ -156,36 +153,35 @@ html, body {
 .close-notifications-button:hover {
     background-color: #5a6268;
 }
- 
-/* Estilos da Sidebar (principal e dashboard) */
+
 .main-container {
     display: flex;
-    min-height: calc(100vh - 80px); /* Ajusta a altura considerando a navbar */
+    min-height: calc(100vh - 80px); 
 }
 
-.sidebar-main { /* Sidebar da página principal */
+.sidebar-main { 
     position: fixed;
     top: 0;
-    left: 0; /* Posição padrão: visível */
-    margin-top: 80px; /* Abaixo da navbar */
+    left: 0; 
+    margin-top: 80px;
     background-color: #111827;
     color: white;
-    padding: 0; /* Removido padding geral para controle interno */
-    width: 250px; /* Largura fixa da sidebar */
+    padding: 0; 
+    width: 250px;
     height: calc(100vh - 80px);
     overflow-y: auto;
     z-index: 999;
     text-align: left;
-    transition: left 0.3s ease, width 0.3s ease; /* Transição suave para ocultar/exibir */
+    transition: left 0.3s ease, width 0.3s ease;
 }
 
-.sidebar-main.oculta { /* Quando a sidebar está oculta */
-    left: -250px; /* Desliza a sidebar completamente para fora da tela */
-    width: 0; /* Colapsa sua largura para não ocupar espaço */
-    overflow: hidden; /* Garante que o conteúdo interno não seja visível */
+.sidebar-main.oculta {
+    left: -250px;
+    width: 0;
+    overflow: hidden;
 }
 
-.sidebar-dashboard { /* Sidebar do Dashboard Admin (mantenha como estava, se não for afetada pelo botão) */
+.sidebar-dashboard {
     position: fixed;
     top: 0;
     left: 0;
@@ -196,7 +192,7 @@ html, body {
     padding-top: 20px;
     display: flex;
     flex-direction: column;
-    gap: 10px; /* Garante o espaçamento entre os itens */
+    gap: 10px;
     z-index: 1000;
     text-align: left;
     padding-left: 20px;
@@ -204,15 +200,14 @@ html, body {
 
 .sidebar h2 {
     font-size: 1.3rem;
-    margin: 0; /* NOVO: Remove todas as margens padrão do h2 */
-    padding: 20px; /* NOVO: Adiciona padding uniforme ao h2 para alinhá-lo */
-    box-sizing: border-box; /* Garante que o padding não aumente a largura/altura total */
+    margin: 0;
+    padding: 20px;
+    box-sizing: border-box;
 }
 
-/* Estilos para as Categorias na Sidebar (Main Page) */
 .category-list ul {
     list-style: none;
-    padding: 10px 30px 0 30px; /* Ajustado: Reduzido o padding-top de 20px para 10px ou 0px se quiser mais junto */
+    padding: 10px 30px 0 30px;
     margin: 0; 
 }
 
@@ -222,8 +217,8 @@ html, body {
     padding: 0px; 
     border-radius: 6px; 
     font-size: 1rem; 
-    margin-bottom: 8px; /* Mantém o espaçamento entre os itens */
-    margin-top: 0; /* Garante que não haja margin-top extra no primeiro item */
+    margin-bottom: 8px;
+    margin-top: 0;
 }
 
 .category-list a { 
@@ -235,13 +230,12 @@ html, body {
     border-radius: 6px;
 }
 
-/* UNIFICAR TODAS AS REGRAS .sidebar a NESTE BLOCO */
 .sidebar a {
-    padding: 12px 20px; /* Vindo da linha 238 e 1195 */
-    text-decoration: none; /* Vindo da linha 238 e 1195 */
-    color: white; /* Vindo da linha 238 e 1195 */
-    display: block; /* Vindo da linha 238 e 1195 */
-    margin: 0 !important; /* AJUSTE CRÍTICO: Zera todas as margens e força isso */
+    padding: 12px 20px;
+    text-decoration: none;
+    color: white;
+    display: block;
+    margin: 0 !important;
 }
  
 .sidebar a:hover,
@@ -249,7 +243,7 @@ html, body {
     background-color: #374151;
 }
  
-.sidebar-notification-item { /* Usado se houver itens de notificação na sidebar */
+.sidebar-notification-item {
     padding: 12px 20px; 
     position: relative;
     border-bottom: 1px solid #374151; 
@@ -287,7 +281,6 @@ html, body {
     padding: 2px;
 }
  
-/* Estilos para as Categorias na Sidebar (Main Page) */
 .category-list ul {
     list-style: none;
     padding: 0;
@@ -298,9 +291,9 @@ html, body {
     color: #333; 
     padding: 0px; 
     border-radius: 6px; 
-    font-size: 1rem; /* Aumentado de 0.95rem para 1rem */
+    font-size: 1rem;
     text-align: left; 
-    margin-bottom: 8px; /* Aumentado de 5px para 8px para mais espaçamento entre os itens */
+    margin-bottom: 8px;
 }
 
 .category-list a { 
@@ -308,7 +301,7 @@ html, body {
     color: white; 
     font-weight: bold;
     display: block; 
-    padding: 8px 10px; /* Aumentado o padding vertical de 4px para 8px */
+    padding: 8px 10px;
     border-radius: 6px;
 }
 
@@ -322,18 +315,17 @@ html, body {
     background: #333; 
     color: #FFD700; 
 }
- 
-/* Estilos da Área de Conteúdo Principal (Notícias na Main Page) */
+
 .content {
     flex: 1;
     padding: 32px;
-    margin-left: 250px; /* Margem inicial: conteúdo deslocado para a direita pela sidebar (250px) */
-    margin-top: 100px; /* Mantém a margem do topo */
-    transition: margin-left 0.3s ease; /* Transição suave para a margem */
+    margin-left: 250px;
+    margin-top: 100px; 
+    transition: margin-left 0.3s ease;
 }
 
 .content.content-expanded { 
-    margin-left: 0; /* Conteúdo ocupa a largura total quando a sidebar está oculta */
+    margin-left: 0;
 }
  
 .content h2 {
@@ -394,9 +386,8 @@ html, body {
     color: #555;
     font-size: 0.95rem;
 }
- 
-/* Estilos da página de Notícia Individual (news-container) */
-.news-container { /* Este é o principal wrapper da notícia na página individual */
+
+.news-container {
     max-width: 800px;
     margin: 140px auto 40px; 
     padding: 24px;
@@ -455,8 +446,7 @@ html, body {
     border-radius: 6px;
     margin-bottom: 10px;
 }
- 
-/* Botões de interação na página de notícia (curtir, compartilhar, denunciar) */
+
 .news-interaction {
     display: flex;
     gap: 12px;
@@ -485,8 +475,7 @@ html, body {
 .interaction-button.share:hover { background-color: #059669; }
 .interaction-button.report { background-color: #ef4444; }
 .interaction-button.report:hover { background-color: #b91c1c; }
- 
-/* Botão de Seguir Categoria na página de notícia (separado dos interaction-buttons) */
+
 .follow-button { 
     display: inline-block;
     background: #1d4ed8;
@@ -504,8 +493,7 @@ html, body {
 .follow-button:hover {
     background: #122b8b;
 }
- 
-/* Estilos para a seção de comentários */
+
 .comment-section {
     margin-top: 30px;
     padding: 20px;
@@ -636,8 +624,7 @@ html, body {
     border-radius: 8px;
     margin-top: 20px;
 }
- 
-/* Estilos da página de Denúncia (report-container) */
+
 .report-container { 
     display: flex;
     flex-direction: column; 
@@ -729,8 +716,6 @@ html, body {
     background-color: #122b8b;
 }
  
- 
-/* Classes gerais para botões de admin e tabelas */
 .delete-button {
     background: #dc2626;
     color: white;
@@ -761,8 +746,7 @@ html, body {
     background-color: #f3f4f6;
     font-weight: bold;
 }
- 
-/* Estilos da lista de categorias na sidebar do dashboard */
+
 .category-list-dashboard { 
     display: flex;
     flex-direction: column; 
@@ -781,8 +765,7 @@ html, body {
     padding: 6px 0;
     border-bottom: 1px solid #ddd; 
 }
- 
-/* Estilo da tabela de comentários (admin) */
+
 .comments-table { 
     width: 100%;
     border-collapse: collapse;
@@ -802,11 +785,10 @@ html, body {
 }
 
 .comments-table thead th {
-    background-color: #000000; /* Fundo preto */
-    color: white; /* Texto branco */
+    background-color: #000000;
+    color: white;
 }
- 
-/* Estilos de gerenciamento de categorias (admin) */
+
 .categories-management-container {
     background: white;
     padding: 20px;
@@ -1194,9 +1176,9 @@ html, body {
 
 .sidebar h2 {
     font-size: 1.3rem;
-    margin: 0; /* Garante que não haja margens padrão no h2 */
-    padding: 20px; /* Adiciona padding uniforme ao h2 para alinhá-lo */
-    box-sizing: border-box; /* Garante que o padding não aumente a largura/altura total */
+    margin: 0;
+    padding: 20px;
+    box-sizing: border-box;
 }
 
 .sidebar a {
@@ -1204,7 +1186,7 @@ html, body {
     text-decoration: none;
     color: white;
     display: block;
-    margin-bottom: 5px; /* Adicionado para espaçamento consistente entre os itens da sidebar */
+    margin-bottom: 5px;
 }
  
 .sidebar a:hover,
@@ -1376,24 +1358,22 @@ html, body {
     cursor: pointer;
     margin-bottom: 12px;
 }
- 
-/* Estilos para o overlay do pop-up */
+
 .popup-overlay {
-    position: fixed; /* Fixa o elemento na tela */
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* Fundo semi-transparente */
-    display: flex; /* Para centralizar o conteúdo do pop-up */
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000; /* Garante que o pop-up fique acima de outros elementos */
+    z-index: 1000;
 }
 
-/* Classe para ocultar elementos */
 .hidden {
-    display: none !important; /* Garante que o elemento seja ocultado, sobrescrevendo outras regras de display */
+    display: none !important;
 }
  
 .popup-content {
@@ -1615,19 +1595,15 @@ html, body {
     font-weight: bold;
 }
 
-/* Contêiner para os botões de ação */
 .action-buttons {
     display: flex;
-    /* Removido: gap: 8px; */ /* O gap não será mais usado aqui para o espaçamento principal */
     align-items: center; 
 }
 
-/* NOVO: Aplica margem ao formulário de "Excluir" para espaçá-lo do anterior */
-.action-buttons form + form { /* Seleciona um formulário que é precedido por outro formulário */
-    margin-left: 8px; /* Ajuste este valor para a distância desejada (ex: 8px, 4px, 2px) */
+.action-buttons form + form {
+    margin-left: 8px;
 }
 
-/* Estilo base para todos os botões de ação */
 .action-button-base {
     padding: 6px 10px;
     border: none;
@@ -1644,7 +1620,6 @@ html, body {
     gap: 5px; 
 }
 
-/* Cores específicas para os tipos de botões */
 .button-primary { 
     background-color: #007bff;
 }
@@ -1857,77 +1832,63 @@ html, body {
     background: #b91c1c;
 }
 
-/* --- INÍCIO: NOVOS ESTILOS PARA MELHORAR PÁGINAS DE RELATÓRIO --- */
-
-/* Estilos gerais para os H1 das páginas de relatório */
 .dashboard-main h1 {
     text-align: center;
     margin-bottom: 30px;
     color: #333;
-    font-size: 2em; /* Ajuste o tamanho da fonte conforme preferir */
+    font-size: 2em;
 }
 
-/* Container que envolve as tabelas administrativas */
 .admin-table-container {
     background: rgb(255, 255, 255);
     padding: 20px;
     border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Sombra para dar profundidade */
-    margin-top: 20px; /* Garante espaçamento do conteúdo acima */
-    overflow-x: auto; /* Adiciona scroll horizontal se a tabela for muito larga */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+    overflow-x: auto;
 }
 
-/* Estilos para todas as tabelas administrativas */
 .admin-table {
     width: 100%;
-    border-collapse: collapse; /* Bordas da célula se mesclam */
-    margin: 20px 0; /* Margem acima e abaixo da tabela */
-    border-radius: 8px; /* Cantos arredondados para a tabela */
-    overflow: hidden; /* Garante que as bordas arredondadas sejam visíveis */
+    border-collapse: collapse;
+    margin: 20px 0;
+    border-radius: 8px;
+    overflow: hidden;
 }
 
-/* Cabeçalho da tabela */
 .admin-table thead th {
-    background-color: #000000; /* Fundo preto para o cabeçalho */
-    color: white; /* Texto branco */
+    background-color: #000000;
+    color: white;
     font-weight: bold;
-    padding: 12px 15px; /* Espaçamento interno */
+    padding: 12px 15px;
     text-align: left;
-    border-bottom: 2px solid #ddd; /* Borda inferior para separar o cabeçalho */
+    border-bottom: 2px solid #ddd;
 }
 
-/* Células da tabela (cabeçalho e corpo) */
 .admin-table th,
 .admin-table td {
-    padding: 12px 15px; /* Espaçamento interno padrão */
-    border-bottom: 1px solid #e5e7eb; /* Borda inferior sutil para as linhas */
+    padding: 12px 15px;
+    border-bottom: 1px solid #e5e7eb;
     text-align: left;
     font-size: 0.95rem;
 }
 
-/* Efeito hover nas linhas da tabela */
 .admin-table tbody tr:hover {
-    background-color: #f0f0f0; /* Fundo mais claro ao passar o mouse */
+    background-color: #f0f0f0;
     transition: background-color 0.2s ease;
 }
 
-/* Estilo para linhas pares (para melhor legibilidade) */
 .admin-table tbody tr:nth-child(even) {
-    background-color: #f9f9f9; /* Cor de fundo para linhas pares */
+    background-color: #f9f9f9;
 }
 
-/* Links dentro das tabelas (como títulos de notícias) */
-
 .admin-table td a {
-    text-decoration: none; /* Remover sublinhado padrão */
+    text-decoration: none;
 }
 
 .admin-table td a:hover {
-    text-decoration: underline; /* Sublinhado ao passar o mouse */
+    text-decoration: underline;
 }
-
-/* --- FIM: NOVOS ESTILOS PARA MELHORAR PÁGINAS DE RELATÓRIO --- */
-
 
  @keyframes fadeInScale {
     from {

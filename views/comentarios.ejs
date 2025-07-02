@@ -6,7 +6,6 @@
     <title>Gerenciar Comentários - NewsStream</title>
     <link rel="stylesheet" href="/style.css">
     <style>
-        /* Estilos do Pop-up (Modal) - Replicados do noticias-admin.ejs para consistência */
         .popup-overlay {
             position: fixed;
             top: 0;
@@ -45,7 +44,7 @@
             color: #555;
             font-size: 1rem;
             line-height: 1.6;
-            white-space: pre-wrap; /* Preserva quebras de linha e espaços */
+            white-space: pre-wrap;
         }
 
         .close-popup-button {
@@ -58,7 +57,7 @@
             font-size: 1rem;
             font-weight: bold;
             transition: background-color 0.2s ease;
-            align-self: center; /* Centraliza o botão no modal */
+            align-self: center;
         }
 
         .close-popup-button:hover {
@@ -92,11 +91,11 @@
             <h1>Gerenciar Comentários Denunciados</h1>
         </header>
 
-        <div class="admin-table-container"> <!-- Adicionado container para aplicar estilos de tabela -->
+        <div class="admin-table-container">
             <% if (comentariosDenunciados.length === 0) { %>
                 <p>Não há comentários denunciados no momento.</p>
             <% } else { %>
-                <table class="comments-table admin-table"> <!-- Adicionada classe admin-table para herdar estilos -->
+                <table class="comments-table admin-table">
                     <thead>
                         <tr>
                             <th>Autor</th>
@@ -104,7 +103,7 @@
                             <th>Data</th>
                             <th>Notícia</th>
                             <th>Motivo Denúncia</th>
-                            <th>Detalhes</th> <!-- NOVA COLUNA PARA DETALHES -->
+                            <th>Detalhes</th>
                             <th>Ações</th>
                         </tr>
                     </thead>
@@ -136,11 +135,10 @@
                     </tbody>
                 </table>
             <% } %>
-        </div> <!-- Fim do admin-table-container -->
+        </div>
 
     </div>
 
-    <!-- Pop-up (Modal) para exibir Detalhes da Denúncia - Replicado do noticias-admin.ejs -->
     <div id="details-popup-overlay" class="popup-overlay hidden">
         <div class="popup-content">
             <h3>Detalhes da Denúncia</h3>
@@ -155,23 +153,20 @@
             const detailsPopupText = document.getElementById('details-popup-text');
             const closeDetailsPopupButton = detailsPopupOverlay.querySelector('.close-popup-button');
             
-            // Event listener para os botões "Ver Detalhes"
             document.querySelectorAll('.view-details-button').forEach(button => {
                 button.addEventListener('click', function() {
-                    const details = this.dataset.details; // Pega o texto dos detalhes do atributo data-details
-                    detailsPopupText.textContent = details; // Define o texto no pop-up
-                    detailsPopupOverlay.classList.remove('hidden'); // Mostra o pop-up
+                    const details = this.dataset.details;
+                    detailsPopupText.textContent = details;
+                    detailsPopupOverlay.classList.remove('hidden');
                 });
             });
 
-            // Event listener para fechar o pop-up
             if (closeDetailsPopupButton) {
                 closeDetailsPopupButton.addEventListener('click', function() {
-                    detailsPopupOverlay.classList.add('hidden'); // Esconde o pop-up
+                    detailsPopupOverlay.classList.add('hidden');
                 });
             }
 
-            // Event listener para fechar o pop-up ao clicar fora (no overlay)
             if (detailsPopupOverlay) {
                 detailsPopupOverlay.addEventListener('click', function(event) {
                     if (event.target === detailsPopupOverlay) {

@@ -340,8 +340,6 @@ router.post('/denunciar-noticia/:id', checkAuth, async (req, res) => {
             // Se 'autor' for um usuario_id, precisaríamos de um JOIN para pegar o usuario_id.
             // Por simplicidade, se autor for 'NewsStream', não notificamos.
             if (autorNoticia !== 'NewsStream') {
-                // Aqui precisaríamos de uma forma de mapear autorNoticia (nome) para usuario_id
-                // Uma solução simples seria ter o usuario_id do autor na tabela noticias, ou buscar por nome/email
                 const [autorUsuario] = await db.promise().query('SELECT id FROM usuarios WHERE nome = ?', [autorNoticia]);
                 if (autorUsuario.length > 0) {
                     const usuarioIdAutor = autorUsuario[0].id;
@@ -360,17 +358,14 @@ router.post('/denunciar-noticia/:id', checkAuth, async (req, res) => {
     }
 });
 
-router.get('/denuncia-confirmada', checkAuth, async (req, res) => { // Adicionado async
-    //console.log('main.js: Acessando rota GET /denuncia-confirmada.');
-    const numNotifications = await getUnreadNotificationsCount(req.session.usuario.id); // Obter notificações para o usuário
+router.get('/denuncia-confirmada', checkAuth, async (req, res) => { 
+    const numNotifications = await getUnreadNotificationsCount(req.session.usuario.id);
     res.render('denuncia-confirmada', {
-        currentPath: req.path, // Adicionado currentPath
+        currentPath: req.path,
         numNotifications: numNotifications
     });
 });
 
-
-// Função auxiliar para obter o número de notificações não lidas
 async function getUnreadNotificationsCount(usuarioId) {
     if (!usuarioId) return 0;
     try {

@@ -1,56 +1,52 @@
-// 1. Importações de Módulos
+
 const express = require('express');
 const path = require('path');
 const session = require('express-session');
-const db = require('./database/mysql_db'); // Seu módulo de conexão com o MySQL
+const db = require('./database/mysql_db'); 
 
-// Importe os routers separados
+
 const loginRoutes = require('./routes/login');
-const mainRoutes = require('./routes/main'); // O router que conterá as rotas principais (usuário)
-//console.log('app.js: mainRoutes importado.'); // LOG: Confirma importação
+const mainRoutes = require('./routes/main'); 
+
 
 const app = express();
 
-// 2. Configuração de Middlewares Globais
+
 app.use(session({
-    secret: 'newsstream_secret_super_secreto_e_longo_para_producao', // Use uma string mais segura em produção!
-    resave: false, // Evita salvar a sessão se não houver modificações
-    saveUninitialized: true, // Salva sessões "novas" que não foram modificadas
+    secret: 'newsstream_secret_super_secreto_e_longo_para_producao', 
+    resave: false, 
+    saveUninitialized: true, 
     cookie: { 
-        maxAge: 1000 * 60 * 60 * 24 // 1 dia de duração do cookie da sessão
+        maxAge: 1000 * 60 * 60 * 24 
     }
 }));
 
-app.use(express.json()); // Permite que o Express parseie corpos de requisição JSON
-app.use(express.urlencoded({ extended: true })); // Permite que o Express parseie corpos de requisição de formulários HTML
+app.use(express.json()); 
+app.use(express.urlencoded({ extended: true })); 
 
-// 3. Configuração do Template Engine (EJS)
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views')); // Define a pasta onde estão seus arquivos .ejs
+app.set('views', path.join(__dirname, 'views')); 
 
-// 4. Servir Arquivos Estáticos
 app.use(express.static(path.join(__dirname, 'public'))); 
-//console.log('app.js: Servindo arquivos estáticos de /public.'); // LOG: Confirma static files
 
-// 5. Middlewares de Autenticação e Autorização (podem ser movidos para um arquivo separado, ex: 'middlewares/auth.js')
 const checkAuth = (req, res, next) => {
     if (!req.session.usuario) {
-        // Redireciona para a página de login se o usuário não estiver logado
+      
         return res.redirect('/login');
     }
-    next(); // Continua para a próxima função middleware ou rota
+    next(); 
 };
 
 const checkAdmin = (req, res, next) => {
-    // Apenas permite acesso se o usuário estiver logado E for admin
+    
     if (!req.session.usuario || req.session.usuario.isAdmin !== 1) {
-        // Retorna um erro 403 (Forbidden) se não for admin
+      
         return res.status(403).send("Acesso não autorizado. Você não é um administrador.");
     }
-    next(); // Continua para a próxima função middleware ou rota
+    next(); 
 };
 
-// Função auxiliar para obter o número de notificações não lidas
+
 async function getUnreadNotificationsCount(usuarioId) {
     if (!usuarioId) return 0;
     try {
@@ -63,25 +59,23 @@ async function getUnreadNotificationsCount(usuarioId) {
 }
 
 
-// 6. Definição das Rotas
 
-// Redirecionamento da raiz para a página de login
+
+
 app.get('/', (req, res) => res.redirect('/login'));
 
-// **PRIORIDADE 1: Rotas Administrativas MUITO ESPECÍFICAS**
-// Estas rotas devem vir ANTES de `app.use('/', mainRoutes);` para evitar conflitos com :id
-// Rotas de gerenciamento de notícias (nova, salvar, editar, atualizar, remover, retirar denúncia)
+
 app.get('/nova-noticia', checkAdmin, async (req, res) => {
-    //console.log('app.js: Acessando rota /nova-noticia.'); // LOG
+
     try {
         const [categoriasRows] = await db.promise().query('SELECT nome FROM categorias ORDER BY nome ASC');
         const categoriasDisponiveis = categoriasRows.map(row => row.nome);
         
-        const numNotifications = await getUnreadNotificationsCount(req.session.usuario.id); // Obter notificações para o admin
+        const numNotifications = await getUnreadNotificationsCount(req.session.usuario.id); 
         
         res.render('nova-noticia', { 
             categorias: categoriasDisponiveis,
-            currentPath: req.path, // Adicionado currentPath
+            currentPath: req.path, 
             numNotifications: numNotifications
         });
     } catch (err) {
@@ -91,7 +85,7 @@ app.get('/nova-noticia', checkAdmin, async (req, res) => {
 });
 
 app.post('/salvar-noticia', checkAdmin, async (req, res) => {
-    //console.log('app.js: Acessando rota POST /salvar-noticia.'); // LOG
+   
     const { titulo, autor, categoria, conteudo, imagem } = req.body; 
 
     const imagemUrl = imagem && imagem.trim() !== '' ? imagem : '/images/default.jpg'; 
@@ -110,7 +104,7 @@ app.post('/salvar-noticia', checkAdmin, async (req, res) => {
 });
 
 app.get('/editar-noticia/:id', checkAdmin, async (req, res) => {
-    //console.log('app.js: Acessando rota /editar-noticia/:id.'); // LOG
+    
     const noticiaId = parseInt(req.params.id);
     try {
         const [noticiaRows] = await db.promise().query('SELECT * FROM noticias WHERE id = ?', [noticiaId]);
@@ -123,12 +117,12 @@ app.get('/editar-noticia/:id', checkAdmin, async (req, res) => {
         const [categoriasRows] = await db.promise().query('SELECT nome FROM categorias ORDER BY nome ASC');
         const categoriasDisponiveis = categoriasRows.map(row => row.nome);
 
-        const numNotifications = await getUnreadNotificationsCount(req.session.usuario.id); // Obter notificações para o admin
+        const numNotifications = await getUnreadNotificationsCount(req.session.usuario.id); 
 
         res.render('editar-noticia', { 
             noticia, 
             categorias: categoriasDisponiveis,
-            currentPath: req.path, // Adicionado currentPath
+            currentPath: req.path, 
             numNotifications: numNotifications
         });
     } catch (err) {
@@ -138,7 +132,7 @@ app.get('/editar-noticia/:id', checkAdmin, async (req, res) => {
 });
 
 app.post('/atualizar-noticia/:id', checkAdmin, async (req, res) => {
-    //console.log('app.js: Acessando rota POST /atualizar-noticia/:id.'); // LOG
+   
     const noticiaId = parseInt(req.params.id);
     const { titulo, autor, categoria, conteudo } = req.body;
 
@@ -155,7 +149,7 @@ app.post('/atualizar-noticia/:id', checkAdmin, async (req, res) => {
 });
 
 app.post('/remover-noticia/:id', checkAdmin, async (req, res) => {
-    //console.log('app.js: Acessando rota POST /remover-noticia/:id.'); // LOG
+    
     const noticiaId = parseInt(req.params.id);
     try {
         await db.promise().execute('DELETE FROM noticias WHERE id = ?', [noticiaId]);
@@ -169,7 +163,7 @@ app.post('/remover-noticia/:id', checkAdmin, async (req, res) => {
 });
 
 app.post('/retirar-denuncia-noticia/:id', checkAdmin, async (req, res) => {
-    //console.log('app.js: Acessando rota POST /retirar-denuncia-noticia/:id.');
+    
     const noticiaId = parseInt(req.params.id);
     try {
         const [result] = await db.promise().execute(
@@ -189,9 +183,9 @@ app.post('/retirar-denuncia-noticia/:id', checkAdmin, async (req, res) => {
     }
 });
 
-// Rotas para as "Consultas Complexas" (relatórios)
+
 app.get('/admin/noticias-mais-curtidas', checkAdmin, async (req, res) => {
-    //console.log('app.js: Acessando rota /admin/noticias-mais-curtidas.');
+    
     try {
         const query = `
             SELECT
@@ -214,12 +208,12 @@ app.get('/admin/noticias-mais-curtidas', checkAdmin, async (req, res) => {
         `;
         const [results] = await db.promise().query(query);
 
-        const numNotifications = await getUnreadNotificationsCount(req.session.usuario.id); // Obter notificações para o admin
+        const numNotifications = await getUnreadNotificationsCount(req.session.usuario.id); 
 
         res.render('relatorio_noticias_curtidas', {
             relatorio: results,
             usuario: req.session.usuario,
-            currentPath: req.path, // Adicionado currentPath
+            currentPath: req.path, 
             numNotifications: numNotifications
         });
 
@@ -230,7 +224,7 @@ app.get('/admin/noticias-mais-curtidas', checkAdmin, async (req, res) => {
 });
 
 app.get('/admin/usuarios-engajados', checkAdmin, async (req, res) => {
-    //console.log('app.js: Acessando rota /admin/usuarios-engajados.');
+    
     try {
         const query = `
             SELECT DISTINCT
@@ -259,12 +253,12 @@ app.get('/admin/usuarios-engajados', checkAdmin, async (req, res) => {
         `;
         const [results] = await db.promise().query(query);
 
-        const numNotifications = await getUnreadNotificationsCount(req.session.usuario.id); // Obter notificações para o admin
+        const numNotifications = await getUnreadNotificationsCount(req.session.usuario.id); 
 
         res.render('relatorio_usuarios_engajados', {
             relatorio: results,
             usuario: req.session.usuario,
-            currentPath: req.path, // Adicionado currentPath
+            currentPath: req.path, 
             numNotifications: numNotifications
         });
 
@@ -275,7 +269,7 @@ app.get('/admin/usuarios-engajados', checkAdmin, async (req, res) => {
 });
 
 app.get('/admin/noticias-mais-comentadas', checkAdmin, async (req, res) => {
-    //console.log('app.js: Acessando rota /admin/noticias-mais-comentadas.');
+    
     try {
         const query = `
             SELECT
@@ -298,12 +292,12 @@ app.get('/admin/noticias-mais-comentadas', checkAdmin, async (req, res) => {
         `;
         const [results] = await db.promise().query(query);
 
-        const numNotifications = await getUnreadNotificationsCount(req.session.usuario.id); // Obter notificações para o admin
+        const numNotifications = await getUnreadNotificationsCount(req.session.usuario.id); 
 
         res.render('relatorio_noticias_comentadas', {
             relatorio: results,
             usuario: req.session.usuario,
-            currentPath: req.path, // Adicionado currentPath
+            currentPath: req.path, 
             numNotifications: numNotifications
         });
 
@@ -314,16 +308,16 @@ app.get('/admin/noticias-mais-comentadas', checkAdmin, async (req, res) => {
 });
 
 app.get('/admin/categorias-seguidas-por-usuario', checkAdmin, async (req, res) => {
-    //console.log('app.js: Acessando rota /admin/categorias-seguidas-por-usuario.');
+    
     try {
         const [categoriasSeguidasPorUsuario] = await db.promise().query('SELECT * FROM view_usuarios_categorias_seguidas ORDER BY nome_usuario, data_seguida DESC');
         
-        const numNotifications = await getUnreadNotificationsCount(req.session.usuario.id); // Obter notificações para o admin
+        const numNotifications = await getUnreadNotificationsCount(req.session.usuario.id); 
 
         res.render('relatorio_categorias_seguidas', {
             categoriasSeguidas: categoriasSeguidasPorUsuario,
             usuario: req.session.usuario,
-            currentPath: req.path, // Adicionado currentPath
+            currentPath: req.path,
             numNotifications: numNotifications
         });
     } catch (err) {
@@ -333,21 +327,19 @@ app.get('/admin/categorias-seguidas-por-usuario', checkAdmin, async (req, res) =
 });
 
 
-// **PRIORIDADE 2: Rotas de Autenticação/Cadastro:** Usando o router de login
+
 app.use('/', loginRoutes); 
-//console.log('app.js: loginRoutes configurado.'); // LOG: Confirma loginRoutes
 
-// **PRIORIDADE 3: Rotas Principais da Aplicação (Usuários Comuns):** Usando o router mainRoutes
+
 app.use('/', mainRoutes); 
-//console.log('app.js: mainRoutes configurado.'); // LOG: Confirma mainRoutes
 
 
-// **PRIORIDADE 4: Outras Rotas Administrativas (gerais, que não conflitam com :id em mainRoutes)**
-// As rotas de admin precisam do middleware checkAdmin
+
+
 app.get('/dashboard', checkAdmin, async (req, res) => {
-    //console.log('app.js: Acessando rota /dashboard.'); // LOG
+   
     try {
-        // Consulta para a View de Notícias com Engajamento
+        
         const [noticiasEngajamentoResults] = await db.promise().query('SELECT * FROM view_noticias_engajamento ORDER BY total_curtidas DESC, total_comentarios DESC LIMIT 10'); // Exemplo: top 10
 
         const [totalUsuariosResult] = await db.promise().query("SELECT COUNT(*) AS totalUsuarios FROM usuarios");
@@ -400,7 +392,7 @@ app.get('/dashboard', checkAdmin, async (req, res) => {
             noticiasPorCategoriaData: noticiasPorCategoriaData,
             usuariosPorCategoriaData: usuariosPorCategoriaData,
             noticiasEngajamento: noticiasEngajamentoResults,
-            currentPath: req.path // Adicionado currentPath
+            currentPath: req.path 
         });
     } catch (err) {
         console.error("Erro ao carregar dados do dashboard do DB:", err);
@@ -409,18 +401,18 @@ app.get('/dashboard', checkAdmin, async (req, res) => {
 });
 
 app.get('/noticias', checkAdmin, async (req, res) => { 
-    //console.log('app.js: Acessando rota /noticias (admin) - Notícias Denunciadas.'); 
+    
     try {
         const [noticiasDenunciadasAdmin] = await db.promise().query(
-            "SELECT id, titulo, categoria, denunciado, motivoDenuncia, detalhesDenuncia FROM noticias WHERE denunciado = TRUE ORDER BY data_publicacao DESC" // <--- Campo 'detalhesDenuncia' adicionado aqui
+            "SELECT id, titulo, categoria, denunciado, motivoDenuncia, detalhesDenuncia FROM noticias WHERE denunciado = TRUE ORDER BY data_publicacao DESC" 
         );
         
-        const numNotifications = await getUnreadNotificationsCount(req.session.usuario.id); // Obter notificações para o admin
+        const numNotifications = await getUnreadNotificationsCount(req.session.usuario.id); 
 
         res.render('noticias-admin', {
             todasNoticias: noticiasDenunciadasAdmin,
             nome: req.session.usuario.nome,
-            currentPath: req.path, // Adicionado currentPath
+            currentPath: req.path, 
             numNotifications: numNotifications
         });
     } catch (err) {
@@ -430,17 +422,17 @@ app.get('/noticias', checkAdmin, async (req, res) => {
 });
 
 app.post('/remover-comentario/:id', checkAdmin, async (req, res) => {
-    //console.log('app.js: Acessando rota POST /remover-comentario/:id.'); // LOG
+    
     const comentarioId = parseInt(req.params.id);
     try {
-        // 1. Obter detalhes do comentário antes de remover para notificação
+        
         const [comentarioRows] = await db.promise().query('SELECT usuario_id, texto, noticia_id FROM comentarios WHERE id = ?', [comentarioId]);
         const comentario = comentarioRows[0];
 
         await db.promise().execute('DELETE FROM comentarios WHERE id = ?', [comentarioId]);
-        //console.log(`Comentário ID ${comentarioId} removido do DB.`);
+        
 
-        // 2. Inserir notificação para o usuário que fez o comentário
+        
         if (comentario && comentario.usuario_id) {
             const mensagemNotificacao = `Seu comentário "${comentario.texto.substring(0, 50)}..." foi removido por um administrador.`;
             await db.promise().execute(
@@ -457,10 +449,10 @@ app.post('/remover-comentario/:id', checkAdmin, async (req, res) => {
 });
 
 app.post('/retirar-denuncia-comentario/:id', checkAdmin, async (req, res) => {
-    //console.log('app.js: Acessando rota POST /retirar-denuncia-comentario/:id.');
+    
     const comentarioId = parseInt(req.params.id);
     try {
-        // 1. Obter detalhes do comentário antes de retirar a denúncia para notificação
+        
         const [comentarioRowsBeforeUpdate] = await db.promise().query('SELECT usuario_id, texto, noticia_id FROM comentarios WHERE id = ?', [comentarioId]);
         const comentarioBeforeUpdate = comentarioRowsBeforeUpdate[0];
 
@@ -470,10 +462,9 @@ app.post('/retirar-denuncia-comentario/:id', checkAdmin, async (req, res) => {
         );
 
         if (result.affectedRows === 0) {
-            //console.warn(`Tentativa de retirar denúncia de comentário não encontrado ou não denunciado: ID ${comentarioId}`);
+           
         } else {
-            //console.log(`Denúncia do Comentário ID ${comentarioId} retirada do DB.`);
-            // 2. Inserir notificação para o usuário que fez o comentário (se ele existir e não for o admin denunciando o próprio)
+            
             if (comentarioBeforeUpdate && comentarioBeforeUpdate.usuario_id && comentarioBeforeUpdate.usuario_id !== req.session.usuario.id) {
                 const mensagemNotificacao = `A denúncia do seu comentário "${comentarioBeforeUpdate.texto.substring(0, 50)}..." foi retirada.`;
                 await db.promise().execute(
@@ -490,18 +481,17 @@ app.post('/retirar-denuncia-comentario/:id', checkAdmin, async (req, res) => {
 });
 
 app.get('/comentarios', checkAdmin, async (req, res) => {
-    //console.log('app.js: Acessando rota /comentarios (admin).'); // LOG
+    
     try {
         const [comentariosDenunciados] = await db.promise().query('SELECT c.*, n.titulo AS noticiaTitulo FROM comentarios c JOIN noticias n ON c.noticia_id = n.id WHERE c.denunciado = TRUE ORDER BY c.data_comentario DESC');
         comentariosDenunciados.forEach(c => {
             c.data = new Date(c.data_comentario).toLocaleDateString('pt-BR');
         });
 
-        const numNotifications = await getUnreadNotificationsCount(req.session.usuario.id); // Obter notificações para o admin
-
+        const numNotifications = await getUnreadNotificationsCount(req.session.usuario.id); 
         res.render('comentarios', { 
             comentariosDenunciados,
-            currentPath: req.path, // Adicionado currentPath
+            currentPath: req.path, 
             numNotifications: numNotifications
         });
     } catch (err) {
@@ -511,15 +501,15 @@ app.get('/comentarios', checkAdmin, async (req, res) => {
 });
 
 app.get('/usuarios', checkAdmin, async (req, res) => {
-    // console.log('app.js: Acessando rota /usuarios (admin).'); // LOG
+    
     try {
         const [usuariosCadastrados] = await db.promise().query("SELECT id, nome, email, isAdmin FROM usuarios ORDER BY id ASC"); 
         
-        const numNotifications = await getUnreadNotificationsCount(req.session.usuario.id); // Obter notificações para o admin
+        const numNotifications = await getUnreadNotificationsCount(req.session.usuario.id); 
 
         res.render('usuarios', { 
             usuariosCadastrados,
-            currentPath: req.path // Adicionado currentPath
+            currentPath: req.path 
         });
     } catch (err) {
         console.error("Erro ao buscar usuários do DB:", err);
@@ -527,17 +517,17 @@ app.get('/usuarios', checkAdmin, async (req, res) => {
     }
 });
 
-// Rota para atualizar informações de um usuário (incluindo isAdmin)
+
 app.post('/atualizar-usuario/:id', checkAdmin, async (req, res) => {
-    //console.log('app.js: Acessando rota POST /atualizar-usuario/:id.');
+    
     const userId = parseInt(req.params.id);
-    const { nome, email, senha, isAdmin } = req.body; // Recebe isAdmin do frontend
+    const { nome, email, senha, isAdmin } = req.body; 
 
     try {
-        let query = 'UPDATE usuarios SET nome = ?, email = ?, isAdmin = ?'; // Inclui isAdmin na query
-        const params = [nome, email, isAdmin]; // Adiciona isAdmin aos parâmetros
+        let query = 'UPDATE usuarios SET nome = ?, email = ?, isAdmin = ?'; 
+        const params = [nome, email, isAdmin]; 
 
-        // Se uma nova senha foi fornecida, inclua-a na atualização
+    
         if (senha && senha.trim() !== '') {
             query += ', senha = ?';
             params.push(senha);
@@ -556,7 +546,7 @@ app.post('/atualizar-usuario/:id', checkAdmin, async (req, res) => {
 
     } catch (err) {
         console.error('Erro ao atualizar usuário no DB:', err);
-        // Verifica se o erro é por email duplicado
+        
         if (err.code === 'ER_DUP_ENTRY') {
             return res.status(400).json({ success: false, message: 'Erro: Este e-mail já está em uso por outro usuário.' });
         }
@@ -566,7 +556,7 @@ app.post('/atualizar-usuario/:id', checkAdmin, async (req, res) => {
 
 
 app.post('/remover-usuario/:id', checkAdmin, async (req, res) => {
-    //console.log('app.js: Acessando rota POST /remover-usuario/:id.'); // LOG
+    
     const usuarioId = parseInt(req.params.id);
     try {
         if (req.session.usuario.id === usuarioId && req.session.usuario.isAdmin === 1) {
@@ -575,7 +565,7 @@ app.post('/remover-usuario/:id', checkAdmin, async (req, res) => {
         }
 
         const [result] = await db.promise().execute("DELETE FROM usuarios WHERE id = ?", [usuarioId]); 
-        //console.log(`Usuário ID ${usuarioId} removido com sucesso. Linhas afetadas: ${result.affectedRows}`); 
+        
         res.redirect('/usuarios'); 
     } catch (err) {
         console.error("Erro ao remover usuário do DB:", err.message);
@@ -584,7 +574,7 @@ app.post('/remover-usuario/:id', checkAdmin, async (req, res) => {
 });
 
 app.get('/categorias', checkAdmin, async (req, res) => {
-    //console.log('app.js: Acessando rota /categorias (admin).'); // LOG
+    
     const mensagem = req.session.mensagem;
     const sucesso = req.session.sucesso;
 
@@ -595,13 +585,13 @@ app.get('/categorias', checkAdmin, async (req, res) => {
         const [categoriasRows] = await db.promise().query('SELECT id, nome FROM categorias ORDER BY nome ASC');
         const categoriasDisponiveis = categoriasRows; 
         
-        const numNotifications = await getUnreadNotificationsCount(req.session.usuario.id); // Obter notificações para o admin
+        const numNotifications = await getUnreadNotificationsCount(req.session.usuario.id); 
 
         res.render('categorias', { 
             categorias: categoriasDisponiveis, 
             mensagem, 
             sucesso,
-            currentPath: req.path // Adicionado currentPath
+            currentPath: req.path 
         });
     } catch (err) {
         console.error('Erro ao carregar categorias do DB:', err);
@@ -610,7 +600,7 @@ app.get('/categorias', checkAdmin, async (req, res) => {
 });
 
 app.post('/adicionar-categoria', checkAdmin, async (req, res) => {
-    //console.log('app.js: Acessando rota POST /adicionar-categoria.'); // LOG
+    
     const { novaCategoriaNome } = req.body;
 
     if (!novaCategoriaNome || novaCategoriaNome.trim() === '') {
@@ -638,7 +628,7 @@ app.post('/adicionar-categoria', checkAdmin, async (req, res) => {
 });
 
 app.post('/remover-categoria', checkAdmin, async (req, res) => {
-    //console.log('app.js: Acessando rota POST /remover-categoria.'); // LOG
+    
     const { categoriaParaRemover } = req.body;
 
     if (!categoriaParaRemover || categoriaParaRemover.trim() === '') {
@@ -652,11 +642,11 @@ app.post('/remover-categoria', checkAdmin, async (req, res) => {
         if (categoriaRows.length === 0) {
             req.session.mensagem = `Categoria "${categoriaParaRemover}" não encontrada.`;
             req.session.sucesso = false;
-            //console.warn(`Tentativa de remover categoria não existente: '${categoriaParaRemover}'`);
+            
         } else {
             req.session.mensagem = `Categoria "${categoriaParaRemover}" removida com sucesso! Notícias associadas foram movidas para 'Outros'.`;
             req.session.sucesso = true;
-            //console.log(`Categoria '${categoriaParaRemover}' removida do DB.`);
+            
         }
         res.redirect('/categorias');
     } catch (err) {
@@ -668,7 +658,7 @@ app.post('/remover-categoria', checkAdmin, async (req, res) => {
 });
 
 app.post('/editar-categoria', checkAdmin, async (req, res) => {
-    //console.log('app.js: Acessando rota POST /editar-categoria.'); // LOG
+    
     const { categoriaAtual, novaCategoria } = req.body;
 
     if (!novaCategoria || novaCategoria.trim() === '') {
@@ -690,13 +680,13 @@ app.post('/editar-categoria', checkAdmin, async (req, res) => {
         if (updateCategoryResult.affectedRows === 0) {
             req.session.mensagem = `Categoria "${categoriaAtual}" não encontrada para edição.`;
             req.session.sucesso = false;
-            //console.warn(`Tentativa de editar categoria não existente: '${categoriaAtual}'`);
+            
         } else {
             await db.promise().execute('UPDATE noticias SET categoria = ? WHERE categoria = ?', [novaCategoria, categoriaAtual]);
             
             req.session.mensagem = `Categoria "${categoriaAtual}" alterada para "${novaCategoria}" com sucesso!`;
             req.session.sucesso = true;
-            //console.log(`Categoria '${categoriaAtual}' alterada para '${novaCategoria}' no DB e notícias associadas atualizadas.`);
+            
         }
         res.redirect('/categorias'); 
     } catch (err) {
@@ -707,9 +697,9 @@ app.post('/editar-categoria', checkAdmin, async (req, res) => {
     }
 });
 
-// Nova rota para buscar notificações de um usuário
+
 app.get('/api/notificacoes', checkAuth, async (req, res) => {
-    //console.log('app.js: Acessando rota GET /api/notificacoes.');
+    
     const usuarioId = req.session.usuario.id;
     try {
         const [notificacoes] = await db.promise().query(
@@ -723,11 +713,11 @@ app.get('/api/notificacoes', checkAuth, async (req, res) => {
     }
 });
 
-// Nova rota para marcar notificações como lidas
+
 app.post('/api/notificacoes/marcar-lida/:id', checkAuth, async (req, res) => {
-    //console.log('app.js: Acessando rota POST /api/notificacoes/marcar-lida/:id.');
+  
     const notificacaoId = parseInt(req.params.id);
-    const usuarioId = req.session.usuario.id; // Garante que o usuário só possa marcar suas próprias notificações
+    const usuarioId = req.session.usuario.id; 
 
     try {
         const [result] = await db.promise().execute(
@@ -744,13 +734,13 @@ app.post('/api/notificacoes/marcar-lida/:id', checkAuth, async (req, res) => {
     }
 });
 
-// NOVO: Rota para limpar todas as notificações de um usuário
+
 app.post('/api/notificacoes/limpar-todas', checkAuth, async (req, res) => {
-    //console.log('app.js: Acessando rota POST /api/notificacoes/limpar-todas.');
+    
     const usuarioId = req.session.usuario.id;
 
     try {
-        // Deleta todas as notificações do usuário
+        
         const [result] = await db.promise().execute(
             'DELETE FROM notificacoes WHERE usuario_id = ?',
             [usuarioId]
@@ -764,6 +754,6 @@ app.post('/api/notificacoes/limpar-todas', checkAuth, async (req, res) => {
 });
 
 
-// 7. Início do Servidor
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Servidor rodando em http://localhost:${PORT}`));

@@ -324,7 +324,7 @@ app.get('/dashboard', checkAdmin, async (req, res) => {
    
     try {
         
-        const [noticiasEngajamentoResults] = await db.promise().query('SELECT * FROM view_noticias_engajamento ORDER BY total_curtidas DESC, total_comentarios DESC LIMIT 10'); // Exemplo: top 10
+        const [noticiasEngajamentoResults] = await db.promise().query('SELECT * FROM view_noticias_engajamento ORDER BY total_curtidas DESC, total_comentarios DESC LIMIT 10');
 
         const [totalUsuariosResult] = await db.promise().query("SELECT COUNT(*) AS totalUsuarios FROM usuarios");
         const totalUsuarios = totalUsuariosResult[0].totalUsuarios;

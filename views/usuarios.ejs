@@ -6,7 +6,6 @@
     <title>Gerenciar Usuários - NewsStream</title>
     <link rel="stylesheet" href="/style.css">
     <style>
-        /* Estilos do Pop-up (Modal) */
         .popup-overlay {
             position: fixed;
             top: 0;
@@ -54,7 +53,7 @@
             border: 1px solid #ddd;
             border-radius: 6px;
             font-size: 1em;
-            box-sizing: border-box; /* Garante que o padding não aumente a largura total */
+            box-sizing: border-box;
         }
 
         .popup-content .form-buttons {
@@ -96,7 +95,6 @@
             display: none !important;
         }
 
-        /* Estilo para o checkbox de admin */
         .admin-checkbox-container {
             display: flex;
             align-items: center;
@@ -105,8 +103,8 @@
             margin-bottom: 10px;
         }
         .admin-checkbox-container input[type="checkbox"] {
-            width: auto; /* Para não ocupar 100% da largura */
-            transform: scale(1.2); /* Aumenta um pouco o tamanho do checkbox */
+            width: auto;
+            transform: scale(1.2);
         }
     </style>
 </head>
@@ -150,15 +148,13 @@
                         <td><%= usuario.email %></td>
                         <td><%= usuario.isAdmin === 1 ? 'Administrador' : 'Comum' %></td>
                         <td class="action-buttons">
-                            <!-- Botão de Atualizar -->
                             <button class="action-button-base button-primary update-user-button"
                                 data-user-id="<%= usuario.id %>"
                                 data-user-nome="<%= usuario.nome %>"
                                 data-user-email="<%= usuario.email %>"
-                                data-user-isadmin="<%= usuario.isAdmin %>"> <!-- Passando isAdmin -->
+                                data-user-isadmin="<%= usuario.isAdmin %>">
                                 Atualizar
                             </button>
-                            <!-- Botão de Excluir -->
                             <form action="/remover-usuario/<%= usuario.id %>" method="POST" style="display:inline;">
                                 <button type="submit" class="delete-button" onclick="return confirm('Tem certeza que deseja remover o usuário <%= usuario.nome %>?');">Excluir</button>
                             </form>
@@ -170,7 +166,6 @@
         
     </div>
 
-    <!-- Pop-up (Modal) para Edição de Usuário -->
     <div id="edit-user-popup-overlay" class="popup-overlay hidden">
         <div class="popup-content">
             <h3>Editar Usuário</h3>
@@ -186,7 +181,6 @@
                 <label for="edit-user-senha">Nova Senha (deixe em branco para não alterar):</label>
                 <input type="password" id="edit-user-senha" name="senha">
 
-                <!-- NOVO CAMPO: Checkbox para isAdmin -->
                 <div class="admin-checkbox-container">
                     <input type="checkbox" id="edit-user-isadmin" name="isAdmin">
                     <label for="edit-user-isadmin" style="margin-bottom: 0;">Tornar Administrador</label>
@@ -208,35 +202,32 @@
             const editUserNome = document.getElementById('edit-user-nome');
             const editUserEmail = document.getElementById('edit-user-email');
             const editUserSenha = document.getElementById('edit-user-senha');
-            const editUserIsAdmin = document.getElementById('edit-user-isadmin'); // NOVO: Campo isAdmin
+            const editUserIsAdmin = document.getElementById('edit-user-isadmin');
             const cancelButton = editUserPopupOverlay.querySelector('.cancel-button');
 
-            // Função para abrir o modal e preencher os dados
             document.querySelectorAll('.update-user-button').forEach(button => {
                 button.addEventListener('click', function() {
                     const userId = this.dataset.userId;
                     const userNome = this.dataset.userNome;
                     const userEmail = this.dataset.userEmail;
-                    const userIsAdmin = this.dataset.userIsadmin === '1'; // NOVO: Pega o status isAdmin
+                    const userIsAdmin = this.dataset.userIsadmin === '1';
 
                     editUserId.value = userId;
                     editUserNome.value = userNome;
                     editUserEmail.value = userEmail;
-                    editUserSenha.value = ''; // Limpa o campo de senha por segurança
-                    editUserIsAdmin.checked = userIsAdmin; // NOVO: Define o estado do checkbox
+                    editUserSenha.value = ''; 
+                    editUserIsAdmin.checked = userIsAdmin;
 
-                    editUserPopupOverlay.classList.remove('hidden'); // Mostra o modal
+                    editUserPopupOverlay.classList.remove('hidden');
                 });
             });
 
-            // Função para fechar o modal
             if (cancelButton) {
                 cancelButton.addEventListener('click', function() {
                     editUserPopupOverlay.classList.add('hidden');
                 });
             }
 
-            // Fechar modal ao clicar fora
             if (editUserPopupOverlay) {
                 editUserPopupOverlay.addEventListener('click', function(event) {
                     if (event.target === editUserPopupOverlay) {
@@ -245,16 +236,15 @@
                 });
             }
 
-            // Lidar com o envio do formulário de edição
             if (editUserForm) {
                 editUserForm.addEventListener('submit', async function(event) {
-                    event.preventDefault(); // Impede o envio padrão do formulário
+                    event.preventDefault();
 
                     const userId = editUserId.value;
                     const nome = editUserNome.value;
                     const email = editUserEmail.value;
-                    const senha = editUserSenha.value; // Pode ser vazio se não for alterada
-                    const isAdmin = editUserIsAdmin.checked ? 1 : 0; // NOVO: Pega o valor do checkbox
+                    const senha = editUserSenha.value;
+                    const isAdmin = editUserIsAdmin.checked ? 1 : 0;
 
                     try {
                         const response = await fetch(`/atualizar-usuario/${userId}`, {
@@ -262,15 +252,15 @@
                             headers: {
                                 'Content-Type': 'application/json'
                             },
-                            body: JSON.stringify({ nome, email, senha, isAdmin }) // NOVO: Envia isAdmin
+                            body: JSON.stringify({ nome, email, senha, isAdmin })
                         });
 
                         const result = await response.json();
 
                         if (result.success) {
                             alert('Usuário atualizado com sucesso!');
-                            editUserPopupOverlay.classList.add('hidden'); // Esconde o modal
-                            window.location.reload(); // Recarrega a página para ver as alterações
+                            editUserPopupOverlay.classList.add('hidden');
+                            window.location.reload();
                         } else {
                             alert('Erro ao atualizar usuário: ' + result.message);
                         }

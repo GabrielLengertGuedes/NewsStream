@@ -74,7 +74,14 @@ router.get('/main', checkAuth, async (req, res) => {
 });
 
 router.get('/noticias/:id', checkAuth, async (req, res) => {
-    const noticiaId = parseInt(req.params.id);
+    const noticiaId = parseInt(req.params.id); // Tenta converter para inteiro
+
+    // ADIÇÃO: Validação de noticiaId para evitar 'NaN'
+    if (isNaN(noticiaId) || noticiaId <= 0) {
+        console.error(`Tentativa de acessar notícia com ID inválido: ${req.params.id}`);
+        return res.status(400).send("ID da notícia inválido."); // Retorna um erro 400 (Bad Request)
+    }
+
     const usuarioId = req.session.usuario.id;
 
     try {
@@ -114,16 +121,16 @@ router.get('/noticias/:id', checkAuth, async (req, res) => {
         }
 
         let numNotifications = 0;
-        if (req.session.usuario) { 
+        if (req.session.usuario) {
             numNotifications = await getUnreadNotificationsCount(req.session.usuario.id);
         }
-        
+
         if (req.session.usuario && req.session.usuario.isAdmin === 1) {
             const [comentariosDenunciadosCount] = await db.promise().query('SELECT COUNT(*) AS total FROM comentarios WHERE denunciado = TRUE');
             const [noticiasDenunciadasCount] = await db.promise().query('SELECT COUNT(*) AS total FROM noticias WHERE denunciado = TRUE');
             numNotifications += comentariosDenunciadosCount[0].total + noticiasDenunciadasCount[0].total;
         }
-        
+
         res.render('noticia', {
             noticia: noticia,
             comentarios: comentariosDaNoticia,
@@ -132,7 +139,7 @@ router.get('/noticias/:id', checkAuth, async (req, res) => {
             curtidoPeloUsuario: noticia.curtidoPeloUsuario,
             seguindoCategoriaPeloUsuario: categoriaDetalhes ? categoriaDetalhes.seguidaPeloUsuario : false,
             categoriaNoticiaDetalhes: categoriaDetalhes,
-            currentPath: req.path 
+            currentPath: req.path
         });
 
     } catch (err) {

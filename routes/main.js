@@ -2,18 +2,16 @@ const express = require('express');
 const router = express.Router();
 const db = require('../database/mysql_db'); 
 
-//console.log('main.js: Router inicializado.'); 
-
 const checkAuth = (req, res, next) => {
     if (!req.session.usuario) {
-        //console.log('main.js: checkAuth - Usuário não autenticado, redirecionando para /login.'); 
+        
         return res.redirect('/login');
     }
     next();
 };
 
 router.get('/main', checkAuth, async (req, res) => {
-    //console.log('main.js: Acessando rota /main.'); 
+    
     const categoriaSelecionadaNome = req.query.categoria || 'Todas';
     let noticias;
     let categoriasDB; 
@@ -50,12 +48,12 @@ router.get('/main', checkAuth, async (req, res) => {
             return { ...cat, seguidaPeloUsuario: seguindo.length > 0 };
         }));
 
-        // Obter o número de notificações não lidas para o usuário logado
+        
         let numNotifications = 0;
-        if (req.session.usuario) { // Garante que há um usuário logado
+        if (req.session.usuario) { 
             numNotifications = await getUnreadNotificationsCount(req.session.usuario.id);
         }
-        // Se for admin, somar as denúncias de notícias e comentários
+        
         if (req.session.usuario && req.session.usuario.isAdmin === 1) {
             const [comentariosDenunciadosCount] = await db.promise().query('SELECT COUNT(*) AS total FROM comentarios WHERE denunciado = TRUE');
             const [noticiasDenunciadasCount] = await db.promise().query('SELECT COUNT(*) AS total FROM noticias WHERE denunciado = TRUE');
@@ -70,7 +68,7 @@ router.get('/main', checkAuth, async (req, res) => {
             noticias: noticiasComStatusCurtida,
             selecionada: categoriaSelecionadaNome,
             numNotifications: numNotifications,
-            currentPath: req.path // <--- CORREÇÃO AQUI: Passando currentPath para main.ejs
+            currentPath: req.path 
         });
 
     } catch (err) {
@@ -79,9 +77,8 @@ router.get('/main', checkAuth, async (req, res) => {
     }
 });
 
-
 router.get('/noticias/:id', checkAuth, async (req, res) => {
-    //console.log('main.js: Acessando rota /noticias/:id.'); 
+    
     const noticiaId = parseInt(req.params.id);
     const usuarioId = req.session.usuario.id;
 
@@ -121,12 +118,12 @@ router.get('/noticias/:id', checkAuth, async (req, res) => {
             categoriaDetalhes.seguidaPeloUsuario = seguindoResults.length > 0;
         }
 
-        // Obter o número de notificações não lidas para o usuário logado
+        
         let numNotifications = 0;
-        if (req.session.usuario) { // Garante que há um usuário logado
+        if (req.session.usuario) { 
             numNotifications = await getUnreadNotificationsCount(req.session.usuario.id);
         }
-        // Se for admin, somar as denúncias de notícias e comentários
+        
         if (req.session.usuario && req.session.usuario.isAdmin === 1) {
             const [comentariosDenunciadosCount] = await db.promise().query('SELECT COUNT(*) AS total FROM comentarios WHERE denunciado = TRUE');
             const [noticiasDenunciadasCount] = await db.promise().query('SELECT COUNT(*) AS total FROM noticias WHERE denunciado = TRUE');
@@ -141,7 +138,7 @@ router.get('/noticias/:id', checkAuth, async (req, res) => {
             curtidoPeloUsuario: noticia.curtidoPeloUsuario,
             seguindoCategoriaPeloUsuario: categoriaDetalhes ? categoriaDetalhes.seguidaPeloUsuario : false,
             categoriaNoticiaDetalhes: categoriaDetalhes,
-            currentPath: req.path // Adicionado currentPath
+            currentPath: req.path 
         });
 
     } catch (err) {
@@ -151,7 +148,7 @@ router.get('/noticias/:id', checkAuth, async (req, res) => {
 });
 
 router.post('/api/noticia/:noticiaId/curtir', checkAuth, async (req, res) => {
-    //console.log('main.js: Acessando rota POST /api/noticia/:noticiaId/curtir.'); 
+    
     const noticiaId = parseInt(req.params.noticiaId);
     const usuarioId = req.session.usuario.id;
 
@@ -175,7 +172,7 @@ router.post('/api/noticia/:noticiaId/curtir', checkAuth, async (req, res) => {
 });
 
 router.post('/api/categoria/:categoriaId/seguir', checkAuth, async (req, res) => {
-    //console.log('main.js: Acessando rota POST /api/categoria/:categoriaId/seguir.'); 
+    
     const categoriaId = parseInt(req.params.categoriaId);
     const usuarioId = req.session.usuario.id;
 
@@ -203,9 +200,8 @@ router.post('/api/categoria/:categoriaId/seguir', checkAuth, async (req, res) =>
     }
 });
 
-
 router.post('/comentar/:id', checkAuth, async (req, res) => {
-    //console.log('main.js: Acessando rota POST /comentar/:id.');
+    
     const noticiaId = parseInt(req.params.id);
     const textoComentario = req.body.comentario;
     const usuarioId = req.session.usuario.id;
@@ -220,7 +216,7 @@ router.post('/comentar/:id', checkAuth, async (req, res) => {
             'INSERT INTO comentarios (noticia_id, usuario_id, autor_nome, texto) VALUES (?, ?, ?, ?)',
             [noticiaId, usuarioId, autorComentario, textoComentario]
         );
-        //console.log(`Comentário salvo para a notícia ${noticiaId}. O trigger deve ter atualizado o total_comentarios.`);
+        
         res.redirect(`/noticias/${noticiaId}`);
     } catch (err) {
         console.error('Erro ao salvar comentário no DB:', err);
@@ -229,7 +225,7 @@ router.post('/comentar/:id', checkAuth, async (req, res) => {
 });
 
 router.get('/denunciar-comentario/:noticiaId/:comentarioId', checkAuth, async (req, res) => {
-    //console.log('main.js: Acessando rota GET /denunciar-comentario/:noticiaId/:comentarioId.'); 
+    
     const noticiaId = parseInt(req.params.noticiaId);
     const comentarioId = parseInt(req.params.comentarioId);
 
@@ -245,7 +241,7 @@ router.get('/denunciar-comentario/:noticiaId/:comentarioId', checkAuth, async (r
             comentarioDenunciado: comentarioEncontrado.texto,
             noticiaId: noticiaId,
             comentarioId: comentarioId,
-            currentPath: req.path // Adicionado currentPath
+            currentPath: req.path 
         });
     } catch (err) {
         console.error('Erro ao carregar comentário para denúncia:', err);
@@ -254,12 +250,12 @@ router.get('/denunciar-comentario/:noticiaId/:comentarioId', checkAuth, async (r
 });
 
 router.post('/denunciar-comentario/:noticiaId/:comentarioId', checkAuth, async (req, res) => {
-    //console.log('main.js: Acessando rota POST /denunciar-comentario/:noticiaId/:comentarioId.'); 
+   
     const { noticiaId, comentarioId } = req.params;
     const { motivo, detalhes } = req.body; 
 
     try {
-        // 1. Obter detalhes do comentário antes de remover para notificação
+        
         const [comentarioRowsBeforeUpdate] = await db.promise().query('SELECT usuario_id, texto, noticia_id FROM comentarios WHERE id = ?', [comentarioId]);
         const comentarioBeforeUpdate = comentarioRowsBeforeUpdate[0];
 
@@ -269,10 +265,9 @@ router.post('/denunciar-comentario/:noticiaId/:comentarioId', checkAuth, async (
         );
 
         if (result.affectedRows === 0) {
-            //console.warn(`Tentativa de denunciar comentário não encontrado ou já denunciado: Notícia ID ${noticiaId}, Comentário ID ${comentarioId}`);
+            
         } else {
-            //console.log(`Comentário ID ${comentarioId} da notícia ID ${noticiaId} denunciado. Motivo: ${motivo}, Detalhes: ${detalhes || 'Nenhum'}`);
-            // 2. Inserir notificação para o usuário que fez o comentário (se ele existir e não for o admin denunciando o próprio)
+            
             if (comentarioBeforeUpdate && comentarioBeforeUpdate.usuario_id && comentarioBeforeUpdate.usuario_id !== req.session.usuario.id) {
                 const mensagemNotificacao = `Seu comentário "${comentarioBeforeUpdate.texto.substring(0, 50)}..." foi denunciado.`;
                 await db.promise().execute(
@@ -283,7 +278,7 @@ router.post('/denunciar-comentario/:noticiaId/:comentarioId', checkAuth, async (
         }
 
         res.render('denuncia-confirmada', {
-            currentPath: req.path // Adicionado currentPath
+            currentPath: req.path 
         }); 
     } catch (err) {
         console.error('Erro ao denunciar comentário no DB:', err);
@@ -292,20 +287,20 @@ router.post('/denunciar-comentario/:noticiaId/:comentarioId', checkAuth, async (
 });
 
 router.get('/denunciar-noticia/:id', checkAuth, async (req, res) => {
-    //console.log('main.js: Acessando rota GET /denunciar-noticia/:id.'); 
+    
     const noticiaId = parseInt(req.params.id);
     try {
         const [noticiaRows] = await db.promise().query('SELECT titulo, id FROM noticias WHERE id = ?', [noticiaId]); 
         const noticia = noticiaRows[0];
 
         if (!noticia) {
-            //console.warn(`main.js: Rota GET /denunciar-noticia/:id - Notícia ID ${noticiaId} não encontrada.`);
+            
             return res.status(404).send("Notícia não encontrada para denúncia.");
         }
-        //console.log(`main.js: Renderizando denunciar-noticia.ejs para Notícia ID: ${noticia.id}`); 
+        
         res.render('denunciar-noticia', { 
             noticia,
-            currentPath: req.path // Adicionado currentPath
+            currentPath: req.path 
         });
     } catch (err) {
         console.error('Erro ao carregar notícia para denúncia:', err);
@@ -314,31 +309,25 @@ router.get('/denunciar-noticia/:id', checkAuth, async (req, res) => {
 });
 
 router.post('/denunciar-noticia/:id', checkAuth, async (req, res) => {
-    //console.log('main.js: Acessando rota POST /denunciar-noticia/:id para usar Stored Procedure.');
+    
     const noticiaId = parseInt(req.params.id);
     const { motivo, detalhes } = req.body;
 
-    //console.log(`Denúncia (via SP) - ID Notícia: ${noticiaId}, Motivo: ${motivo}, Detalhes: ${detalhes}`);
-
     try {
-        // Obter o autor da notícia para notificação
+        
         const [noticiaInfo] = await db.promise().query('SELECT autor FROM noticias WHERE id = ?', [noticiaId]);
-        const autorNoticia = noticiaInfo[0] ? noticiaInfo[0].autor : 'NewsStream'; // Pega o autor da notícia
+        const autorNoticia = noticiaInfo[0] ? noticiaInfo[0].autor : 'NewsStream'; 
 
         const [result] = await db.promise().execute(
-            'CALL DenunciarNoticia(?, ?, ?)', // Os ? são para os parâmetros
-            [noticiaId, motivo, detalhes || null] // Passando os parâmetros para a procedure
+            'CALL DenunciarNoticia(?, ?, ?)', 
+            [noticiaId, motivo, detalhes || null] 
         );
 
         if (result.affectedRows === 0) {
-            //console.warn(`Tentativa de denunciar notícia via SP falhou ou já estava denunciada: ID ${noticiaId}`);
+            
             return res.redirect('/denuncia-confirmada?status=warning&message=Notícia já estava denunciada ou não encontrada.');
         } else {
-            //console.log(`Notícia ID ${noticiaId} denunciada via Stored Procedure. Motivo: ${motivo || 'N/A'}, Detalhes: ${detalhes || 'Nenhum'}`);
-            // Inserir notificação para o autor da notícia (se não for o admin)
-            // Assumimos que 'autor' na tabela noticias pode ser um nome de usuário ou 'NewsStream'
-            // Se 'autor' for um usuario_id, precisaríamos de um JOIN para pegar o usuario_id.
-            // Por simplicidade, se autor for 'NewsStream', não notificamos.
+            
             if (autorNoticia !== 'NewsStream') {
                 const [autorUsuario] = await db.promise().query('SELECT id FROM usuarios WHERE nome = ?', [autorNoticia]);
                 if (autorUsuario.length > 0) {

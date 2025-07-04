@@ -8,7 +8,7 @@
     <style>
         /* Estilo para o botão Limpar Todas as Notificações */
         .clear-all-notifications-button {
-            background-color: #f44336; /* Um tom de vermelho para indicar ação de limpar */
+            background-color: #f44336; 
             color: white;
             padding: 10px 18px;
             border: none;
@@ -17,18 +17,18 @@
             cursor: pointer;
             font-size: 1rem;
             transition: background-color 0.3s ease;
-            width: 100%; /* Ocupa a largura total do pop-up */
-            margin-top: 15px; /* Espaçamento acima */
-            margin-bottom: 10px; /* Espaçamento abaixo */
+            width: 100%; 
+            margin-top: 15px; 
+            margin-bottom: 10px; 
         }
 
         .clear-all-notifications-button:hover {
-            background-color: #d32f2f; /* Um tom mais escuro no hover */
+            background-color: #d32f2f; 
         }
 
         /* Ajuste para espaçamento entre os botões no pop-up */
         .notifications-content .close-popup-button {
-            margin-top: 0; /* Remove a margem superior se houver */
+            margin-top: 0; 
         }
     </style>
 </head>
@@ -45,7 +45,6 @@
                         <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2m.995-14.901a1 1 0 1 0-1.99 0A5 5 0 0 0 3 6c0 1.098-.5 6-2 7h12c-1.5-1-2-5.902-2-7s-.995-14.901a1 1 1 0 1 0-1.99 0z"/>
                     </svg>
                     <span>Notificações</span> 
-                    <!-- O contador agora é atualizado por JS -->
                     <span class="notification-count <%= numNotifications > 0 ? '' : 'hidden' %>" id="notificationCount"><%= numNotifications %></span>
                 </button>
             </div>
@@ -59,15 +58,15 @@
         </div>
     </header>
 
-    <!-- Pop-up de Notificações (agora preenchido dinamicamente) -->
+    
     <div id="notifications-popup" class="popup-overlay hidden">
         <div class="popup-content notifications-content">
             <h3>Suas Notificações</h3>
             <ul class="notifications-list" id="notificationsList">
-                <!-- Notificações serão inseridas aqui via JavaScript -->
+                
                 <li class="no-notifications-message" style="text-align: center; color: #777; font-style: italic;">Nenhuma notificação nova.</li>
             </ul>
-            <!-- NOVO BOTÃO: Limpar Todas as Notificações -->
+            
             <button class="clear-all-notifications-button" id="clearAllNotificationsButton">Limpar Todas</button>
             <button class="close-popup-button" id="closeNotificationsButton">Fechar</button>
         </div>
@@ -77,11 +76,9 @@
         <aside class="sidebar sidebar-main">
             <h2>Categorias</h2>
             <ul class="category-list">
-                <!-- CORREÇÃO AQUI: selectedCategory mudado para selecionada -->
                 <li><a href="/main" class="<%= selecionada === 'Todas' ? 'active' : '' %>">Todas</a></li>
                 <% categorias.forEach(cat => { %>
                     <li>
-                        <!-- CORREÇÃO AQUI: selectedCategory mudado para selecionada -->
                         <a href="/main?categoria=<%= encodeURIComponent(cat.nome) %>" class="<%= selecionada === cat.nome ? 'active' : '' %>">
                             <%= cat.nome %>
                         </a>
@@ -105,7 +102,6 @@
                                 <h3>
                                     <a href="/noticias/<%= item.id %>"><%= item.titulo %></a>
                                 </h3>
-                                <!-- CORREÇÃO AQUI: Removida a tag <p> externa. item.resumo já deve conter HTML. -->
                                 <%- item.resumo %> 
                             </div>
                         </article>
@@ -126,9 +122,9 @@
             const notificationButton = document.getElementById('notificationButton');
             const notificationsPopup = document.getElementById('notifications-popup');
             const closeNotificationsButton = document.getElementById('closeNotificationsButton');
-            const notificationCountSpan = document.getElementById('notificationCount'); // Pegar pelo ID
+            const notificationCountSpan = document.getElementById('notificationCount'); 
             const notificationsList = document.getElementById('notificationsList');
-            const clearAllNotificationsButton = document.getElementById('clearAllNotificationsButton'); // NOVO: Botão Limpar Todas
+            const clearAllNotificationsButton = document.getElementById('clearAllNotificationsButton'); 
 
             // Função para buscar e exibir notificações
             async function fetchAndDisplayNotifications() {
@@ -137,22 +133,22 @@
                     const data = await response.json();
 
                     if (data.success && data.notificacoes.length > 0) {
-                        notificationsList.innerHTML = ''; // Limpa a mensagem "Nenhuma notificação"
+                        notificationsList.innerHTML = ''; 
                         data.notificacoes.forEach(notif => {
                             const li = document.createElement('li');
                             li.innerHTML = `<span class="notification-type">${notif.lida ? '' : '• Nova '}</span> ${notif.mensagem} <a href="${notif.link || '#'}">${notif.link ? '(Ver)' : ''}</a>`;
                             if (!notif.lida) {
-                                li.style.fontWeight = 'bold'; // Destaca não lidas
+                                li.style.fontWeight = 'bold'; 
                             }
                             li.addEventListener('click', async () => {
                                 if (!notif.lida) {
                                     await fetch(`/api/notificacoes/marcar-lida/${notif.id}`, { method: 'POST' });
                                     notif.lida = true;
-                                    li.style.fontWeight = 'normal'; // Remove destaque
-                                    updateNotificationCount(-1); // Decrementa o contador
+                                    li.style.fontWeight = 'normal'; 
+                                    updateNotificationCount(-1); 
                                 }
                                 if (notif.link) {
-                                    window.location.href = notif.link;
+                                    window.location.href = notif.link; 
                                 }
                             });
                             notificationsList.appendChild(li);
@@ -168,6 +164,7 @@
                 }
             }
 
+            // Função para atualizar o contador na UI
             function updateNotificationCount(count) {
                 if (notificationCountSpan) {
                     if (count > 0) {
@@ -179,10 +176,11 @@
                 }
             }
 
+            // Exibir/Ocultar pop-up de notificações
             if (notificationButton) {
                 notificationButton.addEventListener('click', () => {
                     if (notificationsPopup.classList.contains('hidden')) {
-                        fetchAndDisplayNotifications();
+                        fetchAndDisplayNotifications(); 
                         notificationsPopup.classList.remove('hidden');
                     } else {
                         notificationsPopup.classList.add('hidden');
@@ -223,7 +221,7 @@
                     }
                 });
             }    
-
+        
             fetchAndDisplayNotifications();
         }); 
     </script>

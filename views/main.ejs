@@ -6,7 +6,7 @@
     <title>NewsStream – Página Principal</title>
     <link rel="stylesheet" href="/style.css" />
     <style>
-        /* Estilo para o botão Limpar Todas as Notificações */
+        
         .clear-all-notifications-button {
             background-color: #f44336; 
             color: white;
@@ -26,7 +26,7 @@
             background-color: #d32f2f; 
         }
 
-        /* Ajuste para espaçamento entre os botões no pop-up */
+       
         .notifications-content .close-popup-button {
             margin-top: 0; 
         }
@@ -112,7 +112,7 @@
     </div>
 
     <script>
-        // Mover a função toggleSidebar para o escopo global ou acessível
+        
         function toggleSidebar() {
             document.querySelector('.sidebar-main').classList.toggle('oculta');
             document.querySelector('.content').classList.toggle('content-expanded');
@@ -126,7 +126,7 @@
             const notificationsList = document.getElementById('notificationsList');
             const clearAllNotificationsButton = document.getElementById('clearAllNotificationsButton'); 
 
-            // Função para buscar e exibir notificações
+            
             async function fetchAndDisplayNotifications() {
                 try {
                     const response = await fetch('/api/notificacoes');
@@ -164,7 +164,7 @@
                 }
             }
 
-            // Função para atualizar o contador na UI
+            
             function updateNotificationCount(count) {
                 if (notificationCountSpan) {
                     if (count > 0) {
@@ -176,7 +176,7 @@
                 }
             }
 
-            // Exibir/Ocultar pop-up de notificações
+            
             if (notificationButton) {
                 notificationButton.addEventListener('click', () => {
                     if (notificationsPopup.classList.contains('hidden')) {

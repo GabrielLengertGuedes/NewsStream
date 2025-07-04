@@ -253,7 +253,6 @@ router.post('/denunciar-comentario/:noticiaId/:comentarioId', checkAuth, async (
         );
 
         if (result.affectedRows === 0) {
-            // Nenhum registro afetado
         } else {
             if (comentarioBeforeUpdate && comentarioBeforeUpdate.usuario_id && comentarioBeforeUpdate.usuario_id !== req.session.usuario.id) {
                 const mensagemNotificacao = `Seu comentário "${comentarioBeforeUpdate.texto.substring(0, 50)}..." foi denunciado.`;
@@ -298,22 +297,28 @@ router.post('/denunciar-noticia/:id', checkAuth, async (req, res) => {
     const { motivo, detalhes } = req.body;
 
     try {
-        const [noticiaInfo] = await db.promise().query('SELECT autor FROM noticias WHERE id = ?', [noticiaId]);
-        const autorNoticia = noticiaInfo[0] ? noticiaInfo[0].autor : 'NewsStream'; 
+        const [noticiaData] = await db.promise().query('SELECT autor, titulo FROM noticias WHERE id = ?', [noticiaId]);
+        const noticiaExistente = noticiaData[0];
+
+        if (!noticiaExistente) {
+            return res.redirect('/denuncia-confirmada?status=warning&message=Notícia não encontrada para denúncia.');
+        }
+
+        const autorNoticia = noticiaExistente.autor || 'NewsStream';
 
         const [result] = await db.promise().execute(
-            'CALL DenunciarNoticia(?, ?, ?)', 
-            [noticiaId, motivo, detalhes || null] 
+            'UPDATE noticias SET denunciado = TRUE, motivoDenuncia = ?, detalhesDenuncia = ? WHERE id = ? AND denunciado = FALSE',
+            [motivo, detalhes || null, noticiaId]
         );
 
         if (result.affectedRows === 0) {
-            return res.redirect('/denuncia-confirmada?status=warning&message=Notícia já estava denunciada ou não encontrada.');
+            return res.redirect('/denuncia-confirmada?status=warning&message=Notícia já estava denunciada ou não pôde ser encontrada/atualizada.');
         } else {
             if (autorNoticia !== 'NewsStream') {
                 const [autorUsuario] = await db.promise().query('SELECT id FROM usuarios WHERE nome = ?', [autorNoticia]);
                 if (autorUsuario.length > 0) {
                     const usuarioIdAutor = autorUsuario[0].id;
-                    const mensagemNotificacao = `Sua notícia "${noticia.titulo.substring(0, 50)}..." foi denunciada.`;
+                    const mensagemNotificacao = `Sua notícia "${noticiaExistente.titulo.substring(0, 50)}..." foi denunciada.`;
                     await db.promise().execute(
                         'INSERT INTO notificacoes (usuario_id, tipo_notificacao, mensagem, link) VALUES (?, ?, ?, ?)',
                         [usuarioIdAutor, 'noticia_denunciada', mensagemNotificacao, `/noticias/${noticiaId}`]
@@ -323,8 +328,8 @@ router.post('/denunciar-noticia/:id', checkAuth, async (req, res) => {
             return res.redirect('/denuncia-confirmada?status=success');
         }
     } catch (err) {
-        console.error('Erro ao chamar stored procedure DenunciarNoticia no DB:', err);
-        return res.redirect('/denuncia-confirmada?status=error&message=Erro interno do servidor ao processar denúncia via SP.');
+        console.error('Erro ao denunciar notícia no DB:', err);
+        return res.redirect('/denuncia-confirmada?status=error&message=Erro interno do servidor ao processar denúncia.');
     }
 });
 

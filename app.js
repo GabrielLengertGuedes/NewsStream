@@ -1,4 +1,3 @@
-
 const express = require('express');
 const path = require('path');
 const session = require('express-session');
@@ -28,16 +27,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const checkAuth = (req, res, next) => {
     if (!req.session.usuario) {
-      
         return res.redirect('/login');
     }
     next(); 
 };
 
 const checkAdmin = (req, res, next) => {
-    
     if (!req.session.usuario || req.session.usuario.isAdmin !== 1) {
-      
         return res.status(403).send("Acesso não autorizado. Você não é um administrador.");
     }
     next(); 
@@ -57,7 +53,6 @@ async function getUnreadNotificationsCount(usuarioId) {
 app.get('/', (req, res) => res.redirect('/login'));
 
 app.get('/nova-noticia', checkAdmin, async (req, res) => {
-
     try {
         const [categoriasRows] = await db.promise().query('SELECT nome FROM categorias ORDER BY nome ASC');
         const categoriasDisponiveis = categoriasRows.map(row => row.nome);
@@ -76,7 +71,6 @@ app.get('/nova-noticia', checkAdmin, async (req, res) => {
 });
 
 app.post('/salvar-noticia', checkAdmin, async (req, res) => {
-   
     const { titulo, autor, categoria, conteudo, imagem } = req.body; 
 
     const imagemUrl = imagem && imagem.trim() !== '' ? imagem : '/images/default.jpg'; 
@@ -95,7 +89,6 @@ app.post('/salvar-noticia', checkAdmin, async (req, res) => {
 });
 
 app.get('/editar-noticia/:id', checkAdmin, async (req, res) => {
-    
     const noticiaId = parseInt(req.params.id);
     try {
         const [noticiaRows] = await db.promise().query('SELECT * FROM noticias WHERE id = ?', [noticiaId]);
@@ -123,7 +116,6 @@ app.get('/editar-noticia/:id', checkAdmin, async (req, res) => {
 });
 
 app.post('/atualizar-noticia/:id', checkAdmin, async (req, res) => {
-   
     const noticiaId = parseInt(req.params.id);
     const { titulo, autor, categoria, conteudo } = req.body;
 
@@ -140,7 +132,6 @@ app.post('/atualizar-noticia/:id', checkAdmin, async (req, res) => {
 });
 
 app.post('/remover-noticia/:id', checkAdmin, async (req, res) => {
-    
     const noticiaId = parseInt(req.params.id);
     try {
         await db.promise().execute('DELETE FROM noticias WHERE id = ?', [noticiaId]);
@@ -154,7 +145,6 @@ app.post('/remover-noticia/:id', checkAdmin, async (req, res) => {
 });
 
 app.post('/retirar-denuncia-noticia/:id', checkAdmin, async (req, res) => {
-    
     const noticiaId = parseInt(req.params.id);
     try {
         const [result] = await db.promise().execute(
@@ -175,7 +165,6 @@ app.post('/retirar-denuncia-noticia/:id', checkAdmin, async (req, res) => {
 });
 
 app.get('/admin/noticias-mais-curtidas', checkAdmin, async (req, res) => {
-    
     try {
         const query = `
             SELECT
@@ -214,7 +203,6 @@ app.get('/admin/noticias-mais-curtidas', checkAdmin, async (req, res) => {
 });
 
 app.get('/admin/usuarios-engajados', checkAdmin, async (req, res) => {
-    
     try {
         const query = `
             SELECT DISTINCT
@@ -259,7 +247,6 @@ app.get('/admin/usuarios-engajados', checkAdmin, async (req, res) => {
 });
 
 app.get('/admin/noticias-mais-comentadas', checkAdmin, async (req, res) => {
-    
     try {
         const query = `
             SELECT
@@ -298,7 +285,6 @@ app.get('/admin/noticias-mais-comentadas', checkAdmin, async (req, res) => {
 });
 
 app.get('/admin/categorias-seguidas-por-usuario', checkAdmin, async (req, res) => {
-    
     try {
         const [categoriasSeguidasPorUsuario] = await db.promise().query('SELECT * FROM view_usuarios_categorias_seguidas ORDER BY nome_usuario, data_seguida DESC');
         
@@ -321,10 +307,8 @@ app.use('/', loginRoutes);
 app.use('/', mainRoutes); 
 
 app.get('/dashboard', checkAdmin, async (req, res) => {
-   
     try {
-        
-        const [noticiasEngajamentoResults] = await db.promise().query('SELECT * FROM view_noticias_engajamento ORDER BY total_curtidas DESC, total_comentarios DESC LIMIT 10'); // Exemplo: top 10
+        const [noticiasEngajamentoResults] = await db.promise().query('SELECT * FROM view_noticias_engajamento ORDER BY total_curtidas DESC, total_comentarios DESC LIMIT 10'); 
 
         const [totalUsuariosResult] = await db.promise().query("SELECT COUNT(*) AS totalUsuarios FROM usuarios");
         const totalUsuarios = totalUsuariosResult[0].totalUsuarios;
@@ -385,7 +369,6 @@ app.get('/dashboard', checkAdmin, async (req, res) => {
 });
 
 app.get('/noticias', checkAdmin, async (req, res) => { 
-    
     try {
         const [noticiasDenunciadasAdmin] = await db.promise().query(
             "SELECT id, titulo, categoria, denunciado, motivoDenuncia, detalhesDenuncia FROM noticias WHERE denunciado = TRUE ORDER BY data_publicacao DESC" 
@@ -406,16 +389,12 @@ app.get('/noticias', checkAdmin, async (req, res) => {
 });
 
 app.post('/remover-comentario/:id', checkAdmin, async (req, res) => {
-    
     const comentarioId = parseInt(req.params.id);
     try {
-        
         const [comentarioRows] = await db.promise().query('SELECT usuario_id, texto, noticia_id FROM comentarios WHERE id = ?', [comentarioId]);
         const comentario = comentarioRows[0];
 
         await db.promise().execute('DELETE FROM comentarios WHERE id = ?', [comentarioId]);
-        
-
         
         if (comentario && comentario.usuario_id) {
             const mensagemNotificacao = `Seu comentário "${comentario.texto.substring(0, 50)}..." foi removido por um administrador.`;
@@ -433,10 +412,8 @@ app.post('/remover-comentario/:id', checkAdmin, async (req, res) => {
 });
 
 app.post('/retirar-denuncia-comentario/:id', checkAdmin, async (req, res) => {
-    
     const comentarioId = parseInt(req.params.id);
     try {
-        
         const [comentarioRowsBeforeUpdate] = await db.promise().query('SELECT usuario_id, texto, noticia_id FROM comentarios WHERE id = ?', [comentarioId]);
         const comentarioBeforeUpdate = comentarioRowsBeforeUpdate[0];
 
@@ -446,9 +423,8 @@ app.post('/retirar-denuncia-comentario/:id', checkAdmin, async (req, res) => {
         );
 
         if (result.affectedRows === 0) {
-           
+            // Nenhum registro afetado, talvez já estivesse sem denúncia ou ID incorreto
         } else {
-            
             if (comentarioBeforeUpdate && comentarioBeforeUpdate.usuario_id && comentarioBeforeUpdate.usuario_id !== req.session.usuario.id) {
                 const mensagemNotificacao = `A denúncia do seu comentário "${comentarioBeforeUpdate.texto.substring(0, 50)}..." foi retirada.`;
                 await db.promise().execute(
@@ -465,7 +441,6 @@ app.post('/retirar-denuncia-comentario/:id', checkAdmin, async (req, res) => {
 });
 
 app.get('/comentarios', checkAdmin, async (req, res) => {
-    
     try {
         const [comentariosDenunciados] = await db.promise().query('SELECT c.*, n.titulo AS noticiaTitulo FROM comentarios c JOIN noticias n ON c.noticia_id = n.id WHERE c.denunciado = TRUE ORDER BY c.data_comentario DESC');
         comentariosDenunciados.forEach(c => {
@@ -485,7 +460,6 @@ app.get('/comentarios', checkAdmin, async (req, res) => {
 });
 
 app.get('/usuarios', checkAdmin, async (req, res) => {
-    
     try {
         const [usuariosCadastrados] = await db.promise().query("SELECT id, nome, email, isAdmin FROM usuarios ORDER BY id ASC"); 
         
@@ -502,15 +476,13 @@ app.get('/usuarios', checkAdmin, async (req, res) => {
 });
 
 app.post('/atualizar-usuario/:id', checkAdmin, async (req, res) => {
-    
     const userId = parseInt(req.params.id);
     const { nome, email, senha, isAdmin } = req.body; 
 
     try {
         let query = 'UPDATE usuarios SET nome = ?, email = ?, isAdmin = ?'; 
         const params = [nome, email, isAdmin]; 
-
-    
+        
         if (senha && senha.trim() !== '') {
             query += ', senha = ?';
             params.push(senha);
@@ -538,7 +510,6 @@ app.post('/atualizar-usuario/:id', checkAdmin, async (req, res) => {
 });
 
 app.post('/remover-usuario/:id', checkAdmin, async (req, res) => {
-    
     const usuarioId = parseInt(req.params.id);
     try {
         if (req.session.usuario.id === usuarioId && req.session.usuario.isAdmin === 1) {
@@ -556,7 +527,6 @@ app.post('/remover-usuario/:id', checkAdmin, async (req, res) => {
 });
 
 app.get('/categorias', checkAdmin, async (req, res) => {
-    
     const mensagem = req.session.mensagem;
     const sucesso = req.session.sucesso;
 
@@ -582,7 +552,6 @@ app.get('/categorias', checkAdmin, async (req, res) => {
 });
 
 app.post('/adicionar-categoria', checkAdmin, async (req, res) => {
-    
     const { novaCategoriaNome } = req.body;
 
     if (!novaCategoriaNome || novaCategoriaNome.trim() === '') {
@@ -619,22 +588,26 @@ app.post('/remover-categoria', checkAdmin, async (req, res) => {
     }
 
     try {
+        // 1. Verifica se a categoria 'Outros' existe, ou a cria
         const [outrosCategory] = await db.promise().query('SELECT id FROM categorias WHERE nome = ?', ['Outros']);
         if (outrosCategory.length === 0) {
             await db.promise().execute('INSERT IGNORE INTO categorias (nome) VALUES (?)', ['Outros']);
         }
 
+        // 2. Obtém o ID da categoria que será removida
         const [categoriaRows] = await db.promise().query('SELECT id FROM categorias WHERE nome = ?', [categoriaParaRemover.trim()]);
         const categoriaIdParaRemover = categoriaRows.length > 0 ? categoriaRows[0].id : null;
 
         if (!categoriaIdParaRemover) {
             req.session.mensagem = `Categoria "${categoriaParaRemover}" não encontrada.`;
             req.session.sucesso = false;
-            return res.redirect('/categorias');
+            return res.redirect('/categorias'); // Retorna aqui se a categoria não for encontrada
         }
 
+        // 3. ATUALIZA as notícias para a categoria 'Outros' ANTES de remover a categoria original.
         await db.promise().execute('UPDATE noticias SET categoria = ? WHERE categoria = ?', ['Outros', categoriaParaRemover.trim()]);
 
+        // 4. REMOVE a categoria da tabela 'categorias'.
         const [result] = await db.promise().execute('DELETE FROM categorias WHERE id = ?', [categoriaIdParaRemover]);
 
         if (result.affectedRows === 0) {
@@ -655,7 +628,6 @@ app.post('/remover-categoria', checkAdmin, async (req, res) => {
 });
 
 app.post('/editar-categoria', checkAdmin, async (req, res) => {
-    
     const { categoriaAtual, novaCategoria } = req.body;
 
     if (!novaCategoria || novaCategoria.trim() === '') {
@@ -695,7 +667,6 @@ app.post('/editar-categoria', checkAdmin, async (req, res) => {
 });
 
 app.get('/api/notificacoes', checkAuth, async (req, res) => {
-    
     const usuarioId = req.session.usuario.id;
     try {
         const [notificacoes] = await db.promise().query(
@@ -710,7 +681,6 @@ app.get('/api/notificacoes', checkAuth, async (req, res) => {
 });
 
 app.post('/api/notificacoes/marcar-lida/:id', checkAuth, async (req, res) => {
-  
     const notificacaoId = parseInt(req.params.id);
     const usuarioId = req.session.usuario.id; 
 
@@ -730,11 +700,9 @@ app.post('/api/notificacoes/marcar-lida/:id', checkAuth, async (req, res) => {
 });
 
 app.post('/api/notificacoes/limpar-todas', checkAuth, async (req, res) => {
-    
     const usuarioId = req.session.usuario.id;
 
     try {
-        
         const [result] = await db.promise().execute(
             'DELETE FROM notificacoes WHERE usuario_id = ?',
             [usuarioId]

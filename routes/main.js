@@ -4,14 +4,12 @@ const db = require('../database/mysql_db');
 
 const checkAuth = (req, res, next) => {
     if (!req.session.usuario) {
-        
         return res.redirect('/login');
     }
     next();
 };
 
 router.get('/main', checkAuth, async (req, res) => {
-    
     const categoriaSelecionadaNome = req.query.categoria || 'Todas';
     let noticias;
     let categoriasDB; 
@@ -48,7 +46,6 @@ router.get('/main', checkAuth, async (req, res) => {
             return { ...cat, seguidaPeloUsuario: seguindo.length > 0 };
         }));
 
-        
         let numNotifications = 0;
         if (req.session.usuario) { 
             numNotifications = await getUnreadNotificationsCount(req.session.usuario.id);
@@ -59,7 +56,6 @@ router.get('/main', checkAuth, async (req, res) => {
             const [noticiasDenunciadasCount] = await db.promise().query('SELECT COUNT(*) AS total FROM noticias WHERE denunciado = TRUE');
             numNotifications += comentariosDenunciadosCount[0].total + noticiasDenunciadasCount[0].total;
         }
-
 
         res.render('main', {
             nome: req.session.usuario.nome,
@@ -78,7 +74,6 @@ router.get('/main', checkAuth, async (req, res) => {
 });
 
 router.get('/noticias/:id', checkAuth, async (req, res) => {
-    
     const noticiaId = parseInt(req.params.id);
     const usuarioId = req.session.usuario.id;
 
@@ -118,7 +113,6 @@ router.get('/noticias/:id', checkAuth, async (req, res) => {
             categoriaDetalhes.seguidaPeloUsuario = seguindoResults.length > 0;
         }
 
-        
         let numNotifications = 0;
         if (req.session.usuario) { 
             numNotifications = await getUnreadNotificationsCount(req.session.usuario.id);
@@ -148,7 +142,6 @@ router.get('/noticias/:id', checkAuth, async (req, res) => {
 });
 
 router.post('/api/noticia/:noticiaId/curtir', checkAuth, async (req, res) => {
-    
     const noticiaId = parseInt(req.params.noticiaId);
     const usuarioId = req.session.usuario.id;
 
@@ -172,7 +165,6 @@ router.post('/api/noticia/:noticiaId/curtir', checkAuth, async (req, res) => {
 });
 
 router.post('/api/categoria/:categoriaId/seguir', checkAuth, async (req, res) => {
-    
     const categoriaId = parseInt(req.params.categoriaId);
     const usuarioId = req.session.usuario.id;
 
@@ -201,7 +193,6 @@ router.post('/api/categoria/:categoriaId/seguir', checkAuth, async (req, res) =>
 });
 
 router.post('/comentar/:id', checkAuth, async (req, res) => {
-    
     const noticiaId = parseInt(req.params.id);
     const textoComentario = req.body.comentario;
     const usuarioId = req.session.usuario.id;
@@ -225,7 +216,6 @@ router.post('/comentar/:id', checkAuth, async (req, res) => {
 });
 
 router.get('/denunciar-comentario/:noticiaId/:comentarioId', checkAuth, async (req, res) => {
-    
     const noticiaId = parseInt(req.params.noticiaId);
     const comentarioId = parseInt(req.params.comentarioId);
 
@@ -250,12 +240,10 @@ router.get('/denunciar-comentario/:noticiaId/:comentarioId', checkAuth, async (r
 });
 
 router.post('/denunciar-comentario/:noticiaId/:comentarioId', checkAuth, async (req, res) => {
-   
     const { noticiaId, comentarioId } = req.params;
     const { motivo, detalhes } = req.body; 
 
     try {
-        
         const [comentarioRowsBeforeUpdate] = await db.promise().query('SELECT usuario_id, texto, noticia_id FROM comentarios WHERE id = ?', [comentarioId]);
         const comentarioBeforeUpdate = comentarioRowsBeforeUpdate[0];
 
@@ -265,9 +253,8 @@ router.post('/denunciar-comentario/:noticiaId/:comentarioId', checkAuth, async (
         );
 
         if (result.affectedRows === 0) {
-            
+            // Nenhum registro afetado
         } else {
-            
             if (comentarioBeforeUpdate && comentarioBeforeUpdate.usuario_id && comentarioBeforeUpdate.usuario_id !== req.session.usuario.id) {
                 const mensagemNotificacao = `Seu comentário "${comentarioBeforeUpdate.texto.substring(0, 50)}..." foi denunciado.`;
                 await db.promise().execute(
@@ -287,14 +274,12 @@ router.post('/denunciar-comentario/:noticiaId/:comentarioId', checkAuth, async (
 });
 
 router.get('/denunciar-noticia/:id', checkAuth, async (req, res) => {
-    
     const noticiaId = parseInt(req.params.id);
     try {
         const [noticiaRows] = await db.promise().query('SELECT titulo, id FROM noticias WHERE id = ?', [noticiaId]); 
         const noticia = noticiaRows[0];
 
         if (!noticia) {
-            
             return res.status(404).send("Notícia não encontrada para denúncia.");
         }
         
@@ -309,12 +294,10 @@ router.get('/denunciar-noticia/:id', checkAuth, async (req, res) => {
 });
 
 router.post('/denunciar-noticia/:id', checkAuth, async (req, res) => {
-    
     const noticiaId = parseInt(req.params.id);
     const { motivo, detalhes } = req.body;
 
     try {
-        
         const [noticiaInfo] = await db.promise().query('SELECT autor FROM noticias WHERE id = ?', [noticiaId]);
         const autorNoticia = noticiaInfo[0] ? noticiaInfo[0].autor : 'NewsStream'; 
 
@@ -324,10 +307,8 @@ router.post('/denunciar-noticia/:id', checkAuth, async (req, res) => {
         );
 
         if (result.affectedRows === 0) {
-            
             return res.redirect('/denuncia-confirmada?status=warning&message=Notícia já estava denunciada ou não encontrada.');
         } else {
-            
             if (autorNoticia !== 'NewsStream') {
                 const [autorUsuario] = await db.promise().query('SELECT id FROM usuarios WHERE nome = ?', [autorNoticia]);
                 if (autorUsuario.length > 0) {

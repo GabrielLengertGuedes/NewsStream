@@ -6,7 +6,7 @@
     <title>NewsStream – Página Principal</title>
     <link rel="stylesheet" href="/style.css" />
     <style>
-        /* Estilo para o botão Limpar Todas as Notificações */
+        
         .clear-all-notifications-button {
             background-color: #f44336; 
             color: white;
@@ -26,7 +26,7 @@
             background-color: #d32f2f; 
         }
 
-        /* Ajuste para espaçamento entre os botões no pop-up */
+        
         .notifications-content .close-popup-button {
             margin-top: 0; 
         }
@@ -45,6 +45,10 @@
                         <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2m.995-14.901a1 1 0 1 0-1.99 0A5 5 0 0 0 3 6c0 1.098-.5 6-2 7h12c-1.5-1-2-5.902-2-7s-.995-14.901a1 1 1 0 1 0-1.99 0z"/>
                     </svg>
                     <span>Notificações</span> 
+<<<<<<< HEAD
+=======
+                    
+>>>>>>> 0d32a662d6f90d592a2ca3bab1b93f1fc50a72b4
                     <span class="notification-count <%= numNotifications > 0 ? '' : 'hidden' %>" id="notificationCount"><%= numNotifications %></span>
                 </button>
             </div>
@@ -76,9 +80,17 @@
         <aside class="sidebar sidebar-main">
             <h2>Categorias</h2>
             <ul class="category-list">
+<<<<<<< HEAD
                 <li><a href="/main" class="<%= selecionada === 'Todas' ? 'active' : '' %>">Todas</a></li>
                 <% categorias.forEach(cat => { %>
                     <li>
+=======
+                
+                <li><a href="/main" class="<%= selecionada === 'Todas' ? 'active' : '' %>">Todas</a></li>
+                <% categorias.forEach(cat => { %>
+                    <li>
+                        
+>>>>>>> 0d32a662d6f90d592a2ca3bab1b93f1fc50a72b4
                         <a href="/main?categoria=<%= encodeURIComponent(cat.nome) %>" class="<%= selecionada === cat.nome ? 'active' : '' %>">
                             <%= cat.nome %>
                         </a>
@@ -102,6 +114,10 @@
                                 <h3>
                                     <a href="/noticias/<%= item.id %>"><%= item.titulo %></a>
                                 </h3>
+<<<<<<< HEAD
+=======
+                                
+>>>>>>> 0d32a662d6f90d592a2ca3bab1b93f1fc50a72b4
                                 <%- item.resumo %> 
                             </div>
                         </article>
@@ -112,7 +128,7 @@
     </div>
 
     <script>
-        // Mover a função toggleSidebar para o escopo global ou acessível
+        
         function toggleSidebar() {
             document.querySelector('.sidebar-main').classList.toggle('oculta');
             document.querySelector('.content').classList.toggle('content-expanded');
@@ -126,7 +142,7 @@
             const notificationsList = document.getElementById('notificationsList');
             const clearAllNotificationsButton = document.getElementById('clearAllNotificationsButton'); 
 
-            // Função para buscar e exibir notificações
+            
             async function fetchAndDisplayNotifications() {
                 try {
                     const response = await fetch('/api/notificacoes');

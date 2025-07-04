@@ -308,10 +308,23 @@
             const sharePopup = document.getElementById('share-popup');
             const closeSharePopupButton = sharePopup ? sharePopup.querySelector('.close-popup-button') : null;
         
-            function copyPageUrl() {
+           
+            async function copyPageUrl() {
                 const currentUrl = window.location.href;
-                document.execCommand('copy');
-                if (sharePopup) { sharePopup.classList.remove('hidden'); }
+                try {
+                    await navigator.clipboard.writeText(currentUrl);
+                    if (sharePopup) { sharePopup.classList.remove('hidden'); }
+                } catch (err) {
+                    console.error('Erro ao copiar o texto com Clipboard API. Tentando fallback: ', err);
+                    const tempInput = document.createElement('textarea');
+                    tempInput.value = currentUrl;
+                    document.body.appendChild(tempInput);
+                    tempInput.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(tempInput);
+                    if (sharePopup) { sharePopup.classList.remove('hidden'); }
+                    alert('Erro ao copiar o link automaticamente. Por favor, copie manualmente: ' + currentUrl);
+                }
             }
         
             if (shareBtn) {

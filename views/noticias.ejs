@@ -7,9 +7,9 @@
     <link rel="stylesheet" href="/style.css" />
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script> 
     <style>
-        /* Estilo para o botão Limpar Todas as Notificações */
+        
         .clear-all-notifications-button {
-            background-color: #f44336; /* Um tom de vermelho para indicar ação de limpar */
+            background-color: #f44336; 
             color: white;
             padding: 10px 18px;
             border: none;
@@ -18,21 +18,21 @@
             cursor: pointer;
             font-size: 1rem;
             transition: background-color 0.3s ease;
-            width: 100%; /* Ocupa a largura total do pop-up */
-            margin-top: 15px; /* Espaçamento acima */
-            margin-bottom: 10px; /* Espaçamento abaixo */
+            width: 100%; 
+            margin-top: 15px; 
+            margin-bottom: 10px; 
         }
 
         .clear-all-notifications-button:hover {
-            background-color: #d32f2f; /* Um tom mais escuro no hover */
+            background-color: #d32f2f; 
         }
 
-        /* Ajuste para espaçamento entre os botões no pop-up */
+        
         .notifications-content .close-popup-button {
-            margin-top: 0; /* Remove a margem superior se houver */
+            margin-top: 0; 
         }
 
-        /* Estilos do Pop-up (Modal) - Replicados para consistência */
+        
         .popup-overlay {
             position: fixed;
             top: 0;
@@ -71,7 +71,7 @@
             color: #555;
             font-size: 1rem;
             line-height: 1.6;
-            white-space: pre-wrap; /* Preserva quebras de linha e espaços */
+            white-space: pre-wrap; 
         }
 
         .close-popup-button {
@@ -84,7 +84,7 @@
             font-size: 1rem;
             font-weight: bold;
             transition: background-color 0.2s ease;
-            align-self: center; /* Centraliza o botão no modal */
+            align-self: center; 
         }
 
         .close-popup-button:hover {
@@ -95,13 +95,13 @@
             display: none !important;
         }
 
-        /* Estilos específicos para a página de notícias */
+        
         .news-list {
-            margin-left: 220px; /* Ajuste para a sidebar */
+            margin-left: 220px; 
             padding: 30px;
             background-color: #f3f4f6;
             min-height: 100vh;
-            padding-top: 100px; /* Espaçamento para a navbar fixa */
+            padding-top: 100px; 
         }
         .news-item {
             background: white;
@@ -126,7 +126,7 @@
         }
         .news-item h2 a {
             text-decoration: none;
-            color: #333; /* Cor do título da notícia */
+            color: #333; 
         }
         .news-item h2 a:hover {
             text-decoration: underline;
@@ -171,7 +171,7 @@
         </div>
     </header>
 
-    <!-- Pop-up de Notificações (agora preenchido dinamicamente) -->
+    
     <div id="notifications-popup" class="popup-overlay hidden">
         <div class="popup-content notifications-content">
             <h3>Suas Notificações</h3>
@@ -208,7 +208,7 @@
             const notificationsList = document.getElementById('notificationsList');
             const clearAllNotificationsButton = document.getElementById('clearAllNotificationsButton');
 
-            // Função para buscar e exibir notificações
+            
             async function fetchAndDisplayNotifications() {
                 try {
                     const response = await fetch('/api/notificacoes');
@@ -246,7 +246,7 @@
                 }
             }
 
-            // Função para atualizar o contador na UI
+            
             function updateNotificationCount(count) {
                 if (notificationCountSpan) {
                     if (count > 0) {
@@ -258,7 +258,7 @@
                 }
             }
 
-            // Exibir/Ocultar pop-up de notificações
+            
             if (notificationButton) {
                 notificationButton.addEventListener('click', () => {
                     if (notificationsPopup.classList.contains('hidden')) {
@@ -276,7 +276,7 @@
                 });
             }
             
-            // Lógica para o botão Limpar Todas as Notificações
+            
             if (clearAllNotificationsButton) {
                 clearAllNotificationsButton.addEventListener('click', async () => {
                     try {
@@ -297,7 +297,7 @@
                 });
             }
         
-            // Lógica para fechar o pop-up ao clicar fora dele
+            
             if (notificationsPopup) {
                 notificationsPopup.addEventListener('click', (event) => {
                     if (event.target === notificationsPopup) { 
